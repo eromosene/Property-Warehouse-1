@@ -6,18 +6,17 @@
     <title>Dashboard — Property Warehouse</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Manrope:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600;1,700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="dashboard.css">
 </head>
 <body class="dashboard-page">
 
-<!-- ═══════════════════════════════ SIDEBAR ═══════════════════════════════ -->
+<!-- ═══════════ SIDEBAR ═══════════ -->
 <aside class="db-sidebar" id="dbSidebar">
     <a class="db-brand" href="index.html" aria-label="Property Warehouse home">
         <span class="db-brand-mark">P<span>W</span></span>
         <span class="db-brand-name"><span>PROPERTY</span><span>WAREHOUSE</span></span>
     </a>
-
     <nav class="db-nav" aria-label="Dashboard navigation">
         <a href="#" class="db-nav-item active" data-section="dashboard">
             <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
@@ -30,10 +29,10 @@
         <a href="#" class="db-nav-item" data-section="messages">
             <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
             <span>Messages</span>
-            <span class="db-badge" id="msgBadge">6</span>
+            <span class="db-badge">6</span>
         </a>
         <a href="#" class="db-nav-item" data-section="applications">
-            <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
+            <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
             <span>Applications</span>
         </a>
         <a href="#" class="db-nav-item" data-section="payments">
@@ -53,37 +52,42 @@
             <span>Settings</span>
         </a>
     </nav>
-
-    <!-- Promo card -->
     <div class="db-promo">
         <div class="db-promo-img" aria-hidden="true"></div>
         <p class="db-promo-title">Find your next dream home faster</p>
         <p class="db-promo-sub">Get notified about new listings in your preferred areas instantly.</p>
         <button class="db-promo-btn" type="button">
-            <svg viewBox="0 0 24 24" width="14" height="14"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
             Upgrade to Premium
         </button>
     </div>
 </aside>
 
-<!-- ═══════════════════════════════ MAIN WRAPPER ═══════════════════════════════ -->
+<!-- ═══════════ WRAPPER ═══════════ -->
 <div class="db-wrapper">
 
-    <!-- ── TOP HEADER ── -->
+    <!-- ── HEADER ── -->
     <header class="db-header">
-        <button class="db-menu-toggle" id="dbMenuToggle" aria-label="Toggle sidebar" type="button">
+        <button class="db-menu-toggle" id="dbMenuToggle" type="button" aria-label="Toggle menu">
             <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
         </button>
 
+        <!-- Mobile logo (hidden on desktop) -->
+        <a class="db-header-logo" href="index.html" aria-label="Property Warehouse">
+            <span class="db-brand-mark">P<span>W</span></span>
+            <span class="db-brand-name"><span>PROPERTY</span><span>WAREHOUSE</span></span>
+        </a>
+
+        <!-- Desktop greeting (hidden on mobile) -->
         <div class="db-greeting">
-            <h1 id="dbGreeting">Good evening, — <span>👋</span></h1>
+            <h1 id="dbGreeting">Good evening <span>👋</span></h1>
             <p id="dbSubtitle">Let's help you find your perfect space in Lagos.</p>
         </div>
 
         <div class="db-header-right">
             <div class="db-search">
                 <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                <input type="search" placeholder="Search properties, areas…" aria-label="Search properties">
+                <input type="search" placeholder="Search properties, areas…" aria-label="Search">
             </div>
 
             <button class="db-notif-btn" type="button" aria-label="Notifications">
@@ -97,8 +101,7 @@
                     <strong id="dbUserName">Daniel Adewale</strong>
                     <span>Tenant</span>
                 </div>
-                <svg viewBox="0 0 24 24" width="14" height="14"><polyline points="6 9 12 15 18 9"/></svg>
-
+                <svg class="db-chevron" viewBox="0 0 24 24" width="14" height="14"><polyline points="6 9 12 15 18 9"/></svg>
                 <div class="db-user-dropdown" id="dbUserDropdown">
                     <a href="#" data-section="profile">
                         <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
@@ -118,186 +121,224 @@
         </div>
     </header>
 
-    <!-- ── MAIN CONTENT ── -->
-    <main class="db-main">
+    <!-- ══════════════ MAIN ══════════════ -->
+    <main class="db-main" id="dbMain">
 
-        <!-- ────── LEFT / CENTRE COLUMN ────── -->
-        <div class="db-content">
+        <!-- ── Mobile greeting + search (hidden on desktop) ── -->
+        <div class="db-mobile-intro">
+            <div class="db-mobile-greeting">
+                <h2 id="dbGreetingMobile">Good evening, Daniel <span>👋</span></h2>
+                <p id="dbSubtitleMobile">Let's help you find your perfect space in Lagos.</p>
+            </div>
+            <div class="db-mobile-search">
+                <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="search" placeholder="Search properties, areas…" aria-label="Search">
+            </div>
+        </div>
+
+        <!-- ══ LEFT COLUMN: content + messages/activity ══ -->
+        <div class="db-left">
 
             <!-- SAVED HOMES -->
-            <section class="db-section">
+            <section class="db-section db-section--saved">
                 <div class="db-section-head">
                     <h2>Saved Homes</h2>
                     <a href="#" class="db-view-all">View all <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></a>
                 </div>
-
                 <div class="saved-carousel-wrap">
                     <button class="saved-arrow saved-prev" type="button" aria-label="Previous">
                         <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
                     </button>
-                    <div class="saved-track" id="savedTrack">
-                        <!-- Cards injected by JS -->
-                    </div>
+                    <div class="saved-track" id="savedTrack"></div>
                     <button class="saved-arrow saved-next" type="button" aria-label="Next">
                         <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
                     </button>
                 </div>
             </section>
 
-            <!-- RECOMMENDED FOR YOU -->
-            <section class="db-section">
+            <!-- RECOMMENDED FOR YOU (desktop only) -->
+            <section class="db-section db-section--rec">
                 <div class="db-section-head">
                     <h2>Recommended For You</h2>
                     <a href="#" class="db-view-all">View all <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></a>
                 </div>
-                <div class="rec-grid" id="recGrid">
-                    <!-- Cards injected by JS -->
-                </div>
+                <div class="rec-grid" id="recGrid"></div>
             </section>
 
-            <!-- BOTTOM TWO COLUMNS -->
-            <div class="db-bottom-cols">
+            <!-- MESSAGES + ACTIVITY (side by side) -->
+            <div class="db-bottom-row">
 
-                <!-- RECENT MESSAGES -->
-                <section class="db-section db-messages-section">
+                <section class="db-section db-section--messages">
                     <div class="db-section-head">
                         <h2>Recent Messages</h2>
                         <a href="#" class="db-view-all">View all <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></a>
                     </div>
-                    <div class="msg-list" id="msgList">
-                        <!-- Injected by JS -->
-                    </div>
+                    <div class="msg-list" id="msgList"></div>
                     <a href="#" class="db-go-link">Go to Messages <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></a>
                 </section>
 
-                <!-- RECENT ACTIVITY -->
-                <section class="db-section db-activity-section">
+                <section class="db-section db-section--activity">
                     <div class="db-section-head">
                         <h2>Recent Activity</h2>
                         <a href="#" class="db-view-all">View all <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></a>
                     </div>
-                    <div class="activity-list" id="activityList">
-                        <!-- Injected by JS -->
-                    </div>
+                    <div class="activity-list" id="activityList"></div>
                     <a href="#" class="db-go-link">View all activity <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></a>
                 </section>
 
-            </div>
-        </div>
+            </div><!-- /db-bottom-row -->
 
-        <!-- ────── RIGHT PANEL ────── -->
+        </div><!-- /db-left -->
+
+        <!-- ══ RIGHT PANEL ══ -->
         <aside class="db-right">
 
             <!-- UPCOMING INSPECTIONS -->
-            <section class="db-widget">
+            <section class="db-widget db-widget--inspections">
                 <div class="db-section-head">
                     <h3>Upcoming Inspections</h3>
                     <a href="#" class="db-view-all">View all <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></a>
                 </div>
-                <div class="inspection-list" id="inspectionList">
-                    <!-- Injected by JS -->
-                </div>
+                <div class="inspection-list" id="inspectionList"></div>
                 <button class="db-schedule-btn" type="button">
                     <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                     Schedule New Inspection
                 </button>
             </section>
 
-            <!-- AFFORDABILITY INSIGHTS -->
-            <section class="db-widget">
-                <div class="db-section-head">
-                    <h3>Affordability Insights</h3>
-                    <button class="db-info-btn" type="button" aria-label="More info">
-                        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-                    </button>
-                </div>
-                <div class="afford-body">
-                    <div class="afford-gauge-wrap">
-                        <svg class="afford-gauge" viewBox="0 0 120 120" aria-label="28% of monthly income">
-                            <circle class="gauge-track"  cx="60" cy="60" r="50" />
-                            <circle class="gauge-fill"   cx="60" cy="60" r="50" id="gaugeFill"/>
-                            <text class="gauge-pct" x="60" y="57" text-anchor="middle" id="gaugePct">28%</text>
-                            <text class="gauge-sub" x="60" y="72" text-anchor="middle">of monthly income</text>
-                        </svg>
-                    </div>
-                    <div class="afford-info">
-                        <div class="afford-fit">
-                            <span class="fit-badge">Good Fit ✓</span>
-                            <p>This rent is within your affordability range.</p>
-                        </div>
-                        <div class="afford-max">
-                            <span>Recommended max rent</span>
-                            <strong id="maxRent">₦2,000,000 <small>/yr</small></strong>
-                        </div>
-                        <button class="db-adjust-btn" type="button">Adjust Budget</button>
-                    </div>
-                </div>
-            </section>
+            <!-- AFFORDABILITY + PAYMENT (side-by-side on mobile) -->
+            <div class="db-widget-pair">
 
-            <!-- PAYMENT TRACKER -->
-            <section class="db-widget">
-                <div class="db-section-head">
-                    <h3>Payment Tracker</h3>
-                    <a href="#" class="db-view-all">View all <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></a>
-                </div>
-                <div class="payment-row">
-                    <span>Rent Budget</span>
-                    <strong id="rentBudgetLabel">₦2,000,000 <small>/mo</small></strong>
-                </div>
-                <div class="payment-bar-wrap">
-                    <div class="payment-bar">
-                        <div class="payment-bar-fill" id="payBarFill" style="width:60%"></div>
+                <section class="db-widget db-widget--afford">
+                    <div class="db-section-head">
+                        <h3>Affordability Insights</h3>
+                        <button class="db-info-btn" type="button" aria-label="Info">
+                            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                        </button>
                     </div>
-                    <div class="payment-bar-labels">
-                        <span id="spentLabel">₦1,200,000 spent</span>
-                        <span id="leftLabel">₦800,000 left</span>
+                    <div class="afford-body">
+                        <div class="afford-gauge-wrap">
+                            <svg class="afford-gauge" viewBox="0 0 120 120">
+                                <defs>
+                                    <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                                        <stop offset="0%" stop-color="#15935f"/>
+                                        <stop offset="100%" stop-color="#f5a623"/>
+                                    </linearGradient>
+                                </defs>
+                                <circle class="gauge-track" cx="60" cy="60" r="50"/>
+                                <circle class="gauge-fill" cx="60" cy="60" r="50" id="gaugeFill"/>
+                                <text class="gauge-pct" x="60" y="57" text-anchor="middle" id="gaugePct">28%</text>
+                                <text class="gauge-sub" x="60" y="72" text-anchor="middle">of monthly income</text>
+                            </svg>
+                        </div>
+                        <div class="afford-info">
+                            <div class="afford-fit">
+                                <span class="fit-badge">Good Fit! ✓</span>
+                                <p>This rent is within your affordability range.</p>
+                            </div>
+                            <div class="afford-max">
+                                <span>Recommended max rent</span>
+                                <strong id="maxRent">₦2,000,000 <small>/yr</small></strong>
+                            </div>
+                            <button class="db-adjust-btn" type="button">Adjust Budget</button>
+                        </div>
                     </div>
-                </div>
-                <div class="payment-due">
-                    <span>Next Payment Due</span>
-                    <strong id="nextPayDate">June 1, 2025</strong>
-                </div>
-                <button class="db-reminder-btn" type="button">
-                    <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-                    Set Up Reminders
-                </button>
-            </section>
+                </section>
+
+                <section class="db-widget db-widget--payment">
+                    <div class="db-section-head">
+                        <h3>Payment Tracker</h3>
+                        <a href="#" class="db-view-all">View all <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></a>
+                    </div>
+                    <div class="payment-row">
+                        <span>Rent Budget</span>
+                        <strong id="rentBudgetLabel">₦2,000,000 <small>/mo</small></strong>
+                    </div>
+                    <div class="payment-bar-wrap">
+                        <div class="payment-bar">
+                            <div class="payment-bar-fill" id="payBarFill" style="width:0%"></div>
+                        </div>
+                        <div class="payment-bar-labels">
+                            <span id="spentLabel">₦1,200,000 spent</span>
+                            <span id="leftLabel">₦800,000 left</span>
+                        </div>
+                    </div>
+                    <div class="payment-due">
+                        <div>
+                            <span class="pay-due-label">Next Payment Due</span>
+                            <strong id="nextPayDate">June 1, 2025</strong>
+                        </div>
+                        <button class="db-reminder-btn" type="button">
+                            <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                            Set Up Reminders
+                        </button>
+                    </div>
+                </section>
+
+            </div><!-- /db-widget-pair -->
 
             <!-- APPLICATION PROGRESS -->
-            <section class="db-widget">
+            <section class="db-widget db-widget--approg">
                 <div class="db-section-head">
                     <h3>Application Progress</h3>
                     <a href="#" class="db-view-all">View all <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></a>
                 </div>
-                <p class="app-count"><strong id="appCount">2</strong> Active Applications</p>
-                <div class="app-pipeline">
-                    <div class="pipeline-track">
-                        <div class="pipeline-line"><div class="pipeline-line-fill" id="pipelineFill"></div></div>
-                        <div class="pipeline-steps">
-                            <div class="pipeline-step done" data-step="1">
-                                <div class="step-dot"><span>1</span></div>
-                                <span class="step-label">Submitted</span>
-                            </div>
-                            <div class="pipeline-step active" data-step="2">
-                                <div class="step-dot"><span>2</span></div>
-                                <span class="step-label">Review</span>
-                            </div>
-                            <div class="pipeline-step" data-step="3">
-                                <div class="step-dot"><span>3</span></div>
-                                <span class="step-label">Offer</span>
-                            </div>
-                            <div class="pipeline-step" data-step="4">
-                                <div class="step-dot"><span>4</span></div>
-                                <span class="step-label">Move-in</span>
-                            </div>
+                <p class="app-count"><strong id="appCount">2</strong> <span>Active Applications</span></p>
+                <div class="pipeline-track">
+                    <div class="pipeline-line"><div class="pipeline-line-fill"></div></div>
+                    <div class="pipeline-steps">
+                        <div class="pipeline-step done">
+                            <div class="step-dot"><span>1</span></div>
+                            <span class="step-label">Submitted</span>
+                        </div>
+                        <div class="pipeline-step active">
+                            <div class="step-dot"><span>2</span></div>
+                            <span class="step-label">Review</span>
+                        </div>
+                        <div class="pipeline-step">
+                            <div class="step-dot"><span>3</span></div>
+                            <span class="step-label">Offer</span>
+                        </div>
+                        <div class="pipeline-step">
+                            <div class="step-dot"><span>4</span></div>
+                            <span class="step-label">Move-in</span>
                         </div>
                     </div>
                 </div>
             </section>
 
-        </aside>
+        </aside><!-- /db-right -->
+
     </main>
-</div>
+
+    <!-- ── MOBILE BOTTOM NAV ── -->
+    <nav class="db-bottom-nav" aria-label="Bottom navigation">
+        <a href="#" class="db-bnav-item active" data-section="dashboard">
+            <svg viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10.5V20h13v-9.5"/></svg>
+            <span>Dashboard</span>
+        </a>
+        <a href="#" class="db-bnav-item" data-section="saved">
+            <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+            <span>Saved Homes</span>
+        </a>
+        <a href="#" class="db-bnav-item db-bnav-messages" data-section="messages">
+            <div class="db-bnav-icon-wrap">
+                <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                <span class="db-bnav-badge">6</span>
+            </div>
+            <span>Messages</span>
+        </a>
+        <a href="#" class="db-bnav-item" data-section="applications">
+            <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            <span>Applications</span>
+        </a>
+        <a href="#" class="db-bnav-item" data-section="profile">
+            <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <span>Profile</span>
+        </a>
+    </nav>
+
+</div><!-- /db-wrapper -->
 
 <!-- ── QUICK-VIEW MODAL ── -->
 <div class="qv-overlay" id="qvOverlay" role="dialog" aria-modal="true" aria-labelledby="qvTitle">
@@ -322,6 +363,8 @@
         </div>
     </div>
 </div>
+
+<div class="db-sidebar-overlay" id="dbSidebarOverlay"></div>
 
 <script src="dashboard.js"></script>
 </body>
