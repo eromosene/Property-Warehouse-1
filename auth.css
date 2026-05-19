@@ -1,0 +1,556 @@
+/* ── AUTH PAGE BASE ── */
+.auth-page {
+    background: #f0ede8;
+    min-height: 100vh;
+}
+
+/* Fixed header on auth page */
+.auth-header {
+    position: fixed;
+    inset: 8px 72px auto;
+    z-index: 50;
+}
+
+/* ── MAIN LAYOUT ── */
+.auth-main {
+    position: relative;
+    min-height: 100vh;
+    padding: 100px 24px 60px;
+    overflow: hidden;
+}
+
+/* Blurred property photo panels left & right */
+.auth-bg-left,
+.auth-bg-right {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    width: 22%;
+    background: url("IMG-20260512-WA0088.jpg") center / cover no-repeat;
+    z-index: 0;
+    filter: blur(1px) brightness(0.78);
+}
+
+.auth-bg-left  { left: 0; }
+.auth-bg-right { right: 0; background-image: url("IMG-20260512-WA0021.jpg"); }
+
+/* ── CONTAINER ── */
+.auth-container {
+    position: relative;
+    z-index: 1;
+    max-width: 980px;
+    margin: 0 auto;
+}
+
+/* ── HEADING ── */
+.auth-heading {
+    text-align: center;
+    margin-bottom: 36px;
+}
+
+.auth-heading h1 {
+    margin: 0 0 8px;
+    font-family: var(--font-display);
+    font-size: clamp(34px, 5vw, 52px);
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    color: var(--ink);
+    line-height: 1.1;
+}
+
+.auth-heading h1 em {
+    font-style: italic;
+    color: var(--gold);
+}
+
+.auth-heading p {
+    margin: 0 0 16px;
+    color: var(--muted);
+    font-size: 15px;
+    font-weight: 500;
+}
+
+.auth-heading-line {
+    width: 48px;
+    height: 3px;
+    background: var(--gold);
+    margin: 0 auto;
+    border-radius: 99px;
+}
+
+/* ── PANELS GRID ── */
+.auth-panels {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    align-items: start;
+}
+
+/* ── SINGLE PANEL ── */
+.auth-panel {
+    background: rgba(255, 255, 255, 0.97);
+    border: 1px solid rgba(9, 24, 42, 0.08);
+    border-radius: 18px;
+    padding: 32px 36px 28px;
+    box-shadow: 0 20px 60px rgba(9, 24, 42, 0.10);
+}
+
+/* Role badge */
+.panel-role {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 14px;
+    color: var(--green);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+}
+
+.panel-role svg {
+    width: 22px;
+    height: 22px;
+    stroke: var(--green);
+    fill: none;
+    stroke-width: 1.8;
+}
+
+.landlord-role {
+    color: var(--gold);
+}
+
+.landlord-role svg {
+    stroke: var(--gold);
+}
+
+.auth-panel h2 {
+    margin: 0 0 6px;
+    font-family: var(--font-display);
+    font-size: clamp(20px, 2.2vw, 26px);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    color: var(--ink);
+    line-height: 1.2;
+}
+
+.role-color-tenant   { color: var(--green); }
+.role-color-landlord { color: var(--gold); }
+
+.panel-desc {
+    margin: 0 0 20px;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.55;
+}
+
+/* ── TABS ── */
+.auth-tabs {
+    display: flex;
+    border-bottom: 2px solid rgba(9, 24, 42, 0.08);
+    margin-bottom: 20px;
+    gap: 0;
+}
+
+.tab-btn {
+    flex: 1;
+    padding: 10px 0;
+    border: none;
+    background: transparent;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: color 0.18s, border-color 0.18s;
+}
+
+.tab-btn.active {
+    color: var(--green);
+    border-bottom-color: var(--green);
+}
+
+.landlord-tab.active {
+    color: var(--gold);
+    border-bottom-color: var(--gold);
+}
+
+/* ── FORM ── */
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.auth-form.hidden {
+    display: none;
+}
+
+.field-group {
+    position: relative;
+}
+
+.field-group input,
+.field-group select {
+    width: 100%;
+    height: 44px;
+    padding: 0 44px 0 14px;
+    border: 1px solid rgba(9, 24, 42, 0.12);
+    border-radius: 7px;
+    background: #fafafa;
+    color: var(--ink);
+    font-size: 13px;
+    font-weight: 500;
+    transition: border-color 0.18s, box-shadow 0.18s;
+    outline: none;
+    font-family: var(--font-sans);
+    appearance: none;
+}
+
+.field-group select {
+    background-image: linear-gradient(45deg, transparent 50%, #111b29 50%) , linear-gradient(135deg, #111b29 50%, transparent 50%);
+    background-position: calc(100% - 18px) 51%, calc(100% - 14px) 51%;
+    background-size: 4px 4px, 4px 4px;
+    background-repeat: no-repeat;
+    background-color: #fafafa;
+    padding-right: 36px;
+    color: #5c6674;
+    cursor: pointer;
+}
+
+.field-group input::placeholder {
+    color: #9aa4b2;
+}
+
+.field-group input:focus,
+.field-group select:focus {
+    border-color: var(--green);
+    box-shadow: 0 0 0 3px rgba(21, 147, 95, 0.10);
+    background: #fff;
+}
+
+.landlord-panel .field-group input:focus,
+.landlord-panel .field-group select:focus {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(169, 126, 75, 0.12);
+}
+
+/* Password toggle */
+.password-field .field-group input,
+.password-field input {
+    padding-right: 44px;
+}
+
+.pw-toggle {
+    position: absolute;
+    right: 13px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    color: var(--muted);
+    padding: 0;
+    display: grid;
+    place-items: center;
+}
+
+.pw-toggle svg {
+    width: 18px;
+    height: 18px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 1.8;
+}
+
+/* Two-column field row */
+.field-row-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+/* Remember / forgot row */
+.form-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink);
+    cursor: pointer;
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: 15px;
+    height: 15px;
+    margin: 0;
+    accent-color: var(--green);
+    cursor: pointer;
+}
+
+.forgot-link {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--gold);
+    text-decoration: none;
+    transition: opacity 0.15s;
+}
+
+.forgot-link:hover { opacity: 0.75; }
+
+/* Submit button */
+.submit-btn {
+    width: 100%;
+    height: 46px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 800;
+    cursor: pointer;
+    letter-spacing: -0.01em;
+    transition: opacity 0.18s, transform 0.12s;
+}
+
+.submit-btn:hover  { opacity: 0.92; }
+.submit-btn:active { transform: scale(0.98); }
+
+.tenant-btn {
+    background: var(--green);
+    color: #fff;
+    box-shadow: 0 8px 24px rgba(21, 147, 95, 0.28);
+}
+
+.landlord-btn {
+    background: var(--gold);
+    color: #fff;
+    box-shadow: 0 8px 24px rgba(169, 126, 75, 0.30);
+}
+
+/* OR divider */
+.or-divider {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.or-divider::before,
+.or-divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: rgba(9, 24, 42, 0.10);
+}
+
+/* Social buttons */
+.social-btns {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+}
+
+.social-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 38px;
+    border: 1px solid rgba(9, 24, 42, 0.12);
+    border-radius: 7px;
+    background: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--ink);
+    cursor: pointer;
+    transition: background 0.15s, box-shadow 0.15s;
+}
+
+.social-btn svg {
+    flex-shrink: 0;
+    display: block;
+}
+
+.social-btn:hover {
+    background: #f5f5f5;
+    box-shadow: 0 2px 8px rgba(9,24,42,0.08);
+}
+
+/* Legal text */
+.legal-text {
+    margin: 0;
+    text-align: center;
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.6;
+}
+
+.legal-text a {
+    color: var(--green);
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.landlord-panel .legal-text a { color: var(--gold); }
+
+/* ── TRUST BADGES ── */
+.trust-badges {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-top: 24px;
+    padding: 24px 28px;
+    background: rgba(255, 255, 255, 0.93);
+    border: 1px solid rgba(9, 24, 42, 0.07);
+    border-radius: 14px;
+    box-shadow: 0 8px 30px rgba(9, 24, 42, 0.07);
+}
+
+.trust-badge {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.trust-icon {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: grid;
+    place-items: center;
+}
+
+.trust-icon svg {
+    width: 20px;
+    height: 20px;
+    stroke-width: 1.8;
+    fill: none;
+}
+
+.tenant-icon {
+    background: rgba(21, 147, 95, 0.12);
+    color: var(--green);
+}
+.tenant-icon svg { stroke: var(--green); }
+
+.blue-icon {
+    background: rgba(37, 99, 235, 0.10);
+    color: #2563eb;
+}
+.blue-icon svg { stroke: #2563eb; }
+
+.amber-icon {
+    background: rgba(169, 126, 75, 0.12);
+    color: var(--gold);
+}
+.amber-icon svg { stroke: var(--gold); }
+
+.trust-badge strong {
+    display: block;
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--ink);
+    margin-bottom: 3px;
+}
+
+.trust-badge span {
+    font-size: 11.5px;
+    font-weight: 500;
+    color: var(--muted);
+    line-height: 1.45;
+}
+
+/* ── TRUSTED / LOGOS ── */
+.auth-trusted {
+    margin-top: 28px;
+    text-align: center;
+    padding-bottom: 20px;
+}
+
+.auth-trusted p {
+    margin: 0 0 14px;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+    .auth-header {
+        inset-inline: 16px;
+    }
+
+    .auth-bg-left,
+    .auth-bg-right {
+        display: none;
+    }
+
+    .auth-panels {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .trust-badges {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+    }
+}
+
+@media (max-width: 560px) {
+    .auth-main {
+        padding: 88px 12px 48px;
+    }
+
+    .auth-panel {
+        padding: 24px 18px 20px;
+        border-radius: 14px;
+    }
+
+    .social-btns {
+        grid-template-columns: 1fr;
+    }
+
+    .trust-badges {
+        grid-template-columns: 1fr;
+        padding: 16px;
+    }
+
+    .field-row-2 {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ── SUCCESS TOAST ── */
+.auth-toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--ink);
+    color: #fff;
+    padding: 14px 24px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    box-shadow: 0 10px 30px rgba(9,24,42,0.22);
+    z-index: 999;
+    transition: transform 0.35s cubic-bezier(.16,1,.3,1);
+    white-space: nowrap;
+}
+
+.auth-toast.show {
+    transform: translateX(-50%) translateY(0);
+}
