@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Property Warehouse</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Manrope:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600;1,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <header class="site-header">
+        <a class="brand" href="#" aria-label="Property Warehouse home">
+            <span class="brand-mark">P <span>W</span></span>
+            <span class="brand-name">
+                <span>PROPERTY</span>
+                <span>WAREHOUSE</span>
+            </span>
+        </a>
+
+        <nav class="site-nav" aria-label="Primary navigation">
+            <a href="#listings">Listings</a>
+            <a href="#heat-map">Heat Map</a>
+            <a href="#landlords">Landlords</a>
+            <a href="#how-it-works">How It Works</a>
+            <a href="#about-us">About Us</a>
+        </nav>
+
+        <div class="header-actions">
+            <a class="login-link" href="auth.html">Log in / Sign up</a>
+            <a class="list-property" href="auth.html#landlord">+ List Property</a>
+        </div>
+
+        <button class="menu-button" type="button" aria-label="Open menu" aria-expanded="false">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+    </header>
+
+    <main>
+        <section class="hero" aria-labelledby="hero-title">
+            <div class="hero-bg" aria-hidden="true"></div>
+            <div class="hero-shade" aria-hidden="true"></div>
+
+            <div class="hero-content">
+                <div class="eyebrow">
+                    <span class="flag" aria-hidden="true"><span></span><span></span><span></span></span>
+                    <span>LAGOS&rsquo;S #1 DIRECT RENTAL PLATFORM</span>
+                </div>
+
+                <h1 id="hero-title">Find Your Space.<span>Pay Fair.</span></h1>
+
+                <p class="hero-copy">
+                    No agents. No hidden fees.<br>
+                    Connect directly with verified Lagos landlords and rent smarter.
+                </p>
+
+                <div class="hero-actions">
+                    <a class="primary-button" href="#listings">
+                        <span>Browse Listings</span>
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M5 12h13m-5-5 5 5-5 5" />
+                        </svg>
+                    </a>
+
+                    <a class="secondary-button" href="#how-it-works">
+                        <span class="play-badge">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="m10 8 6 4-6 4V8Z" />
+                            </svg>
+                        </span>
+                        <span>How It Works</span>
+                    </a>
+                </div>
+            </div>
+
+            <aside class="testimonial-card" aria-label="Customer testimonial">
+                <span class="quote-mark">&ldquo;</span>
+                <p>&ldquo;We found our dream home in Lekki and saved over <strong>&#8358;350,000</strong> in agent
+                    fees!&rdquo;</p>
+                <div class="testimonial-person">
+                    <img src="IMG-20260512-WA0087.jpg" alt="Ibukun and Tayo">
+                    <div>
+                        <strong>Ibukun &amp; Tayo</strong>
+                        <span>Lekki, Lagos</span>
+                    </div>
+                </div>
+            </aside>
+
+
+        </section>
+
+        <section class="proof-strip" aria-label="Platform numbers and partners">
+            <form class="search-panel" id="listings">
+                <label>
+                    <span>AREA</span>
+                    <select aria-label="Select area">
+                        <option>Select Area</option>
+                        <option>Lekki</option>
+                        <option>Ikoyi</option>
+                        <option>Yaba</option>
+                        <option>Ikeja</option>
+                    </select>
+                </label>
+
+                <label>
+                    <span>PROPERTY TYPE</span>
+                    <select aria-label="Select property type">
+                        <option>Select Type</option>
+                        <option>Apartment</option>
+                        <option>Duplex</option>
+                        <option>Studio</option>
+                        <option>Terrace</option>
+                    </select>
+                </label>
+
+                <label>
+                    <span>MAX BUDGET</span>
+                    <select aria-label="Select max budget">
+                        <option>Max Budget</option>
+                        <option>&#8358;1,000,000</option>
+                        <option>&#8358;2,500,000</option>
+                        <option>&#8358;5,000,000</option>
+                    </select>
+                </label>
+
+                <button class="search-button" type="submit">
+                    <span>Search</span>
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="m21 21-4.35-4.35m1.35-5.15a6.5 6.5 0 1 1-13 0 6.5 6.5 0 0 1 13 0Z" />
+                    </svg>
+                </button>
+            </form>
+            <div class="stats-row">
+                <article class="stat-item">
+                    <span class="stat-icon">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M3 11.5 12 4l9 7.5" />
+                            <path d="M5.5 10.5V20h13v-9.5" />
+                            <path d="M9.5 20v-5h5v5" />
+                        </svg>
+                    </span>
+                    <span class="stat-copy"><strong>500+</strong><small>Active Listings</small></span>
+                </article>
+
+                <article class="stat-item">
+                    <span class="stat-icon">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M12 3 5 6v5.5c0 4.1 2.8 7.9 7 9.5 4.2-1.6 7-5.4 7-9.5V6l-7-3Z" />
+                            <path d="m9.5 12 1.7 1.7 3.6-4" />
+                        </svg>
+                    </span>
+                    <span class="stat-copy"><strong>&#8358;0</strong><small>Agent Fees</small></span>
+                </article>
+
+                <article class="stat-item">
+                    <span class="stat-icon">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M16 19c0-2.2-1.8-4-4-4s-4 1.8-4 4" />
+                            <path d="M12 12a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
+                            <path d="M20 18c0-1.8-1.2-3.2-3-3.7" />
+                            <path d="M17 11.5a2.5 2.5 0 0 0 0-5" />
+                            <path d="M4 18c0-1.8 1.2-3.2 3-3.7" />
+                            <path d="M7 11.5a2.5 2.5 0 0 1 0-5" />
+                        </svg>
+                    </span>
+                    <span class="stat-copy"><strong>200+</strong><small>Verified Landlords</small></span>
+                </article>
+
+                <article class="stat-item">
+                    <span class="stat-icon">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M19 10.5c0 5-7 10-7 10s-7-5-7-10a7 7 0 1 1 14 0Z" />
+                            <path d="M12 13a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z" />
+                        </svg>
+                    </span>
+                    <span class="stat-copy"><strong>12</strong><small>LGAs Covered</small></span>
+                </article>
+            </div>
+
+            <div class="trusted">
+                <p>TRUSTED BY THOUSANDS OF LAGOSIANS</p>
+                <div class="logos" aria-label="Partner logos">
+                    <span class="access"><i></i>access</span>
+                    <span class="gtco">GTCO</span>
+                    <span class="flutter"><i></i>Flutterwave</span>
+                    <span class="interswitch">Interswitch<i></i></span>
+                    <span class="paystack"><i></i>paystack</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="how-it-works" id="how-it-works">
+            <div class="section-title">
+                <span>HOW IT WORKS</span>
+                <h2>Simple. Transparent. Direct.</h2>
+            </div>
+
+            <div class="workflow">
+                <button class="carousel-arrow prev" type="button" aria-label="Previous">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="m15 18-6-6 6-6" />
+                    </svg>
+                </button>
+
+                <div class="workflow-track" data-track>
+                    <article class="workflow-card tenant-card">
+                        <div class="workflow-icon">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M16 19c0-2.2-1.8-4-4-4s-4 1.8-4 4" />
+                                <path d="M12 12a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
+                                <path d="M20 18c0-1.8-1.2-3.2-3-3.7" />
+                                <path d="M17 11.5a2.5 2.5 0 0 0 0-5" />
+                            </svg>
+                        </div>
+                        <h3>For Tenants</h3>
+                        <p>Find. Connect. Move in.</p>
+                        <img src="IMG-20260512-WA0089.jpg" alt="Family looking for a rental home">
+                    </article>
+
+                    <article class="workflow-card landlord-card">
+                        <div class="workflow-icon">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M4 21h16" />
+                                <path d="M6 21V7l8-4v18" />
+                                <path d="M14 9h4v12" />
+                                <path d="M9 10h2" />
+                                <path d="M9 14h2" />
+                                <path d="M17 13h1" />
+                            </svg>
+                        </div>
+                        <h3>For Landlords</h3>
+                        <p>List. Connect. Earn.</p>
+                        <img src="IMG-20260512-WA0088.jpg" alt="Modern Lagos property">
+                    </article>
+                </div>
+
+                <button class="carousel-arrow next" type="button" aria-label="Next">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="m9 18 6-6-6-6" />
+                    </svg>
+                </button>
+            </div>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
