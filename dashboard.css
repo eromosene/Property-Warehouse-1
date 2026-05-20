@@ -894,27 +894,64 @@ body.dashboard-page {
         gap: 10px;
     }
 
-    /* Compact affordability widget */
-    .afford-body  { flex-direction: column; align-items: flex-start; gap: 8px; }
-    .afford-gauge { width: 88px; height: 88px; }
-    .gauge-pct    { font-size: 15px; }
-    .gauge-sub    { font-size: 6px; }
-    .afford-info  { width: 100%; }
+    /* ── Compact card padding in 2-col widgets ── */
+    .db-widget-pair .db-widget,
+    .db-bottom-row  .db-section {
+        padding: 12px 11px 10px;
+    }
 
-    /* Payment reminder button full-width */
-    .payment-due      { flex-direction: column; align-items: flex-start; gap: 7px; }
-    .db-reminder-btn  { width: 100%; }
+    /* ── Affordability widget: gauge left, info right ── */
+    .afford-body {
+        flex-direction: row;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    .afford-gauge-wrap { flex-shrink: 0; }
+    .afford-gauge  { width: 76px; height: 76px; }
+    .gauge-track   { stroke-width: 9; }
+    .gauge-fill    { stroke-width: 9; }
+    .gauge-pct     { font-size: 13px; }
+    .gauge-sub     { font-size: 5.5px; }
+    .afford-info   { flex: 1; min-width: 0; }
+    .afford-fit    { padding: 5px 7px; margin-bottom: 6px; }
+    .fit-badge     { font-size: 9px; margin-bottom: 1px; }
+    .afford-fit p  { font-size: 9px; line-height: 1.35; }
+    .afford-max    { margin-bottom: 7px; }
+    .afford-max span   { font-size: 9px; }
+    .afford-max strong { font-size: 11px; }
+    .afford-max small  { font-size: 9px; }
+    .db-adjust-btn { height: 27px; font-size: 10px; }
+
+    /* ── Payment tracker compact ── */
+    .payment-row span   { font-size: 9.5px; }
+    .payment-row strong { font-size: 11px; }
+    .payment-row strong small { font-size: 9px; }
+    .payment-bar        { height: 6px; }
+    .payment-bar-labels { font-size: 9px; }
+    .pay-due-label      { font-size: 9px; }
+    .payment-due > div strong { font-size: 10.5px; }
+    .payment-due { flex-direction: column; align-items: flex-start; gap: 6px; }
+    .db-reminder-btn { width: 100%; height: 29px; font-size: 9.5px; padding: 0 8px; gap: 4px; }
+    .db-reminder-btn svg { width: 11px; height: 11px; }
+
+    /* ── Messages + Activity compact ── */
+    .db-section-head h2 { font-size: 12px; }
+    .msg-item  { gap: 7px; padding: 6px 5px; }
+    .msg-avatar { width: 28px; height: 28px; font-size: 9.5px; }
+    .msg-name   { font-size: 10px; }
+    .msg-verified { display: none; } /* too tight on mobile */
+    .msg-time   { font-size: 8.5px; }
+    .msg-text   { font-size: 9.5px; }
+    .activity-item { gap: 7px; padding: 6px 5px; }
+    .activity-icon { width: 26px; height: 26px; border-radius: 6px; }
+    .activity-icon svg { width: 12px; height: 12px; }
+    .activity-desc { font-size: 10px; }
+    .activity-time { font-size: 9px; }
+
+    /* ── Saved cards narrower ── */
+    .saved-card     { width: 155px; }
+    .saved-card-img { height: 104px; }
 
     /* Show bottom nav */
     .db-bottom-nav { display: flex; }
-}
-
-/* ════════════════════════════════════════
-   RESPONSIVE — SMALL  ≤520px
-════════════════════════════════════════ */
-@media (max-width:520px) {
-    .db-widget-pair { grid-template-columns: 1fr; }
-    .db-bottom-row  { grid-template-columns: 1fr; }
-    .saved-card     { width: 155px; }
-    .saved-card-img { height: 100px; }
 }
