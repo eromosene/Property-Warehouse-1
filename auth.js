@@ -12,7 +12,21 @@ document.querySelectorAll(".site-nav a, .header-actions a").forEach((link) => {
     });
 });
 
+/* ── Boot: enforce hidden state regardless of CSS cache ── */
+document.querySelectorAll(".auth-form").forEach((f) => {
+    if (f.classList.contains("hidden")) f.style.display = "none";
+});
+
 /* ── Tab switching ── */
+function showForm(formEl) {
+    formEl.classList.remove("hidden");
+    formEl.style.display = "";
+}
+function hideForm(formEl) {
+    formEl.classList.add("hidden");
+    formEl.style.display = "none";
+}
+
 document.querySelectorAll(".tab-btn").forEach((btn) => {
     btn.addEventListener("click", () => {
         const targetFormId = btn.dataset.tab;
@@ -26,9 +40,9 @@ document.querySelectorAll(".tab-btn").forEach((btn) => {
         btn.classList.add("active");
         btn.setAttribute("aria-selected", "true");
 
-        panel.querySelectorAll(".auth-form").forEach(f => f.classList.add("hidden"));
+        panel.querySelectorAll(".auth-form").forEach(hideForm);
         const targetForm = document.getElementById(targetFormId);
-        if (targetForm) targetForm.classList.remove("hidden");
+        if (targetForm) showForm(targetForm);
     });
 });
 

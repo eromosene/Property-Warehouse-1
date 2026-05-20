@@ -184,7 +184,7 @@
 }
 
 .auth-form.hidden {
-    display: none;
+    display: none !important;
 }
 
 .field-group {
