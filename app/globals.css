@@ -1,0 +1,7 @@
+@import "tailwindcss";
+
+@theme inline {
+  --font-manrope: "Manrope", sans-serif;
+  --font-playfair: "Playfair Display", serif;
+  --font-cormorant: "Cormorant Garamond", serif;
+}
