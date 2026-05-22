@@ -955,3 +955,293 @@ body.dashboard-page {
     /* Show bottom nav */
     .db-bottom-nav { display: flex; }
 }
+
+/* ===== iPhone/mobile polish to match reference ===== */
+@media (max-width:600px) {
+    
+    body.dashboard-page {
+        background: #f6f5f3;
+    }
+    
+    .db-header {
+        height: 72px;
+        background: #f6f5f3;
+        border-bottom: none;
+        box-shadow: none;
+        padding: 12px 16px;
+    }
+    
+    .db-header-logo {
+        display: flex;
+        flex: 1;
+        justify-content: flex-start;
+    }
+    
+    .db-header-logo .db-brand-name {
+        font-size: 10px;
+        line-height: 1;
+    }
+    
+    .db-menu-toggle {
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        background: #fff;
+        border: 1px solid var(--line);
+        box-shadow: 0 3px 10px rgba(9, 24, 42, .05);
+    }
+    
+    .db-notif-btn {
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        background: #fff;
+        box-shadow: 0 3px 10px rgba(9, 24, 42, .05);
+    }
+    
+    .db-avatar {
+        width: 46px;
+        height: 46px;
+        font-size: 14px;
+        border: 2px solid #fff;
+        box-shadow: 0 3px 10px rgba(9, 24, 42, .08);
+    }
+    
+    .db-main {
+        padding: 8px 14px calc(var(--bnav-h) + 18px);
+        gap: 12px;
+    }
+    
+    .db-mobile-greeting h2 {
+        font-size: 22px;
+        line-height: 1.2;
+        margin-bottom: 4px;
+    }
+    
+    .db-mobile-greeting p {
+        font-size: 15px;
+        line-height: 1.5;
+    }
+    
+    .db-mobile-search {
+        height: 52px;
+        border-radius: 16px;
+        padding: 0 16px;
+        background: #fff;
+        box-shadow: 0 6px 20px rgba(9, 24, 42, .06);
+    }
+    
+    .db-mobile-search input {
+        font-size: 14px;
+    }
+    
+    .db-section,
+    .db-widget {
+        border-radius: 18px;
+        padding: 16px 14px 14px;
+        box-shadow: 0 5px 18px rgba(9, 24, 42, .04);
+    }
+    
+    .saved-carousel-wrap {
+        display: block;
+    }
+    
+    .saved-arrow {
+        display: none;
+    }
+    
+    .saved-track {
+        gap: 10px;
+        overflow-x: auto;
+        padding-bottom: 4px;
+    }
+    
+    .saved-card {
+        width: 200px;
+        border-radius: 14px;
+    }
+    
+    .saved-card-img {
+        height: 122px;
+    }
+    
+    .db-widget-pair {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+    
+    .db-bottom-row {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+    
+    .insp-img {
+        width: 52px;
+        height: 52px;
+    }
+    
+    .db-bottom-nav {
+        display: flex;
+        height: 70px;
+        padding-bottom: 8px;
+        border-top: 1px solid rgba(9, 24, 42, .08);
+    }
+    
+    .db-bnav-item {
+        font-size: 11px;
+        gap: 4px;
+    }
+    
+    .db-bnav-item svg {
+        width: 23px;
+        height: 23px;
+    }
+    
+    .db-bnav-item.active {
+        color: #0d1f35;
+        font-weight: 800;
+    }
+    
+    .db-bnav-item.active::after {
+        content: '';
+        position: absolute;
+        bottom: 6px;
+        width: 34px;
+        height: 3px;
+        background: #0d1f35;
+        border-radius: 99px;
+    }
+    
+    .db-promo {
+        display: none;
+    }
+    
+}
+
+/* ===== FORCE TRUE MOBILE LAYOUT ===== */
+@media (max-width: 600px) {
+    
+    /* remove desktop sidebar layout */
+    .dashboard-layout {
+        display: block !important;
+    }
+    
+    /* hide desktop sidebar */
+    .db-sidebar {
+        display: none !important;
+    }
+    
+    /* main content full width */
+    .db-content {
+        width: 100% !important;
+        margin-left: 0 !important;
+        padding: 0 !important;
+    }
+    
+    /* remove desktop grids */
+    .db-grid,
+    .dashboard-grid,
+    .dashboard-row,
+    .dashboard-columns {
+        display: block !important;
+        grid-template-columns: 1fr !important;
+    }
+    
+    /* widgets stack */
+    .db-widget,
+    .db-section,
+    .saved-homes,
+    .inspections-card,
+    .messages-card,
+    .activity-card,
+    .payment-card,
+    .affordability-card,
+    .application-card {
+        width: 100% !important;
+        margin-bottom: 14px;
+    }
+    
+    /* cards no fixed widths */
+    .saved-card,
+    .property-card {
+        min-width: 200px;
+        width: 200px;
+        flex-shrink: 0;
+    }
+    
+    /* horizontal property scrolling */
+    .saved-track,
+    .property-scroll {
+        display: flex !important;
+        overflow-x: auto !important;
+        gap: 12px;
+        scroll-snap-type: x mandatory;
+        padding-bottom: 6px;
+    }
+    
+    .saved-track::-webkit-scrollbar {
+        display: none;
+    }
+    
+    /* proper mobile spacing */
+    .db-main,
+    .dashboard-main {
+        width: 100%;
+        padding: 10px 14px 100px !important;
+    }
+    
+    /* search full width */
+    .db-mobile-search,
+    .search-bar {
+        width: 100%;
+    }
+    
+    /* section titles */
+    .section-header {
+        margin-bottom: 14px;
+    }
+    
+    /* make widgets stack */
+    .db-widget-pair,
+    .db-bottom-row {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: 14px;
+    }
+    
+    /* inspection rows */
+    .inspection-item {
+        grid-template-columns: 52px 1fr auto;
+    }
+    
+    /* mobile header */
+    .db-header {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+    }
+    
+    /* bottom nav always visible */
+    .db-bottom-nav {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: #fff;
+        z-index: 999;
+    }
+    
+    /* prevent desktop overflow */
+    body {
+        overflow-x: hidden;
+    }
+    
+}
+/* ===== turn off menu toggle on mobile view ===== */
+@media (max-width:600px) {
+    
+    .db-menu-toggle {
+        display: none !important;
+    }
+    
+}
