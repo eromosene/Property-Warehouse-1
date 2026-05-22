@@ -26,13 +26,13 @@
     top: 0;
     bottom: 0;
     width: 22%;
-    background: url("IMG-20260512-WA0088.jpg") center / cover no-repeat;
+    background: url("dashboard homes sample images assets/04A4A0B0-F13E-44C9-91E6-96DE440E47E9.png") center / cover no-repeat;
     z-index: 0;
     filter: blur(1px) brightness(0.78);
 }
 
 .auth-bg-left  { left: 0; }
-.auth-bg-right { right: 0; background-image: url("IMG-20260512-WA0021.jpg"); }
+.auth-bg-right { right: 0; background-image: url("dashboard homes sample images assets/1D47CC0D-EBBB-4843-B36C-FF1584FBF3C0.png"); }
 
 /* ── CONTAINER ── */
 .auth-container {
