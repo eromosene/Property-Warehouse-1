@@ -12,11 +12,11 @@ if (!currentUser || currentUser.role !== "tenant") {
    STATIC DATA
 ══════════════════════════════════════════════════ */
 const IMGS = [
-    "IMG-20260512-WA0088.jpg",
-    "IMG-20260512-WA0021.jpg",
-    "IMG-20260512-WA0053.jpg",
-    "IMG-20260512-WA0089.jpg",
-    "IMG-20260512-WA0087.jpg"
+    "dashboard homes sample images assets/04A4A0B0-F13E-44C9-91E6-96DE440E47E9.png",
+    "dashboard homes sample images assets/1D47CC0D-EBBB-4843-B36C-FF1584FBF3C0.png",
+    "dashboard homes sample images assets/205A56A8-1549-4228-8254-4C4FAD5D441E.png",
+    "dashboard homes sample images assets/2BBB6637-9807-47DA-998C-93EDCE888A96.png",
+    "dashboard homes sample images assets/B85B7D15-92A0-4AEB-93A9-E1816F2BA58C.png"
 ];
 
 const userArea = currentUser?.area || "Lekki";
