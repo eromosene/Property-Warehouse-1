@@ -145,7 +145,7 @@ document.getElementById("landlord-login")?.addEventListener("submit", (e) => {
 
     localStorage.setItem("pw_current_user", JSON.stringify({ ...stored, role: "landlord" }));
     showToast("Welcome back, " + stored.firstName + "!");
-    setTimeout(() => { window.location.href = "index.html"; }, 1200);
+    setTimeout(() => { window.location.href = "landlord-dashboard.html"; }, 1200);
 });
 
 /* LANDLORD SIGN UP */
@@ -171,5 +171,5 @@ document.getElementById("landlord-signup")?.addEventListener("submit", (e) => {
     localStorage.setItem("pw_landlord", JSON.stringify(userData));
     localStorage.setItem("pw_current_user", JSON.stringify(userData));
     showToast("Landlord account created! Welcome, " + firstName + "!");
-    setTimeout(() => { window.location.href = "index.html"; }, 1400);
+    setTimeout(() => { window.location.href = "landlord-dashboard.html"; }, 1400);
 });

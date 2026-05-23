@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Landlord Dashboard — Property Warehouse</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="landlord-dashboard.css">
+</head>
+<body class="ld-page">
+
+<!-- ═══════════ SIDEBAR ═══════════ -->
+<aside class="ld-sidebar" id="ldSidebar">
+    <a class="ld-brand" href="index.html" aria-label="Property Warehouse home">
+        <span class="ld-brand-mark">P<span>W</span></span>
+        <span class="ld-brand-name"><span>PROPERTY</span><span>WAREHOUSE</span></span>
+    </a>
+    <nav class="ld-nav" aria-label="Landlord navigation">
+        <a href="#" class="ld-nav-item active" data-section="dashboard">
+            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+            <span>Dashboard</span>
+        </a>
+        <a href="#" class="ld-nav-item" data-section="listings">
+            <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            <span>My Listings</span>
+        </a>
+        <a href="#" class="ld-nav-item" data-section="messages">
+            <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <span>Messages</span>
+            <span class="ld-badge">8</span>
+        </a>
+        <a href="#" class="ld-nav-item" data-section="tenants">
+            <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            <span>Tenants</span>
+        </a>
+        <a href="#" class="ld-nav-item" data-section="analytics">
+            <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+            <span>Analytics</span>
+        </a>
+        <a href="#" class="ld-nav-item" data-section="payments">
+            <svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+            <span>Payments</span>
+        </a>
+        <a href="#" class="ld-nav-item" data-section="reviews">
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <span>Reviews</span>
+            <span class="ld-badge">3</span>
+        </a>
+        <a href="#" class="ld-nav-item" data-section="settings">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            <span>Settings</span>
+        </a>
+    </nav>
+    <div class="ld-promo">
+        <div class="ld-promo-img" aria-hidden="true"></div>
+        <p class="ld-promo-title">Boost your property visibility</p>
+        <p class="ld-promo-sub">Promote your listings and reach more quality tenants.</p>
+        <button class="ld-promo-btn" type="button">
+            <svg viewBox="0 0 24 24"><path d="M5 12h13m-5-5 5 5-5 5"/></svg>
+            Promote Listing
+        </button>
+    </div>
+</aside>
+
+<!-- ═══════════ WRAPPER ═══════════ -->
+<div class="ld-wrapper">
+
+    <!-- ── HEADER ── -->
+    <header class="ld-header">
+        <button class="ld-menu-toggle" id="ldMenuToggle" type="button" aria-label="Toggle menu">
+            <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+
+        <!-- Mobile logo -->
+        <a class="ld-header-logo" href="index.html" aria-label="Property Warehouse">
+            <span class="ld-brand-mark">P<span>W</span></span>
+            <span class="ld-brand-name"><span>PROPERTY</span><span>WAREHOUSE</span></span>
+        </a>
+
+        <!-- Desktop greeting -->
+        <div class="ld-greeting">
+            <h1 id="ldGreeting">Welcome back <span>👋</span></h1>
+            <p id="ldSubtitle">Here's what's happening with your properties today.</p>
+        </div>
+
+        <div class="ld-header-right">
+            <div class="ld-search">
+                <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="search" placeholder="Search anything…" aria-label="Search">
+            </div>
+
+            <button class="ld-notif-btn" type="button" aria-label="Notifications">
+                <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                <span class="ld-notif-dot" id="ldNotifDot">3</span>
+            </button>
+
+            <div class="ld-user-chip" id="ldUserChip">
+                <div class="ld-avatar-wrap">
+                    <img class="ld-avatar-img" id="ldAvatarImg" src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=80&h=80&fit=crop&crop=face" alt="Landlord avatar">
+                </div>
+                <div class="ld-user-info">
+                    <strong id="ldUserName">Adeyemi Johnson</strong>
+                    <span class="ld-verified-label">
+                        <svg viewBox="0 0 24 24" width="9" height="9"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                        Verified Landlord
+                    </span>
+                </div>
+                <svg class="ld-chevron" viewBox="0 0 24 24" width="14" height="14"><polyline points="6 9 12 15 18 9"/></svg>
+                <div class="ld-user-dropdown" id="ldUserDropdown">
+                    <a href="#" data-section="settings">
+                        <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        My Profile
+                    </a>
+                    <a href="#" data-section="settings">
+                        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                        Settings
+                    </a>
+                    <div class="ld-dropdown-divider"></div>
+                    <a href="#" id="ldLogoutBtn" class="ld-logout-link">
+                        <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                        Log Out
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ══════════════ MAIN ══════════════ -->
+    <main class="ld-main" id="ldMain">
+
+        <!-- Mobile greeting + search -->
+        <div class="ld-mobile-intro">
+            <div class="ld-mobile-greeting">
+                <h2 id="ldGreetingMobile">Welcome back <span>👋</span></h2>
+                <p id="ldSubtitleMobile">Here's what's happening with your properties today.</p>
+            </div>
+            <div class="ld-mobile-search">
+                <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="search" placeholder="Search anything…" aria-label="Search">
+            </div>
+        </div>
+
+        <!-- ══ LEFT COLUMN ══ -->
+        <div class="ld-left">
+
+            <!-- STATS ROW -->
+            <div class="ld-stats-row" id="ldStatsRow">
+                <div class="ld-stat-card">
+                    <div class="ld-stat-icon ld-stat-icon--blue">
+                        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                    </div>
+                    <div class="ld-stat-body">
+                        <span class="ld-stat-label">Active Listings</span>
+                        <div class="ld-stat-value">12</div>
+                        <div class="ld-stat-change up">
+                            <svg viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>
+                            20% from last month
+                        </div>
+                    </div>
+                </div>
+                <div class="ld-stat-card">
+                    <div class="ld-stat-icon ld-stat-icon--green">
+                        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    </div>
+                    <div class="ld-stat-body">
+                        <span class="ld-stat-label">Monthly Inquiries</span>
+                        <div class="ld-stat-value">248</div>
+                        <div class="ld-stat-change up">
+                            <svg viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>
+                            34% from last month
+                        </div>
+                    </div>
+                </div>
+                <div class="ld-stat-card">
+                    <div class="ld-stat-icon ld-stat-icon--gold">
+                        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    </div>
+                    <div class="ld-stat-body">
+                        <span class="ld-stat-label">Occupancy Rate</span>
+                        <div class="ld-stat-value" id="ldOccupancyVal">91%</div>
+                        <div class="ld-stat-change up">
+                            <svg viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>
+                            8% from last month
+                        </div>
+                    </div>
+                </div>
+                <div class="ld-stat-card">
+                    <div class="ld-stat-icon ld-stat-icon--purple">
+                        <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                    </div>
+                    <div class="ld-stat-body">
+                        <span class="ld-stat-label">Revenue Earned</span>
+                        <div class="ld-stat-value ld-stat-value--sm">₦14,800,000</div>
+                        <div class="ld-stat-change up">
+                            <svg viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>
+                            18% from last month
+                        </div>
+                    </div>
+                </div>
+                <div class="ld-stat-card ld-stat-card--verified">
+                    <div class="ld-verified-shield">
+                        <svg viewBox="0 0 24 24"><path d="M12 3 5 6v5.5c0 4.1 2.8 7.9 7 9.5 4.2-1.6 7-5.4 7-9.5V6l-7-3Z"/><path d="m9.5 12 1.7 1.7 3.6-4"/></svg>
+                    </div>
+                    <div class="ld-verified-body">
+                        <strong>Verified Landlord</strong>
+                        <p>Your profile is verified. You're trusted by thousands of tenants.</p>
+                        <a href="#" class="ld-view-profile-link">View Profile <svg viewBox="0 0 24 24"><path d="M5 12h13m-5-5 5 5-5 5"/></svg></a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RENTAL PERFORMANCE CHART -->
+            <section class="ld-section ld-section--chart">
+                <div class="ld-section-head">
+                    <h2>Rental Performance</h2>
+                    <div class="ld-chart-legend">
+                        <span class="ld-legend-item ld-legend--ink"><i></i>Inquiries</span>
+                        <span class="ld-legend-item ld-legend--gold"><i></i>Occupancy</span>
+                        <span class="ld-legend-item ld-legend--green"><i></i>Revenue</span>
+                    </div>
+                    <select class="ld-period-select" aria-label="Period">
+                        <option>Monthly</option>
+                        <option>Weekly</option>
+                        <option>Yearly</option>
+                    </select>
+                </div>
+                <div class="ld-chart-wrap">
+                    <svg class="ld-chart-svg" viewBox="0 0 580 200" preserveAspectRatio="none" aria-hidden="true">
+                        <!-- Y-axis grid lines -->
+                        <line class="ld-grid" x1="50" y1="10"  x2="565" y2="10"/>
+                        <line class="ld-grid" x1="50" y1="50"  x2="565" y2="50"/>
+                        <line class="ld-grid" x1="50" y1="90"  x2="565" y2="90"/>
+                        <line class="ld-grid" x1="50" y1="130" x2="565" y2="130"/>
+                        <line class="ld-grid" x1="50" y1="170" x2="565" y2="170"/>
+                        <!-- Y labels -->
+                        <text class="ld-axis-label" x="42" y="13"  text-anchor="end">400</text>
+                        <text class="ld-axis-label" x="42" y="53"  text-anchor="end">300</text>
+                        <text class="ld-axis-label" x="42" y="93"  text-anchor="end">200</text>
+                        <text class="ld-axis-label" x="42" y="133" text-anchor="end">100</text>
+                        <text class="ld-axis-label" x="42" y="173" text-anchor="end">0</text>
+                        <!-- X labels -->
+                        <text class="ld-axis-label" x="50"  y="188" text-anchor="middle">Dec</text>
+                        <text class="ld-axis-label" x="153" y="188" text-anchor="middle">Jan</text>
+                        <text class="ld-axis-label" x="256" y="188" text-anchor="middle">Feb</text>
+                        <text class="ld-axis-label" x="359" y="188" text-anchor="middle">Mar</text>
+                        <text class="ld-axis-label" x="462" y="188" text-anchor="middle">Apr</text>
+                        <text class="ld-axis-label" x="565" y="188" text-anchor="middle">May</text>
+                        <!-- Inquiries line (dark) — data: 180,210,240,280,310,248 -->
+                        <polyline class="ld-line ld-line--ink"
+                            points="50,98 153,86 256,74 359,58 462,46 565,71"
+                            fill="none"/>
+                        <!-- Dots -->
+                        <circle class="ld-dot ld-dot--ink" cx="50"  cy="98"  r="4"/>
+                        <circle class="ld-dot ld-dot--ink" cx="153" cy="86"  r="4"/>
+                        <circle class="ld-dot ld-dot--ink" cx="256" cy="74"  r="4"/>
+                        <circle class="ld-dot ld-dot--ink" cx="359" cy="58"  r="4"/>
+                        <circle class="ld-dot ld-dot--ink" cx="462" cy="46"  r="4"/>
+                        <circle class="ld-dot ld-dot--ink" cx="565" cy="71"  r="4"/>
+                        <!-- Occupancy line (gold) — data: 150,160,170,200,220,230 -->
+                        <polyline class="ld-line ld-line--gold"
+                            points="50,110 153,106 256,103 359,90 462,83 565,78"
+                            fill="none"/>
+                        <circle class="ld-dot ld-dot--gold" cx="50"  cy="110" r="4"/>
+                        <circle class="ld-dot ld-dot--gold" cx="153" cy="106" r="4"/>
+                        <circle class="ld-dot ld-dot--gold" cx="256" cy="103" r="4"/>
+                        <circle class="ld-dot ld-dot--gold" cx="359" cy="90"  r="4"/>
+                        <circle class="ld-dot ld-dot--gold" cx="462" cy="83"  r="4"/>
+                        <circle class="ld-dot ld-dot--gold" cx="565" cy="78"  r="4"/>
+                        <!-- Revenue line (green) — data: 100,120,130,150,160,200 -->
+                        <polyline class="ld-line ld-line--green"
+                            points="50,130 153,122 256,118 359,110 462,106 565,90"
+                            fill="none"/>
+                        <circle class="ld-dot ld-dot--green" cx="50"  cy="130" r="4"/>
+                        <circle class="ld-dot ld-dot--green" cx="153" cy="122" r="4"/>
+                        <circle class="ld-dot ld-dot--green" cx="256" cy="118" r="4"/>
+                        <circle class="ld-dot ld-dot--green" cx="359" cy="110" r="4"/>
+                        <circle class="ld-dot ld-dot--green" cx="462" cy="106" r="4"/>
+                        <circle class="ld-dot ld-dot--green" cx="565" cy="90"  r="4"/>
+                    </svg>
+                </div>
+            </section>
+
+            <!-- MY LISTINGS TABLE -->
+            <section class="ld-section ld-section--listings">
+                <div class="ld-section-head">
+                    <h2>My Listings</h2>
+                    <button class="ld-add-btn" type="button" id="ldAddBtn">
+                        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        Add New Property
+                    </button>
+                </div>
+                <div class="ld-table-wrap">
+                    <table class="ld-table" id="ldListingsTable">
+                        <thead>
+                            <tr>
+                                <th>PROPERTY</th>
+                                <th>AREA</th>
+                                <th>STATUS</th>
+                                <th class="ld-th-num">MONTHLY INQUIRIES</th>
+                                <th class="ld-th-num">ANNUAL RENT</th>
+                                <th class="ld-th-num">OCCUPANCY</th>
+                                <th>PERFORMANCE</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="ldTableBody"></tbody>
+                    </table>
+                </div>
+                <a href="#" class="ld-go-link" id="ldViewAll">View all listings <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></a>
+            </section>
+
+        </div><!-- /ld-left -->
+
+        <!-- ══ RIGHT PANEL ══ -->
+        <aside class="ld-right">
+
+            <!-- MOST VIEWED PROPERTY -->
+            <section class="ld-widget ld-widget--toplist">
+                <div class="ld-section-head">
+                    <h3>Most Viewed Property</h3>
+                </div>
+                <div class="ld-top-prop" id="ldMostViewed">
+                    <img src="dashboard homes sample images assets/04A4A0B0-F13E-44C9-91E6-96DE440E47E9.png" alt="Most viewed property" loading="lazy">
+                    <div class="ld-top-prop-info">
+                        <div class="ld-top-prop-name">Luxury 3 Bedroom Duplex</div>
+                        <div class="ld-top-prop-loc">Lekki Phase 1</div>
+                        <div class="ld-top-prop-views">
+                            <svg viewBox="0 0 24 24" width="12" height="12"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                            1,245 views
+                        </div>
+                    </div>
+                </div>
+                <div class="ld-inquiry-area">
+                    <div class="ld-section-head" style="margin-top:14px;">
+                        <h3>Highest Inquiry Area</h3>
+                    </div>
+                    <div class="ld-area-row">
+                        <div class="ld-area-icon">
+                            <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                        </div>
+                        <div>
+                            <div class="ld-area-name">Lekki Phase 1</div>
+                            <div class="ld-area-count">56 inquiries</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="ld-best-listing" id="ldBestListing">
+                    <div class="ld-section-head" style="margin-top:14px;">
+                        <h3>Best Performing Listing</h3>
+                    </div>
+                    <div class="ld-best-row">
+                        <img src="dashboard homes sample images assets/2BBB6637-9807-47DA-998C-93EDCE888A96.png" alt="Best performing listing" loading="lazy">
+                        <div>
+                            <div class="ld-best-name">4 Bedroom Terrace Duplex</div>
+                            <div class="ld-best-loc">Chevron, Lekki</div>
+                            <div class="ld-best-occ">
+                                <svg viewBox="0 0 24 24" width="10" height="10" style="fill:rgba(21,147,95,.15);stroke:var(--green);"><path d="M12 3 5 6v5.5c0 4.1 2.8 7.9 7 9.5 4.2-1.6 7-5.4 7-9.5V6l-7-3Z"/><path d="m9.5 12 1.7 1.7 3.6-4"/></svg>
+                                95% occupancy rate
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- RECENT MESSAGES -->
+            <section class="ld-widget ld-widget--messages">
+                <div class="ld-section-head">
+                    <h3>Recent Messages</h3>
+                    <a href="#" class="ld-view-all">View all <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></a>
+                </div>
+                <div class="ld-msg-list" id="ldMsgList"></div>
+                <a href="#" class="ld-go-link">Go to Messages <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></a>
+            </section>
+
+            <!-- UPCOMING INSPECTIONS -->
+            <section class="ld-widget ld-widget--inspections">
+                <div class="ld-section-head">
+                    <h3>Upcoming Inspections</h3>
+                    <a href="#" class="ld-view-all">View all <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></a>
+                </div>
+                <div class="ld-insp-list" id="ldInspList"></div>
+                <button class="ld-add-insp-btn" type="button">
+                    <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    Add Inspection
+                </button>
+            </section>
+
+            <!-- RECENT PAYMENTS -->
+            <section class="ld-widget ld-widget--payments">
+                <div class="ld-section-head">
+                    <h3>Recent Payments</h3>
+                    <a href="#" class="ld-view-all">View all <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></a>
+                </div>
+                <div class="ld-pay-list" id="ldPayList"></div>
+            </section>
+
+            <!-- TENANT SATISFACTION -->
+            <section class="ld-widget ld-widget--satisfaction">
+                <div class="ld-section-head">
+                    <h3>Tenant Satisfaction</h3>
+                    <select class="ld-period-select" aria-label="Period">
+                        <option>This Month</option>
+                        <option>Last Month</option>
+                    </select>
+                </div>
+                <div class="ld-sat-body">
+                    <div class="ld-sat-score">
+                        <div class="ld-sat-number">4.8</div>
+                        <div class="ld-sat-out">/ 5</div>
+                        <div class="ld-sat-stars" id="ldStars">★★★★★</div>
+                        <div class="ld-sat-label">Excellent</div>
+                        <div class="ld-sat-reviews">Based on 32 reviews</div>
+                    </div>
+                    <div class="ld-sat-emoji">
+                        <svg viewBox="0 0 64 64" width="52" height="52">
+                            <circle cx="32" cy="32" r="30" fill="#fef3c7" stroke="#f59e0b" stroke-width="2"/>
+                            <circle cx="22" cy="26" r="3" fill="#92400e"/>
+                            <circle cx="42" cy="26" r="3" fill="#92400e"/>
+                            <path d="M20 40 Q32 50 44 40" stroke="#92400e" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                </div>
+            </section>
+
+        </aside><!-- /ld-right -->
+
+    </main>
+
+    <!-- ── MOBILE BOTTOM NAV ── -->
+    <nav class="ld-bottom-nav" aria-label="Bottom navigation">
+        <a href="#" class="ld-bnav-item active" data-section="dashboard">
+            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+            <span>Dashboard</span>
+        </a>
+        <a href="#" class="ld-bnav-item" data-section="listings">
+            <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            <span>Listings</span>
+        </a>
+        <a href="#" class="ld-bnav-item ld-bnav-messages" data-section="messages">
+            <div class="ld-bnav-icon-wrap">
+                <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                <span class="ld-bnav-badge">8</span>
+            </div>
+            <span>Messages</span>
+        </a>
+        <a href="#" class="ld-bnav-item" data-section="tenants">
+            <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+            <span>Tenants</span>
+        </a>
+        <a href="#" class="ld-bnav-item" data-section="profile">
+            <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <span>Profile</span>
+        </a>
+    </nav>
+
+</div><!-- /ld-wrapper -->
+
+<div class="ld-sidebar-overlay" id="ldSidebarOverlay"></div>
+
+<script src="landlord-dashboard.js"></script>
+</body>
+</html>
