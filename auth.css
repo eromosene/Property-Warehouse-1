@@ -17,6 +17,9 @@
     min-height: 100vh;
     padding: 100px 24px 60px;
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 /* Blurred property photo panels left & right */
@@ -38,8 +41,8 @@
 .auth-container {
     position: relative;
     z-index: 1;
+    width: 100%;
     max-width: 980px;
-    margin: 0 auto;
 }
 
 /* ── HEADING ── */
