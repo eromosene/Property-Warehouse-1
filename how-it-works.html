@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>How It Works — Property Warehouse</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="how-it-works.css">
+</head>
+
+<body class="hiw-page">
+
+<!-- ═══════════ NAVBAR ═══════════ -->
+<header class="hiw-header">
+  <a class="hiw-brand" href="index.html" aria-label="Property Warehouse home">
+    <span class="hiw-brand-mark">P <span>W</span></span>
+    <span class="hiw-brand-name"><span>PROPERTY</span><span>WAREHOUSE</span></span>
+  </a>
+
+  <nav class="hiw-nav" aria-label="Primary navigation">
+    <a href="index.html#listings">Listings</a>
+    <a href="heatmap.html">Heat Map</a>
+    <a href="index.html#landlords">Landlords</a>
+    <a href="how-it-works.html" class="active">How It Works</a>
+    <a href="index.html#about-us">About Us</a>
+  </nav>
+
+  <div class="hiw-header-actions">
+    <a class="hiw-login-link" href="auth.html">Log in</a>
+    <a class="hiw-list-btn" href="auth.html#landlord">+ List Property</a>
+  </div>
+
+  <button class="hiw-menu-btn" id="hiwMenuBtn" type="button" aria-label="Open menu">
+    <span></span><span></span><span></span>
+  </button>
+</header>
+
+<div class="hiw-drawer" id="hiwDrawer">
+  <a href="index.html#listings">Listings</a>
+  <a href="heatmap.html">Heat Map</a>
+  <a href="index.html#landlords">Landlords</a>
+  <a href="how-it-works.html" class="active">How It Works</a>
+  <a href="index.html#about-us">About Us</a>
+  <a href="auth.html">Log in / Sign up</a>
+</div>
+
+<!-- ═══════════ HERO ═══════════ -->
+<section class="hiw-hero">
+  <div class="hiw-hero-bg" aria-hidden="true">
+    <img src="https://images.unsplash.com/photo-1613977257363-707ba9348227?w=1600&q=80&fit=crop" alt="" />
+    <div class="hiw-hero-overlay"></div>
+  </div>
+
+  <span class="hiw-ghost-text" aria-hidden="true">SIMPLE</span>
+
+  <div class="hiw-hero-content">
+    <h1>How Property<br>Warehouse Works</h1>
+    <p>No agents. No confusion. Just a smarter way to rent in Lagos.</p>
+
+    <div class="hiw-toggle" role="group" aria-label="User type">
+      <button class="hiw-toggle-btn active" id="toggleTenant" data-target="tenant">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        I'm a Tenant
+      </button>
+      <button class="hiw-toggle-btn" id="toggleLandlord" data-target="landlord">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        I'm a Landlord
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ PROBLEM STRIP ═══════════ -->
+<section class="hiw-problems">
+  <p class="hiw-problem-label">THE PROBLEM WE SOLVE</p>
+
+  <div class="hiw-problem-cards">
+    <div class="hiw-problem-card">
+      <div class="hiw-prob-x">✕</div>
+      <h3>Agents charging 10–15% commission upfront</h3>
+      <p>You pay huge fees before you even see a property.</p>
+    </div>
+    <div class="hiw-problem-card">
+      <div class="hiw-prob-x">✕</div>
+      <h3>Fake listings wasting your time</h3>
+      <p>Many listings are outdated or don't even exist.</p>
+    </div>
+    <div class="hiw-problem-card">
+      <div class="hiw-prob-x">✕</div>
+      <h3>Hidden fees discovered at move-in</h3>
+      <p>Unexpected charges that blow your budget.</p>
+    </div>
+  </div>
+
+  <div class="hiw-fix-row">
+    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#a97e4b" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
+    <p class="hiw-fix-text">Property Warehouse fixes all of this.</p>
+  </div>
+</section>
+
+<!-- ═══════════ JOURNEYS ═══════════ -->
+<section class="hiw-journeys" id="journeySection">
+  <div class="hiw-journey-col" id="tenantJourney">
+    <div class="hiw-journey-header tenant">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span>TENANT JOURNEY</span>
+    </div>
+
+    <div class="hiw-steps">
+      <div class="hiw-step">
+        <div class="hiw-step-num tenant-num">1</div>
+        <div class="hiw-step-icon">
+          <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </div>
+        <div class="hiw-step-dash"></div>
+        <strong>Search</strong>
+        <p>Browse listings, filtered by area, type, and budget that fit you.</p>
+      </div>
+
+      <div class="hiw-step">
+        <div class="hiw-step-num tenant-num">2</div>
+        <div class="hiw-step-icon">
+          <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        </div>
+        <div class="hiw-step-dash"></div>
+        <strong>Check Affordability</strong>
+        <p>Enter your income range. The calculator tells you instantly if you can afford it.</p>
+      </div>
+
+      <div class="hiw-step">
+        <div class="hiw-step-num tenant-num">3</div>
+        <div class="hiw-step-icon">
+          <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        </div>
+        <div class="hiw-step-dash"></div>
+        <strong>View Full Details</strong>
+        <p>See rent breakdown, caution fee, service charge. No surprises.</p>
+      </div>
+
+      <div class="hiw-step">
+        <div class="hiw-step-num tenant-num">4</div>
+        <div class="hiw-step-icon">
+          <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.4 2 2 0 0 1 3.6 1.22h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.79a16 16 0 0 0 6.29 6.29l.96-.96a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7a2 2 0 0 1 1.73 2.04z"/></svg>
+        </div>
+        <div class="hiw-step-dash"></div>
+        <strong>Contact Landlord</strong>
+        <p>Send a WhatsApp message directly with the landlord. Zero agent involved.</p>
+      </div>
+
+      <div class="hiw-step">
+        <div class="hiw-step-num tenant-num">5</div>
+        <div class="hiw-step-icon">
+          <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        </div>
+        <div class="hiw-step-dash"></div>
+        <strong>Inspect Property</strong>
+        <p>Schedule a physical visit directly with the landlord.</p>
+      </div>
+
+      <div class="hiw-step last">
+        <div class="hiw-step-num tenant-num">6</div>
+        <div class="hiw-step-icon">
+          <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        </div>
+        <strong>Move In</strong>
+        <p>Sign agreement directly with your landlord and move in.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="hiw-journey-divider" aria-hidden="true"></div>
+
+  <div class="hiw-journey-col" id="landlordJourney">
+    <div class="hiw-journey-header landlord">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>LANDLORD JOURNEY</span>
+    </div>
+
+    <div class="hiw-steps">
+      <div class="hiw-step">
+        <div class="hiw-step-num landlord-num">1</div>
+        <div class="hiw-step-icon">
+          <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        </div>
+        <div class="hiw-step-dash"></div>
+        <strong>Create Listing</strong>
+        <p>Fill in your property details, rent, fees, and availability.</p>
+      </div>
+
+      <div class="hiw-step">
+        <div class="hiw-step-num landlord-num">2</div>
+        <div class="hiw-step-icon">
+          <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        </div>
+        <div class="hiw-step-dash"></div>
+        <strong>Add Photos</strong>
+        <p>Upload property photos and set your WhatsApp number for visibility.</p>
+      </div>
+
+      <div class="hiw-step">
+        <div class="hiw-step-num landlord-num">3</div>
+        <div class="hiw-step-icon">
+          <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3 5 6v5.5c0 4.1 2.8 7.9 7 9.5 4.2-1.6 7-5.4 7-9.5V6l-7-3Z"/><path d="m9.5 12 1.7 1.7 3.6-4"/></svg>
+        </div>
+        <div class="hiw-step-dash"></div>
+        <strong>Get Verified</strong>
+        <p>Apply for a verification badge to build trust and boost listing visibility.</p>
+      </div>
+
+      <div class="hiw-step">
+        <div class="hiw-step-num landlord-num">4</div>
+        <div class="hiw-step-icon">
+          <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <div class="hiw-step-dash"></div>
+        <strong>Receive Inquiries</strong>
+        <p>Tenants contact you directly on WhatsApp. You choose who fits.</p>
+      </div>
+
+      <div class="hiw-step last">
+        <div class="hiw-step-num landlord-num">5</div>
+        <div class="hiw-step-icon">
+          <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+        </div>
+        <strong>Collect Rent</strong>
+        <p>No commission. No agent. 100% goes to you.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ FEATURES ═══════════ -->
+<section class="hiw-features">
+  <div class="hiw-feature-card">
+    <div class="hiw-feat-icon teal">
+      <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3 5 6v5.5c0 4.1 2.8 7.9 7 9.5 4.2-1.6 7-5.4 7-9.5V6l-7-3Z"/><path d="m9.5 12 1.7 1.7 3.6-4"/></svg>
+    </div>
+    <strong>Verified Listings</strong>
+    <p>Every verified listing has been reviewed for authenticity and quality to keep you safe.</p>
+  </div>
+
+  <div class="hiw-feature-card">
+    <div class="hiw-feat-icon navy">
+      <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+    </div>
+    <strong>Rent Burden Calculator</strong>
+    <p>Know before you commit whether the rent fits your income.</p>
+  </div>
+
+  <div class="hiw-feature-card">
+    <div class="hiw-feat-icon gold">
+      <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+    </div>
+    <strong>Pay Monthly Option</strong>
+    <p>Spread your rent payments monthly instead of yearly.</p>
+  </div>
+
+  <div class="hiw-feature-card">
+    <div class="hiw-feat-icon red">
+      <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+    </div>
+    <strong>Heat Map Insights</strong>
+    <p>See which Lagos areas are rising, falling or affordable right now.</p>
+  </div>
+</section>
+
+<!-- ═══════════ COMPARISON TABLE ═══════════ -->
+<section class="hiw-compare">
+  <h2>Property Warehouse vs Traditional Agents</h2>
+
+  <div class="hiw-table-wrap">
+    <table class="hiw-table">
+      <thead>
+        <tr>
+          <th>FEATURES</th>
+          <th class="pw-col">
+            <span class="hiw-brand-mark-sm">P <span>W</span></span>
+            PROPERTY WAREHOUSE
+          </th>
+          <th>TRADITIONAL AGENT</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Agent Commission</td>
+          <td class="pw-col"><span class="good">NO ✓</span></td>
+          <td><span class="bad">10–15% ✕</span></td>
+        </tr>
+        <tr>
+          <td>Listing Verification</td>
+          <td class="pw-col"><span class="good">Yes ✓</span></td>
+          <td><span class="bad">Rarely ✕</span></td>
+        </tr>
+        <tr>
+          <td>Transparent Pricing</td>
+          <td class="pw-col"><span class="good">Always ✓</span></td>
+          <td><span class="bad">Hidden fees ✕</span></td>
+        </tr>
+        <tr>
+          <td>Direct Communication</td>
+          <td class="pw-col"><span class="good">Yes ✓</span></td>
+          <td><span class="bad">No agent ✕</span></td>
+        </tr>
+        <tr>
+          <td>Pay Monthly Option</td>
+          <td class="pw-col"><span class="good">Available ✓</span></td>
+          <td><span class="bad">Never ✕</span></td>
+        </tr>
+        <tr>
+          <td>Fake Listing Risk</td>
+          <td class="pw-col"><span class="good">Very Low ✓</span></td>
+          <td><span class="bad">Very High ✕</span></td>
+        </tr>
+        <tr>
+          <td>Speed of Finding a Home</td>
+          <td class="pw-col"><span class="good">Fast ✓</span></td>
+          <td><span class="bad">Slow ✕</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ═══════════ TRUST BAR ═══════════ -->
+<section class="hiw-trust">
+  <div class="hiw-trust-item">
+    <div class="hiw-trust-icon gold-icon">
+      <svg viewBox="0 0 24 24" width="28" height="28" fill="#a97e4b" stroke="#a97e4b" stroke-width="1"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+    </div>
+    <strong>4.8<span class="trust-denom">/5</span></strong>
+    <span>Rating from users</span>
+  </div>
+
+  <div class="hiw-trust-item">
+    <div class="hiw-trust-icon gold-icon">
+      <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="#a97e4b" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    </div>
+    <strong>500+</strong>
+    <span>Listings across Lagos</span>
+  </div>
+
+  <div class="hiw-trust-item">
+    <div class="hiw-trust-icon gold-icon">
+      <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="#a97e4b" stroke-width="2"><path d="M12 3 5 6v5.5c0 4.1 2.8 7.9 7 9.5 4.2-1.6 7-5.4 7-9.5V6l-7-3Z"/><path d="m9.5 12 1.7 1.7 3.6-4"/></svg>
+    </div>
+    <strong>200+</strong>
+    <span>Verified Landlords</span>
+  </div>
+
+  <div class="hiw-trust-item">
+    <div class="hiw-trust-icon gold-icon">
+      <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="#a97e4b" stroke-width="2"><path d="M19 10.5c0 5-7 10-7 10s-7-5-7-10a7 7 0 1 1 14 0Z"/><circle cx="12" cy="10.5" r="2.5"/></svg>
+    </div>
+    <strong>12</strong>
+    <span>LGAs Covered</span>
+  </div>
+</section>
+
+<!-- ═══════════ FAQ ═══════════ -->
+<section class="hiw-faq">
+  <h2>Frequently Asked Questions</h2>
+
+  <div class="hiw-faq-grid">
+    <div class="hiw-faq-col">
+      <div class="hiw-faq-item">
+        <button class="hiw-faq-q" aria-expanded="false">
+          Is Property Warehouse really free for tenants?
+          <svg class="faq-arrow" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+        <div class="hiw-faq-a">
+          Yes. Tenants pay zero fees to Property Warehouse. You only pay the rent and agreed fees directly to the landlord — no agent commission ever.
+        </div>
+      </div>
+
+      <div class="hiw-faq-item">
+        <button class="hiw-faq-q" aria-expanded="false">
+          How do I know a listing is real and not fake?
+          <svg class="faq-arrow" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+        <div class="hiw-faq-a">
+          Every listing undergoes a review process. Verified landlords display a badge. We also cross-check addresses and contact details before a listing goes live.
+        </div>
+      </div>
+
+      <div class="hiw-faq-item">
+        <button class="hiw-faq-q" aria-expanded="false">
+          What does the "verified" badge mean?
+          <svg class="faq-arrow" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+        <div class="hiw-faq-a">
+          A verified landlord has submitted valid ID, proof of property ownership, and passed our quality check. Their listings are guaranteed to be genuine.
+        </div>
+      </div>
+
+      <div class="hiw-faq-item">
+        <button class="hiw-faq-q" aria-expanded="false">
+          How does the Pay Monthly option work?
+          <svg class="faq-arrow" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+        <div class="hiw-faq-a">
+          Select listings offer a monthly payment plan. Instead of paying a full year upfront, your rent is split into monthly instalments agreed directly with the landlord.
+        </div>
+      </div>
+    </div>
+
+    <div class="hiw-faq-col">
+      <div class="hiw-faq-item">
+        <button class="hiw-faq-q" aria-expanded="false">
+          Can I list more than one property as a landlord?
+          <svg class="faq-arrow" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+        <div class="hiw-faq-a">
+          Absolutely. You can add and manage multiple listings from your landlord dashboard with no limit on the number of properties.
+        </div>
+      </div>
+
+      <div class="hiw-faq-item">
+        <button class="hiw-faq-q" aria-expanded="false">
+          What if I have a dispute with a landlord?
+          <svg class="faq-arrow" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+        <div class="hiw-faq-a">
+          Contact our support team through your dashboard. We facilitate mediation between tenants and landlords and can suspend listings that violate our standards.
+        </div>
+      </div>
+
+      <div class="hiw-faq-item">
+        <button class="hiw-faq-q" aria-expanded="false">
+          Which areas of Lagos are currently covered?
+          <svg class="faq-arrow" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+        <div class="hiw-faq-a">
+          We currently cover 12 LGAs including Lekki, Ikoyi, Victoria Island, Yaba, Surulere, Gbagada, Ajah, Sangotedo, Ikeja, Agege, Isale-Eko, and Apapa.
+        </div>
+      </div>
+
+      <div class="hiw-faq-item">
+        <button class="hiw-faq-q" aria-expanded="false">
+          Is my personal information safe?
+          <svg class="faq-arrow" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+        <div class="hiw-faq-a">
+          Yes. We only share your WhatsApp contact with landlords when you initiate a conversation. We never sell your data to third parties.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ FINAL CTA ═══════════ -->
+<section class="hiw-cta">
+  <div class="hiw-cta-bg">
+    <img src="https://images.unsplash.com/photo-1560185007-cde436f6a4d0?w=1400&q=80&fit=crop" alt="" />
+    <div class="hiw-cta-overlay"></div>
+  </div>
+
+  <div class="hiw-cta-content">
+    <h2>Ready to rent smarter?</h2>
+    <p>Join thousands of Lagos residents renting smarter — no agent, no stress.</p>
+
+    <div class="hiw-cta-btns">
+      <a href="auth.html" class="hiw-cta-primary">
+        Start Searching
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h13m-5-5 5 5-5 5"/></svg>
+      </a>
+      <a href="auth.html#landlord" class="hiw-cta-secondary">
+        List Your Property
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h13m-5-5 5 5-5 5"/></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<script src="how-it-works.js"></script>
+</body>
+</html>
