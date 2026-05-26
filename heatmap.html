@@ -3,202 +3,560 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  
   <title>Heat Map — Property Warehouse</title>
 
-  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
   <link rel="stylesheet" href="heatmap.css">
 </head>
 
 <body class="hm-page">
 
-<!-- NAVBAR -->
+<!-- ═══════════ NAVBAR ═══════════ -->
 <header class="hm-header">
-
-  <a href="index.html" class="hm-logo">
-      PROPERTY WAREHOUSE
+  <a class="hm-brand" href="index.html" aria-label="Property Warehouse home">
+    <span class="hm-brand-mark">P<span>W</span></span>
+    <span class="hm-brand-name">
+      <span>PROPERTY</span>
+      <span>WAREHOUSE</span>
+    </span>
   </a>
 
-  <nav class="hm-nav">
-      <a href="index.html">Listings</a>
-      <a href="heatmap.html" class="active">Heat Map</a>
-      <a href="#">Landlords</a>
-      <a href="#">How It Works</a>
+  <nav class="hm-nav" aria-label="Primary navigation">
+    <a href="index.html#listings">Listings</a>
+    <a href="heatmap.html" class="active">Heat Map</a>
+    <a href="index.html#landlords">Landlords</a>
+    <a href="index.html#how-it-works">How It Works</a>
+    <a href="index.html#about-us">About Us</a>
   </nav>
 
-</header>
-
-<!-- HERO -->
-<section class="hm-hero">
-
-  <div class="hm-title-wrap">
-      <h1>Lagos Housing Heat Map</h1>
-      <p>
-        Where demand is rising, prices are moving,
-        and the best value hides.
-      </p>
+  <div class="hm-header-actions">
+    <button class="hm-save-btn" aria-label="Saved">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+    </button>
+    <a class="hm-login-link" href="auth.html">Log in</a>
+    <a class="hm-list-btn" href="auth.html#landlord">+ List Property</a>
   </div>
 
+  <button class="hm-menu-btn" id="hmMenuBtn" type="button" aria-label="Open menu">
+    <span></span><span></span><span></span>
+  </button>
+</header>
+
+<!-- Mobile drawer -->
+<div class="hm-drawer" id="hmDrawer">
+  <a href="index.html#listings">Listings</a>
+  <a href="heatmap.html" class="active">Heat Map</a>
+  <a href="index.html#landlords">Landlords</a>
+  <a href="index.html#how-it-works">How It Works</a>
+  <a href="index.html#about-us">About Us</a>
+  <a href="auth.html">Log in / Sign up</a>
+</div>
+
+<!-- ═══════════ HERO ═══════════ -->
+<section class="hm-hero">
+  <div class="hm-title-wrap">
+    <h1>
+      Lagos Housing Heat Map
+      <span class="hm-map-emoji">🗺️</span>
+    </h1>
+    <p>Where demand is rising, prices are moving, and the best value hides.</p>
+  </div>
+  <div class="hm-view-by">
+    <span>View by:</span>
+    <select id="viewBySelect" aria-label="View by metric">
+      <option value="demand">Demand Score</option>
+      <option value="rent">Avg Rent</option>
+      <option value="listings">Listings</option>
+    </select>
+  </div>
 </section>
 
-<!-- MAIN GRID -->
+<!-- ═══════════ MAIN GRID ═══════════ -->
 <section class="hm-grid">
 
   <!-- MAP -->
   <div class="hm-map-card">
+    <div class="hm-map-legend">
+      <span class="legend-label">DEMAND LEVEL</span>
+      <div class="legend-bar"></div>
+      <div class="legend-ticks">
+        <span>Low</span><span>Medium</span><span>High</span><span>Very High</span>
+      </div>
+    </div>
 
-      <img
-        src="https://staticmap.openstreetmap.de/staticmap.php?center=6.5244,3.3792&zoom=12&size=800x500&maptype=mapnik"
-        alt="Lagos-map"
-        class="hm-map"
-      >
+    <div id="lagosMap"></div>
 
-      <!-- HOTSPOTS -->
-      <div class="hotspot yaba"></div>
-      <div class="hotspot lekki"></div>
-      <div class="hotspot surulere"></div>
+    <div class="hm-map-tooltip" id="mapTooltip">
+      <div class="tooltip-icon">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      </div>
+      <div>
+        <strong>How it works</strong>
+        <p>Our heat map shows rental demand based on searches, inquiries, and market activity.</p>
+      </div>
+    </div>
 
+    <a href="https://www.openstreetmap.org/#map=12/6.5244/3.3792" target="_blank" rel="noopener" class="hm-view-larger">
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 10.5c0 5-7 10-7 10s-7-5-7-10a7 7 0 1 1 14 0Z"/><circle cx="12" cy="10.5" r="2.5"/></svg>
+      View Larger Map
+    </a>
   </div>
 
-  <!-- INSIGHTS -->
+  <!-- INSIGHT CARDS -->
   <div class="hm-side">
 
-      <div class="hm-insight-card">
-          <span>Most Searched</span>
-          <h3>Lekki Phase 1</h3>
-          <p>12.4K searches this month</p>
+    <div class="hm-insight-card most-searched">
+      <div class="insight-icon-wrap flame">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2c0 0-5 5-5 10a5 5 0 0 0 10 0c0-2-1-4-2-5 0 2-1.5 3-2 3-.5 0-1-.5-1-1.5C12 6 12 2 12 2Z"/></svg>
       </div>
+      <span class="insight-label">Most Searched</span>
+      <h3 class="insight-name">Lekki Phase 1</h3>
+      <p class="insight-stat">12.4K searches this month</p>
+      <p class="insight-change up">↑ 18% vs last month</p>
+    </div>
 
-      <div class="hm-insight-card">
-          <span>Fastest Rising</span>
-          <h3>Ajah</h3>
-          <p>+32% increase</p>
+    <div class="hm-insight-card fastest-rising">
+      <div class="insight-icon-wrap trend">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
       </div>
+      <span class="insight-label">Fastest Rising</span>
+      <h3 class="insight-name">Ajah</h3>
+      <p class="insight-stat up-badge">↑ 32% increase</p>
+      <p class="insight-sub">in demand score</p>
+    </div>
 
-      <div class="hm-insight-card">
-          <span>Best Value</span>
-          <h3>Gbagada</h3>
-          <p>High demand, lower rent</p>
+    <div class="hm-insight-card best-value">
+      <div class="insight-icon-wrap diamond">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 22 9 18 21 6 21 2 9"/></svg>
       </div>
+      <span class="insight-label">Best Value</span>
+      <h3 class="insight-name">Gbagada</h3>
+      <p class="insight-stat">High demand, lower rent</p>
+      <span class="roi-badge">Best ROI</span>
+    </div>
 
   </div>
 
 </section>
 
-<!-- MARKET OVERVIEW -->
+<!-- ═══════════ MARKET OVERVIEW ═══════════ -->
 <section class="hm-overview">
 
+  <div class="hm-overview-top">
     <h2>Market Overview</h2>
+  </div>
 
-    <p>
-      Lekki Phase 1 remains the most in-demand area in Lagos,
-      while Ajah is showing the fastest growth.
-      Gbagada currently offers the best value.
-    </p>
+  <p class="hm-overview-text">
+    Lekki Phase 1 remains the most in-demand area in Lagos, while Ajah is showing
+    the fastest growth. Gbagada offers the best value for money with high demand
+    and affordable rents.
+  </p>
 
-    <div class="hm-stats">
-
-        <div class="hm-stat">
-            <h3>127K+</h3>
-            <span>Total Searches</span>
-        </div>
-
-        <div class="hm-stat">
-            <h3>8,450+</h3>
-            <span>Active Inquiries</span>
-        </div>
-
-        <div class="hm-stat">
-            <h3>2,340+</h3>
-            <span>Properties Listed</span>
-        </div>
-
-        <div class="hm-stat">
-            <h3>12</h3>
-            <span>LGAs Covered</span>
-        </div>
-
+  <div class="hm-stats">
+    <div class="hm-stat">
+      <h3>127K+</h3>
+      <span>Total Searches</span>
     </div>
+    <div class="hm-stat">
+      <h3>8,450+</h3>
+      <span>Active Inquiries</span>
+    </div>
+    <div class="hm-stat">
+      <h3>2,340+</h3>
+      <span>Properties Listed</span>
+    </div>
+    <div class="hm-stat">
+      <h3>12</h3>
+      <span>LGAs Covered</span>
+    </div>
+  </div>
+
+  <div class="hm-overview-footer">
+    <span class="hm-data-updated">
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      Data updated: May 24, 2025
+    </span>
+    <button class="hm-refresh-btn" id="refreshBtn">
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+      Refresh Data
+    </button>
+  </div>
 
 </section>
 
-<!-- AREA BREAKDOWN -->
+<!-- ═══════════ AREA BREAKDOWN ═══════════ -->
 <section class="hm-breakdown">
 
-    <div class="hm-tabs">
+  <div class="hm-breakdown-header">
+    <h2>Area Breakdown</h2>
+    <button class="hm-download-btn" id="downloadBtn">
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Download Report
+    </button>
+  </div>
 
-        <button class="active">All Areas</button>
-        <button>High Demand</button>
-        <button>Premium</button>
-        <button>Emerging</button>
-        <button>Affordable</button>
+  <div class="hm-tabs" role="tablist">
+    <button class="active" data-filter="all" role="tab" aria-selected="true">All Areas</button>
+    <button data-filter="high-demand" role="tab">High Demand</button>
+    <button data-filter="premium" role="tab">Premium</button>
+    <button data-filter="emerging" role="tab">Emerging</button>
+    <button data-filter="affordable" role="tab">Affordable</button>
+  </div>
 
-    </div>
+  <div class="hm-area-grid" id="areaGrid">
 
-    <div class="hm-area-grid">
-
-        <!-- CARD -->
-        <div class="hm-area-card">
-
-            <div class="hm-area-top">
-                <h3>Lekki Phase 1</h3>
-                <span>High Demand</span>
-            </div>
-
-            <div class="hm-progress">
-                <div class="hm-progress-fill" style="width:92%"></div>
-            </div>
-
-            <div class="hm-area-meta">
-                <div>
-                    <strong>₦2.8M</strong>
-                    <span>Avg Rent</span>
-                </div>
-
-                <div>
-                    <strong>Rising</strong>
-                    <span>Trend</span>
-                </div>
-
-                <div>
-                    <strong>342</strong>
-                    <span>Listings</span>
-                </div>
-            </div>
-
-            <a href="index.html" class="hm-view-link">
-                View Properties
-            </a>
-
+    <div class="hm-area-card" data-category="high-demand">
+      <div class="hm-area-top">
+        <div>
+          <h3>Lekki Phase 1</h3>
+          <p class="hm-area-lga">Eti-Osa LGA</p>
         </div>
-
+        <span class="hm-tag high-demand">High Demand</span>
+      </div>
+      <div class="hm-score-row">
+        <span class="hm-score-label">Demand Score</span>
+        <span class="hm-score-num">92<small>/100</small></span>
+      </div>
+      <div class="hm-progress">
+        <div class="hm-progress-fill" style="width:92%"></div>
+      </div>
+      <div class="hm-area-meta">
+        <div>
+          <strong>₦2,800,000</strong>
+          <span>AVG RENT/YR</span>
+        </div>
+        <div>
+          <strong class="trend-up">↑ Rising</strong>
+          <span>TREND</span>
+        </div>
+        <div>
+          <strong>342</strong>
+          <span>LISTINGS</span>
+        </div>
+      </div>
+      <a href="index.html#listings" class="hm-view-link">View Properties →</a>
     </div>
+
+    <div class="hm-area-card" data-category="premium">
+      <div class="hm-area-top">
+        <div>
+          <h3>Ikoyi</h3>
+          <p class="hm-area-lga">Ikoyi LGA</p>
+        </div>
+        <span class="hm-tag premium">Premium</span>
+      </div>
+      <div class="hm-score-row">
+        <span class="hm-score-label">Demand Score</span>
+        <span class="hm-score-num">88<small>/100</small></span>
+      </div>
+      <div class="hm-progress">
+        <div class="hm-progress-fill" style="width:88%"></div>
+      </div>
+      <div class="hm-area-meta">
+        <div>
+          <strong>₦3,500,000</strong>
+          <span>AVG RENT/YR</span>
+        </div>
+        <div>
+          <strong class="trend-stable">→ Stable</strong>
+          <span>TREND</span>
+        </div>
+        <div>
+          <strong>156</strong>
+          <span>LISTINGS</span>
+        </div>
+      </div>
+      <a href="index.html#listings" class="hm-view-link">View Properties →</a>
+    </div>
+
+    <div class="hm-area-card" data-category="emerging">
+      <div class="hm-area-top">
+        <div>
+          <h3>Yaba</h3>
+          <p class="hm-area-lga">Lagos Mainland</p>
+        </div>
+        <span class="hm-tag emerging">Emerging</span>
+      </div>
+      <div class="hm-score-row">
+        <span class="hm-score-label">Demand Score</span>
+        <span class="hm-score-num">76<small>/100</small></span>
+      </div>
+      <div class="hm-progress">
+        <div class="hm-progress-fill" style="width:76%"></div>
+      </div>
+      <div class="hm-area-meta">
+        <div>
+          <strong>₦1,200,000</strong>
+          <span>AVG RENT/YR</span>
+        </div>
+        <div>
+          <strong class="trend-up">↑ Rising</strong>
+          <span>TREND</span>
+        </div>
+        <div>
+          <strong>289</strong>
+          <span>LISTINGS</span>
+        </div>
+      </div>
+      <a href="index.html#listings" class="hm-view-link">View Properties →</a>
+    </div>
+
+    <div class="hm-area-card" data-category="affordable">
+      <div class="hm-area-top">
+        <div>
+          <h3>Gbagada</h3>
+          <p class="hm-area-lga">Kosofe LGA</p>
+        </div>
+        <span class="hm-tag affordable">Affordable</span>
+      </div>
+      <div class="hm-score-row">
+        <span class="hm-score-label">Demand Score</span>
+        <span class="hm-score-num">68<small>/100</small></span>
+      </div>
+      <div class="hm-progress">
+        <div class="hm-progress-fill" style="width:68%"></div>
+      </div>
+      <div class="hm-area-meta">
+        <div>
+          <strong>₦900,000</strong>
+          <span>AVG RENT/YR</span>
+        </div>
+        <div>
+          <strong class="trend-stable">→ Stable</strong>
+          <span>TREND</span>
+        </div>
+        <div>
+          <strong>412</strong>
+          <span>LISTINGS</span>
+        </div>
+      </div>
+      <a href="index.html#listings" class="hm-view-link">View Properties →</a>
+    </div>
+
+    <div class="hm-area-card" data-category="emerging">
+      <div class="hm-area-top">
+        <div>
+          <h3>Ajah</h3>
+          <p class="hm-area-lga">Eti-Osa LGA</p>
+        </div>
+        <span class="hm-tag emerging">Emerging</span>
+      </div>
+      <div class="hm-score-row">
+        <span class="hm-score-label">Demand Score</span>
+        <span class="hm-score-num">72<small>/100</small></span>
+      </div>
+      <div class="hm-progress">
+        <div class="hm-progress-fill" style="width:72%"></div>
+      </div>
+      <div class="hm-area-meta">
+        <div>
+          <strong>₦1,100,000</strong>
+          <span>AVG RENT/YR</span>
+        </div>
+        <div>
+          <strong class="trend-up">↑ Rising</strong>
+          <span>TREND</span>
+        </div>
+        <div>
+          <strong>378</strong>
+          <span>LISTINGS</span>
+        </div>
+      </div>
+      <a href="index.html#listings" class="hm-view-link">View Properties →</a>
+    </div>
+
+    <div class="hm-area-card" data-category="high-demand">
+      <div class="hm-area-top">
+        <div>
+          <h3>Surulere</h3>
+          <p class="hm-area-lga">Lagos Mainland</p>
+        </div>
+        <span class="hm-tag high-demand">High Demand</span>
+      </div>
+      <div class="hm-score-row">
+        <span class="hm-score-label">Demand Score</span>
+        <span class="hm-score-num">81<small>/100</small></span>
+      </div>
+      <div class="hm-progress">
+        <div class="hm-progress-fill" style="width:81%"></div>
+      </div>
+      <div class="hm-area-meta">
+        <div>
+          <strong>₦1,450,000</strong>
+          <span>AVG RENT/YR</span>
+        </div>
+        <div>
+          <strong class="trend-up">↑ Rising</strong>
+          <span>TREND</span>
+        </div>
+        <div>
+          <strong>267</strong>
+          <span>LISTINGS</span>
+        </div>
+      </div>
+      <a href="index.html#listings" class="hm-view-link">View Properties →</a>
+    </div>
+
+    <div class="hm-area-card" data-category="premium">
+      <div class="hm-area-top">
+        <div>
+          <h3>Victoria Island</h3>
+          <p class="hm-area-lga">Eti-Osa LGA</p>
+        </div>
+        <span class="hm-tag premium">Premium</span>
+      </div>
+      <div class="hm-score-row">
+        <span class="hm-score-label">Demand Score</span>
+        <span class="hm-score-num">85<small>/100</small></span>
+      </div>
+      <div class="hm-progress">
+        <div class="hm-progress-fill" style="width:85%"></div>
+      </div>
+      <div class="hm-area-meta">
+        <div>
+          <strong>₦4,200,000</strong>
+          <span>AVG RENT/YR</span>
+        </div>
+        <div>
+          <strong class="trend-stable">→ Stable</strong>
+          <span>TREND</span>
+        </div>
+        <div>
+          <strong>198</strong>
+          <span>LISTINGS</span>
+        </div>
+      </div>
+      <a href="index.html#listings" class="hm-view-link">View Properties →</a>
+    </div>
+
+    <div class="hm-area-card" data-category="affordable">
+      <div class="hm-area-top">
+        <div>
+          <h3>Ikeja</h3>
+          <p class="hm-area-lga">Ikeja LGA</p>
+        </div>
+        <span class="hm-tag affordable">Affordable</span>
+      </div>
+      <div class="hm-score-row">
+        <span class="hm-score-label">Demand Score</span>
+        <span class="hm-score-num">65<small>/100</small></span>
+      </div>
+      <div class="hm-progress">
+        <div class="hm-progress-fill" style="width:65%"></div>
+      </div>
+      <div class="hm-area-meta">
+        <div>
+          <strong>₦850,000</strong>
+          <span>AVG RENT/YR</span>
+        </div>
+        <div>
+          <strong class="trend-up">↑ Rising</strong>
+          <span>TREND</span>
+        </div>
+        <div>
+          <strong>503</strong>
+          <span>LISTINGS</span>
+        </div>
+      </div>
+      <a href="index.html#listings" class="hm-view-link">View Properties →</a>
+    </div>
+
+    <div class="hm-area-card" data-category="emerging">
+      <div class="hm-area-top">
+        <div>
+          <h3>Sangotedo</h3>
+          <p class="hm-area-lga">Eti-Osa LGA</p>
+        </div>
+        <span class="hm-tag emerging">Emerging</span>
+      </div>
+      <div class="hm-score-row">
+        <span class="hm-score-label">Demand Score</span>
+        <span class="hm-score-num">59<small>/100</small></span>
+      </div>
+      <div class="hm-progress">
+        <div class="hm-progress-fill" style="width:59%"></div>
+      </div>
+      <div class="hm-area-meta">
+        <div>
+          <strong>₦750,000</strong>
+          <span>AVG RENT/YR</span>
+        </div>
+        <div>
+          <strong class="trend-up">↑ Rising</strong>
+          <span>TREND</span>
+        </div>
+        <div>
+          <strong>221</strong>
+          <span>LISTINGS</span>
+        </div>
+      </div>
+      <a href="index.html#listings" class="hm-view-link">View Properties →</a>
+    </div>
+
+    <div class="hm-area-card" data-category="affordable">
+      <div class="hm-area-top">
+        <div>
+          <h3>Agege</h3>
+          <p class="hm-area-lga">Agege LGA</p>
+        </div>
+        <span class="hm-tag affordable">Affordable</span>
+      </div>
+      <div class="hm-score-row">
+        <span class="hm-score-label">Demand Score</span>
+        <span class="hm-score-num">51<small>/100</small></span>
+      </div>
+      <div class="hm-progress">
+        <div class="hm-progress-fill" style="width:51%"></div>
+      </div>
+      <div class="hm-area-meta">
+        <div>
+          <strong>₦600,000</strong>
+          <span>AVG RENT/YR</span>
+        </div>
+        <div>
+          <strong class="trend-stable">→ Stable</strong>
+          <span>TREND</span>
+        </div>
+        <div>
+          <strong>187</strong>
+          <span>LISTINGS</span>
+        </div>
+      </div>
+      <a href="index.html#listings" class="hm-view-link">View Properties →</a>
+    </div>
+
+  </div>
 
 </section>
 
-<!-- CTA -->
+<!-- ═══════════ CTA ═══════════ -->
 <section class="hm-cta">
-
-    <div>
-        <h2>Want personalized insights?</h2>
-        <p>
-          Create an account to save favorite areas
-          and get custom alerts.
-        </p>
-    </div>
-
-    <div class="hm-cta-actions">
-        <a href="auth.html" class="hm-btn-primary">
-            Sign Up Free
-        </a>
-
-        <a href="auth.html" class="hm-btn-secondary">
-            Log In
-        </a>
-    </div>
-
+  <div class="hm-cta-icon">
+    <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+  </div>
+  <div class="hm-cta-text">
+    <h2>Want personalized insights?</h2>
+    <p>Create an account to save your favorite areas and get custom alerts.</p>
+  </div>
+  <div class="hm-cta-actions">
+    <a href="auth.html" class="hm-btn-primary">Sign Up Free</a>
+    <a href="auth.html" class="hm-btn-secondary">
+      Log in
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h13m-5-5 5 5-5 5"/></svg>
+    </a>
+  </div>
 </section>
 
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<!-- Leaflet Heat plugin -->
+<script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
 <script src="heatmap.js"></script>
 
 </body>
