@@ -255,9 +255,9 @@ function activateSection(section) {
 
 document.querySelectorAll(".ld-nav-item, .ld-bnav-item").forEach(link => {
     link.addEventListener("click", e => {
-        e.preventDefault();
         const sec = link.dataset.section;
         if (!sec) return;
+        e.preventDefault();
         activateSection(sec);
         if (sec !== "dashboard") toast(`${sec.charAt(0).toUpperCase()+sec.slice(1)} coming soon!`);
     });
