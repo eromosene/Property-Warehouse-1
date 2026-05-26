@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  
+  <title>Heat Map — Property Warehouse</title>
+
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="heatmap.css">
+</head>
+
+<body class="hm-page">
+
+<!-- NAVBAR -->
+<header class="hm-header">
+
+  <a href="index.html" class="hm-logo">
+      PROPERTY WAREHOUSE
+  </a>
+
+  <nav class="hm-nav">
+      <a href="index.html">Listings</a>
+      <a href="heatmap.html" class="active">Heat Map</a>
+      <a href="#">Landlords</a>
+      <a href="#">How It Works</a>
+  </nav>
+
+</header>
+
+<!-- HERO -->
+<section class="hm-hero">
+
+  <div class="hm-title-wrap">
+      <h1>Lagos Housing Heat Map</h1>
+      <p>
+        Where demand is rising, prices are moving,
+        and the best value hides.
+      </p>
+  </div>
+
+</section>
+
+<!-- MAIN GRID -->
+<section class="hm-grid">
+
+  <!-- MAP -->
+  <div class="hm-map-card">
+
+      <img
+        src="https://staticmap.openstreetmap.de/staticmap.php?center=6.5244,3.3792&zoom=12&size=800x500&maptype=mapnik"
+        alt="Lagos map"
+        class="hm-map"
+      >
+
+      <!-- HOTSPOTS -->
+      <div class="hotspot yaba"></div>
+      <div class="hotspot lekki"></div>
+      <div class="hotspot surulere"></div>
+
+  </div>
+
+  <!-- INSIGHTS -->
+  <div class="hm-side">
+
+      <div class="hm-insight-card">
+          <span>Most Searched</span>
+          <h3>Lekki Phase 1</h3>
+          <p>12.4K searches this month</p>
+      </div>
+
+      <div class="hm-insight-card">
+          <span>Fastest Rising</span>
+          <h3>Ajah</h3>
+          <p>+32% increase</p>
+      </div>
+
+      <div class="hm-insight-card">
+          <span>Best Value</span>
+          <h3>Gbagada</h3>
+          <p>High demand, lower rent</p>
+      </div>
+
+  </div>
+
+</section>
+
+<!-- MARKET OVERVIEW -->
+<section class="hm-overview">
+
+    <h2>Market Overview</h2>
+
+    <p>
+      Lekki Phase 1 remains the most in-demand area in Lagos,
+      while Ajah is showing the fastest growth.
+      Gbagada currently offers the best value.
+    </p>
+
+    <div class="hm-stats">
+
+        <div class="hm-stat">
+            <h3>127K+</h3>
+            <span>Total Searches</span>
+        </div>
+
+        <div class="hm-stat">
+            <h3>8,450+</h3>
+            <span>Active Inquiries</span>
+        </div>
+
+        <div class="hm-stat">
+            <h3>2,340+</h3>
+            <span>Properties Listed</span>
+        </div>
+
+        <div class="hm-stat">
+            <h3>12</h3>
+            <span>LGAs Covered</span>
+        </div>
+
+    </div>
+
+</section>
+
+<!-- AREA BREAKDOWN -->
+<section class="hm-breakdown">
+
+    <div class="hm-tabs">
+
+        <button class="active">All Areas</button>
+        <button>High Demand</button>
+        <button>Premium</button>
+        <button>Emerging</button>
+        <button>Affordable</button>
+
+    </div>
+
+    <div class="hm-area-grid">
+
+        <!-- CARD -->
+        <div class="hm-area-card">
+
+            <div class="hm-area-top">
+                <h3>Lekki Phase 1</h3>
+                <span>High Demand</span>
+            </div>
+
+            <div class="hm-progress">
+                <div class="hm-progress-fill" style="width:92%"></div>
+            </div>
+
+            <div class="hm-area-meta">
+                <div>
+                    <strong>₦2.8M</strong>
+                    <span>Avg Rent</span>
+                </div>
+
+                <div>
+                    <strong>Rising</strong>
+                    <span>Trend</span>
+                </div>
+
+                <div>
+                    <strong>342</strong>
+                    <span>Listings</span>
+                </div>
+            </div>
+
+            <a href="index.html" class="hm-view-link">
+                View Properties
+            </a>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- CTA -->
+<section class="hm-cta">
+
+    <div>
+        <h2>Want personalized insights?</h2>
+        <p>
+          Create an account to save favorite areas
+          and get custom alerts.
+        </p>
+    </div>
+
+    <div class="hm-cta-actions">
+        <a href="auth.html" class="hm-btn-primary">
+            Sign Up Free
+        </a>
+
+        <a href="auth.html" class="hm-btn-secondary">
+            Log In
+        </a>
+    </div>
+
+</section>
+
+<script src="heatmap.js"></script>
+
+</body>
+</html>
