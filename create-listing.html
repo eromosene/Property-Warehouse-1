@@ -224,15 +224,44 @@
     </div>
 
     <div class="cl-field">
-      <label>Property Image URLs
-        <span class="cl-field-hint">Go to unsplash.com and copy any property photo URL</span>
+      <label>Property Photos
+        <span class="cl-photo-count" id="clPhotoCount">0 / 6</span>
       </label>
-      <p class="cl-unsplash-tip">💡 Use URLs from <a href="https://unsplash.com" target="_blank">unsplash.com</a> or any direct image link</p>
-      <div class="cl-image-inputs">
-        <input type="url" class="cl-img-url" placeholder="https://images.unsplash.com/..." />
-        <input type="url" class="cl-img-url" placeholder="https://images.unsplash.com/..." />
-        <input type="url" class="cl-img-url" placeholder="https://images.unsplash.com/..." />
-        <input type="url" class="cl-img-url" placeholder="https://images.unsplash.com/..." />
+      <p class="cl-field-hint" style="margin-bottom:12px;text-transform:none;letter-spacing:0;font-size:12px;">Clear, well-lit photos attract more tenants.</p>
+
+      <div class="cl-photo-tabs">
+        <button type="button" class="cl-photo-tab active" id="clTabUpload" onclick="switchPhotoTab('upload')">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Upload from Device
+        </button>
+        <button type="button" class="cl-photo-tab" id="clTabUrl" onclick="switchPhotoTab('url')">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          Paste Image URL
+        </button>
+      </div>
+
+      <div id="clUploadPane">
+        <div class="cl-dropzone" id="clDropzone">
+          <input type="file" id="clFileInput" accept="image/*" multiple style="display:none" />
+          <svg viewBox="0 0 48 48" width="52" height="52" fill="none" stroke="#c8c3bb" stroke-width="1.5">
+            <rect x="6" y="12" width="36" height="26" rx="4"/>
+            <circle cx="17" cy="24" r="3"/>
+            <path d="M6 33 16 24l8 8 6-5 12 9"/>
+          </svg>
+          <p class="cl-drop-title">Drag photos here or <span class="cl-drop-link" id="clDropLink">browse files</span></p>
+          <p class="cl-drop-hint">JPG, PNG, WEBP &middot; Max 6 photos &middot; 5 MB each</p>
+        </div>
+        <div class="cl-thumb-strip" id="clThumbStrip"></div>
+      </div>
+
+      <div id="clUrlPane" style="display:none">
+        <p class="cl-unsplash-tip">Go to <a href="https://unsplash.com" target="_blank">unsplash.com</a>, find a property photo, right-click &rarr; Copy image address</p>
+        <div class="cl-image-inputs">
+          <input type="url" class="cl-img-url" placeholder="https://images.unsplash.com/..." />
+          <input type="url" class="cl-img-url" placeholder="https://images.unsplash.com/..." />
+          <input type="url" class="cl-img-url" placeholder="https://images.unsplash.com/..." />
+          <input type="url" class="cl-img-url" placeholder="https://images.unsplash.com/..." />
+        </div>
       </div>
     </div>
 

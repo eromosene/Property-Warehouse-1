@@ -152,6 +152,59 @@
 }
 .cl-amenity-label input { display: none; }
 
+/* ═══ PHOTO TABS ═══ */
+.cl-photo-count { font-size: 11px; font-weight: 700; color: #9a9490; text-transform: none; letter-spacing: 0; }
+.cl-photo-tabs {
+  display: flex; gap: 8px; margin-bottom: 12px;
+}
+.cl-photo-tab {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 16px; border-radius: 10px; font-family: "Manrope", sans-serif;
+  font-size: 12px; font-weight: 800; cursor: pointer;
+  border: 1.5px solid #e0ddd9; background: #fff; color: #5d6876;
+  transition: all .2s;
+}
+.cl-photo-tab:hover { border-color: #09182a; color: #09182a; }
+.cl-photo-tab.active { background: #09182a; color: #fff; border-color: #09182a; }
+
+/* ═══ DROPZONE ═══ */
+.cl-dropzone {
+  border: 2px dashed #d9d5ce; border-radius: 16px;
+  background: #fafaf8; padding: 36px 20px;
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  cursor: pointer; text-align: center; transition: border-color .2s, background .2s;
+}
+.cl-dropzone:hover, .cl-dropzone--over {
+  border-color: #a97e4b; background: #fdf8f2;
+}
+.cl-drop-title { font-size: 14px; font-weight: 700; color: #09182a; }
+.cl-drop-link { color: #a97e4b; cursor: pointer; text-decoration: underline; }
+.cl-drop-hint { font-size: 11px; color: #9a9490; font-weight: 600; }
+
+/* ═══ THUMBNAIL STRIP ═══ */
+.cl-thumb-strip {
+  display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px;
+}
+.cl-thumb {
+  position: relative; width: 88px; height: 88px; border-radius: 10px;
+  overflow: hidden; border: 2px solid #e0ddd9; flex-shrink: 0;
+}
+.cl-thumb:first-child { border-color: #a97e4b; }
+.cl-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.cl-thumb-badge {
+  position: absolute; bottom: 4px; left: 4px;
+  background: #a97e4b; color: #fff; font-size: 9px; font-weight: 800;
+  padding: 2px 6px; border-radius: 5px; text-transform: uppercase; letter-spacing: 0.5px;
+}
+.cl-thumb-remove {
+  position: absolute; top: 3px; right: 3px;
+  width: 20px; height: 20px; border-radius: 50%;
+  background: rgba(9,24,42,0.75); color: #fff;
+  font-size: 14px; line-height: 1; display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-family: sans-serif; transition: background .15s;
+}
+.cl-thumb-remove:hover { background: #c0392b; }
+
 /* ═══ IMAGE INPUTS ═══ */
 .cl-image-inputs { display: flex; flex-direction: column; gap: 10px; }
 .cl-img-url {

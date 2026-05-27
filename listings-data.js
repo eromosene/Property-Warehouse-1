@@ -232,3 +232,34 @@ function formatNaira(amount) {
 function generateListingId() {
   return 'LL' + Date.now().toString(36).toUpperCase();
 }
+
+/* ── Tenant Favourites ── */
+function getFavourites() {
+  return JSON.parse(localStorage.getItem('pw_favourites') || '[]');
+}
+function isFavourite(listingId) {
+  return getFavourites().includes(listingId);
+}
+function toggleFavourite(listingId) {
+  const favs = getFavourites();
+  const idx  = favs.indexOf(listingId);
+  if (idx > -1) favs.splice(idx, 1);
+  else favs.unshift(listingId);
+  localStorage.setItem('pw_favourites', JSON.stringify(favs));
+  return idx === -1;
+}
+function getSavedListings() {
+  const favs = getFavourites();
+  return getAllListings().filter(l => favs.includes(l.id));
+}
+
+/* ── Inquiries ── */
+function getInquiries() {
+  return JSON.parse(localStorage.getItem('pw_inquiries') || '[]');
+}
+function addInquiry(inquiry) {
+  const list = getInquiries();
+  list.unshift({ ...inquiry, sentAt: new Date().toISOString() });
+  if (list.length > 50) list.length = 50;
+  localStorage.setItem('pw_inquiries', JSON.stringify(list));
+}

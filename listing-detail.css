@@ -268,3 +268,16 @@
   .ldet-main-img { height: 240px; }
   .ldet-title { font-size: 22px; }
 }
+
+/* ═══ SAVE BUTTON ═══ */
+.ldet-save-btn {
+  width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 11px 16px; border: 1.5px solid #e0ddd9; border-radius: 12px;
+  background: #fff; font-family: "Manrope", sans-serif;
+  font-size: 13px; font-weight: 800; color: #5d6876; cursor: pointer;
+  transition: all .2s; margin-bottom: 14px;
+}
+.ldet-save-btn:hover { border-color: #a97e4b; color: #a97e4b; }
+.ldet-save-btn.saved { background: #fff8f1; border-color: #a97e4b; color: #a97e4b; }
+.ldet-save-btn svg { flex-shrink: 0; transition: fill .2s; }
+.ldet-save-btn.saved svg { fill: #a97e4b; stroke: #a97e4b; }
