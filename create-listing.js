@@ -1,6 +1,7 @@
 let currentStep = 1;
 let currentUser = null;
 const uploadedImages = [];
+const uploadedDocs   = [];
 
 /* ── Auth Guard ── */
 document.addEventListener('DOMContentLoaded', () => {
@@ -33,6 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   updateProgress();
   initPhotoUpload();
+  initDocUpload();
 });
 
 /* ── Photo Tab Switching ── */
@@ -114,6 +116,74 @@ function renderThumbs() {
 function removeThumb(idx) {
   uploadedImages.splice(idx, 1);
   renderThumbs();
+}
+
+/* ── Document Upload ── */
+function initDocUpload() {
+  const dropzone = document.getElementById('clDocDropzone');
+  const fileInput = document.getElementById('clDocInput');
+  if (!dropzone || !fileInput) return;
+
+  document.getElementById('clDocDropLink').addEventListener('click', e => { e.stopPropagation(); fileInput.click(); });
+  dropzone.addEventListener('click', () => fileInput.click());
+
+  fileInput.addEventListener('change', e => {
+    handleDocFiles([...e.target.files]);
+    fileInput.value = '';
+  });
+
+  dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('cl-dropzone--over'); });
+  dropzone.addEventListener('dragleave', () => dropzone.classList.remove('cl-dropzone--over'));
+  dropzone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropzone.classList.remove('cl-dropzone--over');
+    handleDocFiles([...e.dataTransfer.files]);
+  });
+}
+
+function handleDocFiles(files) {
+  const remaining = 5 - uploadedDocs.length;
+  if (!remaining) { alert('Maximum 5 documents allowed.'); return; }
+  files.slice(0, remaining).forEach(file => {
+    if (file.size > 10 * 1024 * 1024) { alert(`"${file.name}" exceeds the 10 MB limit.`); return; }
+    const allowed = ['application/pdf', 'image/jpeg', 'image/png'];
+    if (!allowed.includes(file.type) && !file.name.match(/\.(pdf|jpg|jpeg|png)$/i)) {
+      alert(`"${file.name}" is not a supported format. Use PDF, JPG, or PNG.`); return;
+    }
+    const reader = new FileReader();
+    reader.onload = e => {
+      uploadedDocs.push({ name: file.name, type: file.type, data: e.target.result });
+      renderDocList();
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function renderDocList() {
+  const list  = document.getElementById('clDocList');
+  const count = document.getElementById('clDocCount');
+  if (count) count.textContent = `${uploadedDocs.length} / 5`;
+  if (!list) return;
+
+  if (!uploadedDocs.length) { list.innerHTML = ''; return; }
+
+  list.innerHTML = uploadedDocs.map((doc, i) => {
+    const isPdf = doc.type === 'application/pdf' || doc.name.endsWith('.pdf');
+    const icon  = isPdf
+      ? `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#e53e3e" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>`
+      : `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#a97e4b" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>`;
+    return `
+    <div class="cl-doc-item">
+      <div class="cl-doc-icon">${icon}</div>
+      <div class="cl-doc-name">${doc.name}</div>
+      <button class="cl-thumb-remove" type="button" onclick="removeDoc(${i})" title="Remove">&#215;</button>
+    </div>`;
+  }).join('');
+}
+
+function removeDoc(idx) {
+  uploadedDocs.splice(idx, 1);
+  renderDocList();
 }
 
 /* ── Step Navigation ── */
@@ -208,7 +278,7 @@ function updatePricePreview() {
 
 /* ── Publish ── */
 function publishListing() {
-  if (!validateStep(4)) return;
+  if (!validateStep(4)) { goToStep(4); return; }
 
   const rent    = Number(document.getElementById('clRent').value)    || 0;
   const caution = Number(document.getElementById('clCaution').value) || 0;
@@ -222,7 +292,8 @@ function publishListing() {
   }
 
   const amenities = [...document.querySelectorAll('input[name="amenity"]:checked')].map(i => i.value);
-  const area = document.getElementById('clArea').value.trim();
+  const docTypes  = [...document.querySelectorAll('input[name="docType"]:checked')].map(i => i.value);
+  const area  = document.getElementById('clArea').value.trim();
   const title = document.getElementById('clTitle').value.trim();
   const waNum = document.getElementById('clWhatsapp').value.trim();
   const name  = document.getElementById('clContactName').value.trim();
@@ -252,6 +323,8 @@ function publishListing() {
     amenities,
     description:       document.getElementById('clDesc').value.trim(),
     images,
+    ownershipDocTypes: docTypes,
+    ownershipDocCount: uploadedDocs.length,
     views:             0,
     createdAt:         new Date().toISOString().split('T')[0]
   };
@@ -259,18 +332,23 @@ function publishListing() {
   saveListing(listing);
 
   // Show success
-  document.getElementById(`clStep4`).classList.add('hidden');
+  document.getElementById('clStep5').classList.add('hidden');
   document.getElementById('clSuccess').classList.remove('hidden');
+
+  const docsNote = docTypes.length
+    ? `<p>Ownership Docs: <span>${docTypes.join(', ')}</span></p>`
+    : '';
   document.getElementById('clSuccessSummary').innerHTML = `
     <strong>${title}</strong>
     <p>Area: <span>${area}</span></p>
     <p>Annual Rent: <span>${formatNaira(rent)}</span></p>
     <p>Total Move-in: <span>${formatNaira(rent + caution + service)}</span></p>
+    ${docsNote}
   `;
   window.scrollTo({ top: 0, behavior: 'smooth' });
 
-  // Update progress to done
-  currentStep = 5;
+  // Update progress to all done
+  currentStep = 6;
   document.querySelectorAll('.cl-step').forEach(s => s.classList.add('done'));
   document.querySelectorAll('.cl-step-line').forEach(l => l.classList.add('done'));
 }
@@ -282,7 +360,9 @@ function resetForm() {
   document.querySelectorAll('.cl-panel').forEach(p => p.classList.add('hidden'));
   document.getElementById('clStep1').classList.remove('hidden');
   uploadedImages.length = 0;
+  uploadedDocs.length   = 0;
   renderThumbs();
+  renderDocList();
   document.querySelectorAll('input[type="text"], input[type="number"], input[type="tel"], input[type="url"], textarea').forEach(i => i.value = '');
   document.querySelectorAll('select').forEach(s => s.selectedIndex = 0);
   document.querySelectorAll('input[type="checkbox"]').forEach(c => c.checked = false);

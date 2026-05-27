@@ -300,6 +300,10 @@ document.querySelectorAll(".ld-nav-item, .ld-bnav-item").forEach(link => {
         const sec = link.dataset.section;
         if (!sec) return;
         e.preventDefault();
+        if (sec === "listings") {
+            window.location.href = "listings.html";
+            return;
+        }
         activateSection(sec);
         if (sec !== "dashboard") toast(`${sec.charAt(0).toUpperCase()+sec.slice(1)} coming soon!`);
     });
@@ -337,7 +341,7 @@ document.getElementById("ldLogoutBtn")?.addEventListener("click", e => {
    INTERACTIVE BUTTONS
 ══════════════════════════════════════════════════ */
 /* ldAddBtn is now an <a> link to create-listing.html */
-document.getElementById("ldViewAll")?.addEventListener("click",      e => { e.preventDefault(); toast("Viewing all listings…"); });
+document.getElementById("ldViewAll")?.addEventListener("click",      e => { e.preventDefault(); window.location.href = "listings.html"; });
 document.querySelector(".ld-add-insp-btn")?.addEventListener("click",() => toast("Inspection scheduler coming soon!"));
 document.querySelector(".ld-promo-btn")?.addEventListener("click",   () => toast("Promotion feature coming soon!"));
 document.querySelector(".ld-view-profile-link")?.addEventListener("click", e => { e.preventDefault(); toast("Profile page coming soon!"); });

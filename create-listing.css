@@ -273,6 +273,31 @@
 .cl-error { border-color: #c0392b !important; }
 .cl-error-msg { font-size: 11px; color: #c0392b; margin-top: 5px; font-weight: 600; }
 
+/* ═══ DOCUMENT LIST ═══ */
+.cl-doc-list { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+.cl-doc-item {
+  display: flex; align-items: center; gap: 12px;
+  background: #f6f4f1; border: 1.5px solid #e8e5de;
+  border-radius: 10px; padding: 10px 14px;
+}
+.cl-doc-icon { flex-shrink: 0; display: flex; align-items: center; }
+.cl-doc-name {
+  flex: 1; font-size: 13px; font-weight: 700; color: #09182a;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* ═══ PRIVACY NOTE ═══ */
+.cl-privacy-note {
+  display: flex; align-items: flex-start; gap: 10px;
+  background: #f0f9f5; border: 1px solid #c3ebd9;
+  border-radius: 12px; padding: 14px 16px; margin-bottom: 4px;
+}
+.cl-privacy-note svg { flex-shrink: 0; stroke: #15935f; margin-top: 2px; }
+.cl-privacy-note p {
+  font-size: 12px; font-weight: 600; color: #15935f;
+  margin: 0; line-height: 1.6;
+}
+
 /* ═══ RESPONSIVE ═══ */
 @media (max-width: 680px) {
   .cl-header { padding: 0 16px; }

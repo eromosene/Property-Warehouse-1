@@ -61,6 +61,14 @@
       </div>
       <span class="cl-step-label">Contact Info</span>
     </div>
+    <div class="cl-step-line"></div>
+    <div class="cl-step" data-step="5">
+      <div class="cl-step-circle">
+        <span class="cl-step-num">5</span>
+        <svg class="cl-step-check" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <span class="cl-step-label">Ownership Docs</span>
+    </div>
   </div>
 </div>
 
@@ -302,6 +310,57 @@
 
     <div class="cl-nav-row">
       <button class="cl-btn-ghost" onclick="goToStep(3)">← Back</button>
+      <button class="cl-btn-navy" onclick="goToStep(5)">Continue →</button>
+    </div>
+  </div>
+
+  <!-- ── STEP 5: Ownership Documents ── -->
+  <div class="cl-panel hidden" id="clStep5">
+    <div class="cl-panel-head">
+      <h2>Ownership Documents</h2>
+      <p>Upload proof of ownership to verify your listing. This step is optional but recommended.</p>
+    </div>
+
+    <div class="cl-field">
+      <label>What documents do you have?</label>
+      <div class="cl-amenities-grid">
+        <label class="cl-amenity-label"><input type="checkbox" name="docType" value="C of O"> 📄 Certificate of Occupancy (C of O)</label>
+        <label class="cl-amenity-label"><input type="checkbox" name="docType" value="Deed of Assignment"> 📝 Deed of Assignment</label>
+        <label class="cl-amenity-label"><input type="checkbox" name="docType" value="Survey Plan"> 🗺️ Survey Plan</label>
+        <label class="cl-amenity-label"><input type="checkbox" name="docType" value="Governor's Consent"> ✅ Governor's Consent</label>
+        <label class="cl-amenity-label"><input type="checkbox" name="docType" value="Power of Attorney"> 🔏 Power of Attorney</label>
+        <label class="cl-amenity-label"><input type="checkbox" name="docType" value="Registered Lease"> 📋 Registered Lease</label>
+      </div>
+    </div>
+
+    <div class="cl-field">
+      <label>Upload Documents
+        <span class="cl-photo-count" id="clDocCount">0 / 5</span>
+      </label>
+      <p class="cl-field-hint" style="margin-bottom:12px;text-transform:none;letter-spacing:0;font-size:12px;">Accepted: PDF, JPG, PNG &middot; Max 5 files &middot; 10 MB each. Documents are private — only used for verification.</p>
+
+      <div class="cl-dropzone" id="clDocDropzone">
+        <input type="file" id="clDocInput" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png" multiple style="display:none" />
+        <svg viewBox="0 0 48 48" width="52" height="52" fill="none" stroke="#c8c3bb" stroke-width="1.5">
+          <rect x="6" y="8" width="28" height="34" rx="3"/>
+          <path d="M28 8v10h10"/>
+          <line x1="14" y1="24" x2="26" y2="24"/>
+          <line x1="14" y1="30" x2="24" y2="30"/>
+          <line x1="14" y1="36" x2="20" y2="36"/>
+        </svg>
+        <p class="cl-drop-title">Drag documents here or <span class="cl-drop-link" id="clDocDropLink">browse files</span></p>
+        <p class="cl-drop-hint">PDF, JPG, PNG &middot; Max 5 files &middot; 10 MB each</p>
+      </div>
+      <div class="cl-doc-list" id="clDocList"></div>
+    </div>
+
+    <div class="cl-privacy-note">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3 5 6v5.5c0 4.1 2.8 7.9 7 9.5 4.2-1.6 7-5.4 7-9.5V6l-7-3Z"/><path d="m9.5 12 1.7 1.7 3.6-4"/></svg>
+      <p>Your documents are kept strictly private and will never be shown to tenants. They are only reviewed by Property Warehouse to verify your ownership.</p>
+    </div>
+
+    <div class="cl-nav-row">
+      <button class="cl-btn-ghost" onclick="goToStep(4)">← Back</button>
       <button class="cl-btn-amber" id="clPublishBtn" onclick="publishListing()">🚀 Publish Listing</button>
     </div>
   </div>
