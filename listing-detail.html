@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Property Detail — Property Warehouse</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="listing-detail.css">
+</head>
+<body class="ld-det-page">
+
+<!-- ═══════════ NAVBAR ═══════════ -->
+<header class="ldet-header">
+  <a class="brand ldet-brand" href="index.html" aria-label="Property Warehouse home">
+    <span class="brand-mark">P <span>W</span></span>
+    <span class="brand-name"><span>PROPERTY</span><span>WAREHOUSE</span></span>
+  </a>
+  <nav class="site-nav ldet-nav">
+    <a href="listings.html" class="active">Listings</a>
+    <a href="heatmap.html">Heat Map</a>
+    <a href="index.html#landlords">Landlords</a>
+    <a href="how-it-works.html">How It Works</a>
+    <a href="index.html#about-us">About Us</a>
+  </nav>
+  <div class="ldet-header-actions">
+    <a class="login-link" href="auth.html">Log in</a>
+    <a class="list-property" href="create-listing.html">+ List Property</a>
+  </div>
+  <button class="ldet-menu-btn" id="ldetMenuBtn" type="button" aria-label="Open menu">
+    <span></span><span></span><span></span>
+  </button>
+</header>
+<div class="ldet-drawer" id="ldetDrawer">
+  <a href="listings.html" class="active">Listings</a>
+  <a href="heatmap.html">Heat Map</a>
+  <a href="index.html#landlords">Landlords</a>
+  <a href="how-it-works.html">How It Works</a>
+  <a href="index.html#about-us">About Us</a>
+  <a href="auth.html">Log in / Sign up</a>
+</div>
+
+<!-- ═══════════ BREADCRUMB ═══════════ -->
+<div class="ldet-breadcrumb">
+  <a href="listings.html" class="ldet-back">
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5m7-7-7 7 7 7"/></svg>
+    Back to Listings
+  </a>
+  <span class="ldet-bc-sep">›</span>
+  <span class="ldet-bc-cur" id="ldetBcTitle">Loading...</span>
+</div>
+
+<!-- ═══════════ CONTENT ═══════════ -->
+<div class="ldet-body" id="ldetBody">
+  <!-- Injected by JS -->
+  <div class="ldet-loading">Loading property details...</div>
+</div>
+
+<script src="listings-data.js"></script>
+<script src="listing-detail.js"></script>
+</body>
+</html>

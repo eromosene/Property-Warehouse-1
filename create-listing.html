@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Create Listing — Property Warehouse</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="create-listing.css">
+</head>
+<body class="cl-page">
+
+<!-- ═══════════ NAVBAR ═══════════ -->
+<header class="cl-header">
+  <a class="brand cl-brand" href="index.html" aria-label="Property Warehouse home">
+    <span class="brand-mark">P <span>W</span></span>
+    <span class="brand-name"><span>PROPERTY</span><span>WAREHOUSE</span></span>
+  </a>
+  <div class="cl-header-center">
+    <span class="cl-header-label">Create Listing</span>
+  </div>
+  <div class="cl-header-right">
+    <span class="cl-user-name" id="clUserName"></span>
+    <button class="cl-draft-btn" id="clDraftBtn">Save Draft</button>
+  </div>
+</header>
+
+<!-- ═══════════ PROGRESS BAR ═══════════ -->
+<div class="cl-progress-wrap">
+  <div class="cl-progress-inner">
+    <div class="cl-step active" data-step="1">
+      <div class="cl-step-circle">
+        <span class="cl-step-num">1</span>
+        <svg class="cl-step-check" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <span class="cl-step-label">Property Details</span>
+    </div>
+    <div class="cl-step-line"></div>
+    <div class="cl-step" data-step="2">
+      <div class="cl-step-circle">
+        <span class="cl-step-num">2</span>
+        <svg class="cl-step-check" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <span class="cl-step-label">Pricing</span>
+    </div>
+    <div class="cl-step-line"></div>
+    <div class="cl-step" data-step="3">
+      <div class="cl-step-circle">
+        <span class="cl-step-num">3</span>
+        <svg class="cl-step-check" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <span class="cl-step-label">Amenities &amp; Photos</span>
+    </div>
+    <div class="cl-step-line"></div>
+    <div class="cl-step" data-step="4">
+      <div class="cl-step-circle">
+        <span class="cl-step-num">4</span>
+        <svg class="cl-step-check" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <span class="cl-step-label">Contact Info</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ FORM BODY ═══════════ -->
+<div class="cl-body">
+
+  <!-- ── STEP 1: Property Details ── -->
+  <div class="cl-panel" id="clStep1">
+    <div class="cl-panel-head">
+      <h2>Property Details</h2>
+      <p>Tell us about the property you want to list.</p>
+    </div>
+
+    <div class="cl-field">
+      <label for="clTitle">Listing Title <span class="req">*</span></label>
+      <input type="text" id="clTitle" placeholder="e.g. Modern 2-Bedroom Flat in Yaba" maxlength="80" />
+    </div>
+
+    <div class="cl-row-2">
+      <div class="cl-field">
+        <label for="clArea">Specific Area <span class="req">*</span></label>
+        <input type="text" id="clArea" placeholder="e.g. Onike, Sabo, Palmgroove" />
+      </div>
+      <div class="cl-field">
+        <label for="clLga">LGA <span class="req">*</span></label>
+        <select id="clLga">
+          <option value="">Select LGA</option>
+          <option>Yaba</option>
+          <option>Surulere</option>
+          <option>Lekki</option>
+          <option>Ajah</option>
+          <option>Gbagada</option>
+          <option>Ikorodu</option>
+          <option>Ojodu</option>
+          <option>Ikeja</option>
+          <option>Victoria Island</option>
+          <option>Magodo</option>
+          <option>Ketu</option>
+          <option>Ogba</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="cl-field">
+      <label for="clAddress">Full Address <span class="req">*</span></label>
+      <input type="text" id="clAddress" placeholder="e.g. 14 Herbert Macaulay Way, Yaba, Lagos" />
+    </div>
+
+    <div class="cl-row-2">
+      <div class="cl-field">
+        <label for="clType">Property Type <span class="req">*</span></label>
+        <select id="clType">
+          <option value="">Select Type</option>
+          <option>Self-contain</option>
+          <option>1 Bedroom</option>
+          <option>2 Bedroom</option>
+          <option>3 Bedroom</option>
+          <option>Duplex</option>
+          <option>Bungalow</option>
+        </select>
+      </div>
+      <div class="cl-field">
+        <label for="clAvailable">Available From</label>
+        <input type="date" id="clAvailable" />
+      </div>
+    </div>
+
+    <div class="cl-row-2">
+      <div class="cl-field">
+        <label for="clBeds">Bedrooms <span class="req">*</span></label>
+        <input type="number" id="clBeds" min="0" max="10" placeholder="e.g. 2" />
+      </div>
+      <div class="cl-field">
+        <label for="clBaths">Bathrooms <span class="req">*</span></label>
+        <input type="number" id="clBaths" min="1" max="10" placeholder="e.g. 2" />
+      </div>
+    </div>
+
+    <div class="cl-field">
+      <label for="clDesc">Description <span class="req">*</span>
+        <span class="cl-char-count" id="clDescCount">0/500</span>
+      </label>
+      <textarea id="clDesc" rows="4" maxlength="500"
+        placeholder="Describe the property — location advantages, finish quality, nearby landmarks..."></textarea>
+    </div>
+
+    <div class="cl-nav-row">
+      <div></div>
+      <button class="cl-btn-navy" onclick="goToStep(2)">Continue →</button>
+    </div>
+  </div>
+
+  <!-- ── STEP 2: Pricing ── -->
+  <div class="cl-panel hidden" id="clStep2">
+    <div class="cl-panel-head">
+      <h2>Pricing</h2>
+      <p>Set transparent prices. Tenants will see the full breakdown.</p>
+    </div>
+
+    <div class="cl-row-2">
+      <div class="cl-field">
+        <label for="clRent">Annual Rent (₦) <span class="req">*</span></label>
+        <input type="number" id="clRent" class="cl-mono-input" placeholder="800000" min="0" oninput="updatePricePreview()" />
+      </div>
+      <div class="cl-field">
+        <label for="clCaution">Caution Fee (₦)</label>
+        <input type="number" id="clCaution" class="cl-mono-input" placeholder="400000" min="0" oninput="updatePricePreview()" />
+      </div>
+    </div>
+
+    <div class="cl-field">
+      <label for="clService">Service Charge (₦)</label>
+      <input type="number" id="clService" class="cl-mono-input" placeholder="100000" min="0" oninput="updatePricePreview()" />
+    </div>
+
+    <!-- Live preview -->
+    <div class="cl-price-preview">
+      <p class="cl-prev-label">MOVE-IN COST PREVIEW</p>
+      <div class="cl-prev-row"><span>Annual Rent</span><span id="prevRent">₦0</span></div>
+      <div class="cl-prev-row"><span>Caution Fee</span><span id="prevCaution">₦0</span></div>
+      <div class="cl-prev-row"><span>Service Charge</span><span id="prevService">₦0</span></div>
+      <div class="cl-prev-divider"></div>
+      <div class="cl-prev-total">
+        <span>Total Move-in</span>
+        <span id="prevTotal">₦0</span>
+      </div>
+    </div>
+
+    <div class="cl-toggle-field">
+      <label class="cl-checkbox-toggle">
+        <input type="checkbox" id="clMonthly" />
+        <span class="cl-checkbox-custom"></span>
+        Enable Pay Monthly Option
+      </label>
+      <p class="cl-toggle-hint">Tenants can pay monthly instead of a full year upfront.</p>
+    </div>
+
+    <div class="cl-nav-row">
+      <button class="cl-btn-ghost" onclick="goToStep(1)">← Back</button>
+      <button class="cl-btn-navy" onclick="goToStep(3)">Continue →</button>
+    </div>
+  </div>
+
+  <!-- ── STEP 3: Amenities & Photos ── -->
+  <div class="cl-panel hidden" id="clStep3">
+    <div class="cl-panel-head">
+      <h2>Amenities &amp; Photos</h2>
+      <p>What does the property include? Add photos to attract tenants.</p>
+    </div>
+
+    <div class="cl-field">
+      <label>Amenities</label>
+      <div class="cl-amenities-grid">
+        <label class="cl-amenity-label"><input type="checkbox" name="amenity" value="Water"> 💧 Water</label>
+        <label class="cl-amenity-label"><input type="checkbox" name="amenity" value="Parking"> 🚗 Parking</label>
+        <label class="cl-amenity-label"><input type="checkbox" name="amenity" value="Security"> 🔒 Security</label>
+        <label class="cl-amenity-label"><input type="checkbox" name="amenity" value="Generator"> ⚡ Generator</label>
+        <label class="cl-amenity-label"><input type="checkbox" name="amenity" value="AC"> ❄️ AC</label>
+        <label class="cl-amenity-label"><input type="checkbox" name="amenity" value="Lift"> 🛗 Lift</label>
+      </div>
+    </div>
+
+    <div class="cl-field">
+      <label>Property Image URLs
+        <span class="cl-field-hint">Go to unsplash.com and copy any property photo URL</span>
+      </label>
+      <p class="cl-unsplash-tip">💡 Use URLs from <a href="https://unsplash.com" target="_blank">unsplash.com</a> or any direct image link</p>
+      <div class="cl-image-inputs">
+        <input type="url" class="cl-img-url" placeholder="https://images.unsplash.com/..." />
+        <input type="url" class="cl-img-url" placeholder="https://images.unsplash.com/..." />
+        <input type="url" class="cl-img-url" placeholder="https://images.unsplash.com/..." />
+        <input type="url" class="cl-img-url" placeholder="https://images.unsplash.com/..." />
+      </div>
+    </div>
+
+    <div class="cl-nav-row">
+      <button class="cl-btn-ghost" onclick="goToStep(2)">← Back</button>
+      <button class="cl-btn-navy" onclick="goToStep(4)">Continue →</button>
+    </div>
+  </div>
+
+  <!-- ── STEP 4: Contact Info ── -->
+  <div class="cl-panel hidden" id="clStep4">
+    <div class="cl-panel-head">
+      <h2>Contact Info</h2>
+      <p>Tenants will reach you directly using this information.</p>
+    </div>
+
+    <div class="cl-row-2">
+      <div class="cl-field">
+        <label for="clContactName">Your Full Name <span class="req">*</span></label>
+        <input type="text" id="clContactName" placeholder="e.g. Emeka Okafor" />
+      </div>
+      <div class="cl-field">
+        <label for="clWhatsapp">WhatsApp Number <span class="req">*</span></label>
+        <input type="tel" id="clWhatsapp" placeholder="e.g. 2348012345678" />
+        <p class="cl-field-hint">Include country code: 234 for Nigeria (no +)</p>
+      </div>
+    </div>
+
+    <div class="cl-field">
+      <label for="clPhone">Phone Number</label>
+      <input type="tel" id="clPhone" placeholder="e.g. 08012345678" />
+    </div>
+
+    <div class="cl-wa-preview" id="clWaPreview">
+      <p class="cl-wa-preview-label">WhatsApp Preview</p>
+      <p class="cl-wa-preview-link" id="clWaPreviewLink">wa.me/—</p>
+    </div>
+
+    <div class="cl-nav-row">
+      <button class="cl-btn-ghost" onclick="goToStep(3)">← Back</button>
+      <button class="cl-btn-amber" id="clPublishBtn" onclick="publishListing()">🚀 Publish Listing</button>
+    </div>
+  </div>
+
+  <!-- ── SUCCESS ── -->
+  <div class="cl-panel hidden" id="clSuccess">
+    <div class="cl-success-inner">
+      <div class="cl-success-icon">🎉</div>
+      <h2>Listing Published!</h2>
+      <p>Your property is now live on Property Warehouse.</p>
+
+      <div class="cl-success-summary" id="clSuccessSummary"></div>
+
+      <div class="cl-success-btns">
+        <a href="landlord-dashboard.html" class="cl-btn-navy cl-inline-btn">View My Listings →</a>
+        <button class="cl-btn-ghost" onclick="resetForm()">+ Add Another Property</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="listings-data.js"></script>
+<script src="create-listing.js"></script>
+</body>
+</html>

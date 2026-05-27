@@ -1,0 +1,239 @@
+const AMENITY_ICONS = {
+  Water: '💧', Parking: '🚗', Security: '🔒',
+  Generator: '⚡', AC: '❄️', Lift: '🛗'
+};
+
+const INCOME_MAP = {
+  'below50':  600000,
+  '50to150':  1200000,
+  '150to300': 2700000,
+  'above300': 4500000
+};
+
+function init() {
+  const params = new URLSearchParams(location.search);
+  const id = params.get('id');
+  if (!id) { location.href = 'listings.html'; return; }
+
+  const l = getListingById(id);
+  if (!l) { location.href = 'listings.html'; return; }
+
+  document.title = `${l.title} — Property Warehouse`;
+  document.getElementById('ldetBcTitle').textContent = l.title;
+
+  const similar = getAllListings()
+    .filter(x => x.area === l.area && x.id !== l.id)
+    .slice(0, 2);
+
+  document.getElementById('ldetBody').innerHTML = buildHTML(l, similar);
+  bindEvents(l);
+}
+
+function buildHTML(l, similar) {
+  const monthlyAmt = Math.round(l.rentPerYear / 12);
+
+  return `
+  <div class="ldet-layout">
+    <!-- LEFT -->
+    <div class="ldet-left">
+
+      <!-- Gallery -->
+      <div class="ldet-gallery">
+        <img class="ldet-main-img" id="ldetMainImg" src="${l.images[0]}" alt="${l.title}" />
+        <div class="ldet-thumbs">
+          ${l.images.map((img, i) => `
+            <img class="ldet-thumb${i===0?' active':''}" src="${img}"
+              alt="Photo ${i+1}" data-idx="${i}" onclick="swapImg(this, '${img}')" />
+          `).join('')}
+        </div>
+      </div>
+
+      <!-- Property Info -->
+      <div class="ldet-card">
+        <div class="ldet-badges">
+          ${l.isVerified ? '<span class="ldet-badge ldet-badge-verified">🛡️ Verified</span>' : ''}
+          ${l.isMonthly  ? '<span class="ldet-badge ldet-badge-monthly">📅 Pay Monthly</span>' : ''}
+          <span class="ldet-badge ldet-badge-type">${l.type}</span>
+        </div>
+        <h1 class="ldet-title">${l.title}</h1>
+        <div class="ldet-address">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          ${l.address}
+        </div>
+        <div class="ldet-meta">
+          <div class="ldet-meta-item">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 20h20M4 20V8l8-6 8 6v12"/><rect x="9" y="14" width="6" height="6"/></svg>
+            ${l.beds} Bedroom${l.beds > 1 ? 's' : ''}
+          </div>
+          <div class="ldet-meta-item">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12h16"/><path d="M4 6V4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8"/><path d="M2 20h20v-2a6 6 0 0 0-6-6H8a6 6 0 0 0-6 6v2z"/></svg>
+            ${l.baths} Bathroom${l.baths > 1 ? 's' : ''}
+          </div>
+          <div class="ldet-meta-item">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            ${l.views} views
+          </div>
+        </div>
+        <p class="ldet-desc">${l.description}</p>
+      </div>
+
+      <!-- Amenities -->
+      <div class="ldet-card">
+        <h3 style="font-size:13px;font-weight:800;color:#09182a;margin-bottom:14px;letter-spacing:0.5px;text-transform:uppercase">Amenities</h3>
+        <div class="ldet-amenities-grid">
+          ${l.amenities.map(a => `
+            <span class="ldet-amenity-chip">${AMENITY_ICONS[a] || '✓'} ${a}</span>
+          `).join('')}
+        </div>
+      </div>
+
+      <!-- Price Breakdown -->
+      <div class="ldet-price-card">
+        <h3>Price Breakdown</h3>
+        <div class="ldet-price-row">
+          <span class="ldet-price-label">Annual Rent</span>
+          <span class="ldet-price-val">${formatNaira(l.rentPerYear)}</span>
+        </div>
+        <div class="ldet-price-row">
+          <span class="ldet-price-label">Caution Fee</span>
+          <span class="ldet-price-val">${formatNaira(l.cautionFee)}</span>
+        </div>
+        <div class="ldet-price-row">
+          <span class="ldet-price-label">Service Charge</span>
+          <span class="ldet-price-val">${formatNaira(l.serviceCharge)}</span>
+        </div>
+        <hr class="ldet-price-divider" />
+        <div class="ldet-total-row">
+          <span class="ldet-total-label">Total Move-in</span>
+          <span class="ldet-total-val">${formatNaira(l.totalMoveIn)}</span>
+        </div>
+      </div>
+
+      <!-- Pay Monthly -->
+      ${l.isMonthly ? `
+      <div class="ldet-monthly-card">
+        <h4>📅 Pay Monthly Option Available</h4>
+        <p>Instead of ${formatNaira(l.rentPerYear)} upfront, pay
+          <span class="ldet-monthly-amt">${formatNaira(monthlyAmt)}</span>/month
+          agreed directly with the landlord.
+        </p>
+      </div>` : ''}
+
+      <!-- Rent Burden Calculator -->
+      <div class="ldet-card ldet-calc-card">
+        <h4>🧮 Can you afford this?</h4>
+        <select class="ldet-calc-select" id="ldetIncomeSelect" onchange="calcBurden(${l.rentPerYear})">
+          <option value="">Select your monthly income range</option>
+          <option value="below50">Below ₦50,000/month</option>
+          <option value="50to150">₦50,000 – ₦150,000/month</option>
+          <option value="150to300">₦150,000 – ₦300,000/month</option>
+          <option value="above300">Above ₦300,000/month</option>
+        </select>
+        <div class="ldet-calc-result" id="ldetCalcResult"></div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT -->
+    <div class="ldet-right">
+
+      <!-- Contact Card -->
+      <div class="ldet-contact-card">
+        <h3>Interested in this property?</h3>
+        <p>Message the landlord directly — no agents.</p>
+        <div class="ldet-form-field">
+          <label>YOUR NAME</label>
+          <input type="text" id="ldetName" placeholder="e.g. Amaka Obi" />
+        </div>
+        <div class="ldet-form-field">
+          <label>YOUR PHONE</label>
+          <input type="tel" id="ldetPhone" placeholder="+234 ..." />
+        </div>
+        <div class="ldet-form-field">
+          <label>MESSAGE</label>
+          <textarea id="ldetMsg" rows="3"
+            placeholder="Hello, I'm interested in this property..."></textarea>
+        </div>
+        <a class="ldet-wa-btn" id="ldetWaBtn"
+          href="https://wa.me/${l.landlordWhatsApp}?text=${encodeURIComponent('Hello '+l.landlordName+', I am interested in '+l.title+' at '+l.address+'.')}"
+          target="_blank" rel="noopener" onclick="showSuccess()">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
+          Contact via WhatsApp
+        </a>
+        <div class="ldet-wa-success" id="ldetWaSuccess">
+          ✅ Opening WhatsApp — your message is ready to send!
+        </div>
+      </div>
+
+      <!-- Landlord Card -->
+      <div class="ldet-card">
+        <div class="ldet-ll-label">Listed By</div>
+        <div class="ldet-ll-name">${l.landlordName}</div>
+        <div class="ldet-ll-meta">
+          Member since ${l.landlordSince}<br>
+          ${l.landlordListings} active listing${l.landlordListings > 1 ? 's' : ''}
+        </div>
+        ${l.landlordVerified ? `<span class="ldet-ll-verified">🛡️ Verified Landlord</span>` : ''}
+      </div>
+
+      <!-- Similar Properties -->
+      ${similar.length ? `
+      <div>
+        <div class="ldet-similar-title">Similar in ${l.area}</div>
+        <div class="ldet-sim-cards">
+          ${similar.map(s => `
+            <a class="ldet-sim-card" href="listing-detail.html?id=${s.id}">
+              <img class="ldet-sim-img" src="${s.images[0]}" alt="${s.title}" />
+              <div class="ldet-sim-info">
+                <div class="ldet-sim-name">${s.title}</div>
+                <div class="ldet-sim-area">${s.area}</div>
+                <div class="ldet-sim-price">${formatNaira(s.rentPerYear)}/yr</div>
+              </div>
+            </a>
+          `).join('')}
+        </div>
+      </div>` : ''}
+
+    </div>
+  </div>`;
+}
+
+function swapImg(thumb, src) {
+  document.getElementById('ldetMainImg').src = src;
+  document.querySelectorAll('.ldet-thumb').forEach(t => t.classList.remove('active'));
+  thumb.classList.add('active');
+}
+
+function calcBurden(rentPerYear) {
+  const sel = document.getElementById('ldetIncomeSelect').value;
+  const res = document.getElementById('ldetCalcResult');
+  if (!sel) { res.className = 'ldet-calc-result'; return; }
+
+  const annualIncome = INCOME_MAP[sel];
+  const ratio = rentPerYear / annualIncome;
+
+  if (ratio <= 0.30) {
+    res.className = 'ldet-calc-result green';
+    res.innerHTML = '✅ <strong>Affordable</strong> — This rent is within 30% of your estimated income. A healthy range.';
+  } else if (ratio <= 0.50) {
+    res.className = 'ldet-calc-result yellow';
+    res.innerHTML = '⚠️ <strong>You\'ll feel stretched</strong> — This rent takes 30–50% of your income. Manage expenses carefully.';
+  } else {
+    res.className = 'ldet-calc-result red';
+    res.innerHTML = '🚨 <strong>High Burden</strong> — This rent exceeds 50% of your estimated income. Consider lower-priced options.';
+  }
+}
+
+function showSuccess() {
+  setTimeout(() => {
+    const s = document.getElementById('ldetWaSuccess');
+    if (s) { s.classList.add('show'); }
+  }, 400);
+}
+
+function bindEvents(l) {
+  document.getElementById('ldetMenuBtn').addEventListener('click', () =>
+    document.getElementById('ldetDrawer').classList.toggle('open'));
+}
+
+document.addEventListener('DOMContentLoaded', init);

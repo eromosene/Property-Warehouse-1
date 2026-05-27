@@ -1,0 +1,594 @@
+I have an existing Property Warehouse codebase with these files:
+index.html, auth.html, auth.js, auth.css, dashboard.html, 
+dashboard.js, dashboard.css, landlord-dashboard.html, 
+landlord-dashboard.js, landlord-dashboard.css, heatmap.html, 
+how-it-works.html, style.css
+
+The auth system already works using localStorage:
+- Tenant login/signup saves to pw_tenant and pw_current_user
+- Landlord login/signup saves to pw_landlord and pw_current_user
+- pw_current_user has a "role" field: "tenant" or "landlord"
+
+I need you to build the listings system that connects 
+tenants (browsing) and landlords (adding properties).
+Do NOT modify any existing files unless explicitly told to.
+
+=== SHARED DATA LAYER ===
+
+Create a file called listings-data.js with this content:
+
+const DEFAULT_LISTINGS = [
+  {
+    id: "L001",
+    landlordId: "default",
+    landlordName: "Emeka Okafor",
+    landlordPhone: "2348012345678",
+    landlordWhatsApp: "2348012345678",
+    landlordSince: "2021",
+    landlordVerified: true,
+    landlordListings: 3,
+    title: "Modern 2-Bedroom Flat",
+    area: "Yaba",
+    lga: "Lagos Mainland",
+    address: "14 Herbert Macaulay Way, Yaba, Lagos",
+    type: "2 Bedroom",
+    rentPerYear: 800000,
+    cautionFee: 400000,
+    serviceCharge: 100000,
+    totalMoveIn: 1300000,
+    isVerified: true,
+    isMonthly: true,
+    beds: 2,
+    baths: 2,
+    amenities: ["Water", "Parking", "Security"],
+    description: "Beautifully finished 2-bedroom flat in the heart of Yaba. Walking distance to UNILAG and Yaba Tech. Perfect for young professionals.",
+    images: [
+      "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&q=80",
+      "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&q=80",
+      "https://images.unsplash.com/photo-1484154218962-a197022b5858?w=800&q=80",
+      "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&q=80"
+    ],
+    views: 342,
+    createdAt: "2025-01-15"
+  },
+  {
+    id: "L002",
+    landlordId: "default",
+    landlordName: "Ngozi Adeyemi",
+    landlordPhone: "2348023456789",
+    landlordWhatsApp: "2348023456789",
+    landlordSince: "2022",
+    landlordVerified: false,
+    landlordListings: 1,
+    title: "Self-Contain Studio",
+    area: "Surulere",
+    lga: "Surulere",
+    address: "22 Bode Thomas Street, Surulere, Lagos",
+    type: "Self-contain",
+    rentPerYear: 350000,
+    cautionFee: 350000,
+    serviceCharge: 50000,
+    totalMoveIn: 750000,
+    isVerified: false,
+    isMonthly: false,
+    beds: 1,
+    baths: 1,
+    amenities: ["Water", "Security"],
+    description: "Cozy self-contain studio in a quiet neighbourhood. Ideal for singles seeking an affordable option in Surulere.",
+    images: [
+      "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&q=80",
+      "https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=800&q=80",
+      "https://images.unsplash.com/photo-1560185127-6ed189bf02f4?w=800&q=80",
+      "https://images.unsplash.com/photo-1519710164239-da123dc03ef4?w=800&q=80"
+    ],
+    views: 189,
+    createdAt: "2025-02-01"
+  },
+  {
+    id: "L003",
+    landlordId: "default",
+    landlordName: "Babatunde Fashola",
+    landlordPhone: "2348034567890",
+    landlordWhatsApp: "2348034567890",
+    landlordSince: "2019",
+    landlordVerified: true,
+    landlordListings: 5,
+    title: "Luxury 3-Bedroom Flat",
+    area: "Lekki Phase 1",
+    lga: "Eti-Osa",
+    address: "5 Admiralty Way, Lekki Phase 1, Lagos",
+    type: "3 Bedroom",
+    rentPerYear: 3500000,
+    cautionFee: 1750000,
+    serviceCharge: 500000,
+    totalMoveIn: 5750000,
+    isVerified: true,
+    isMonthly: true,
+    beds: 3,
+    baths: 3,
+    amenities: ["Water", "Parking", "Security", "Generator", "AC"],
+    description: "Premium 3-bedroom apartment in prestigious Lekki Phase 1. Fully serviced with 24/7 security, swimming pool access, and standby generator.",
+    images: [
+      "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=80",
+      "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800&q=80",
+      "https://images.unsplash.com/photo-1600566753376-12c8ab7fb75b?w=800&q=80",
+      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80"
+    ],
+    views: 612,
+    createdAt: "2025-01-08"
+  },
+  {
+    id: "L004",
+    landlordId: "default",
+    landlordName: "Chioma Nwosu",
+    landlordPhone: "2348045678901",
+    landlordWhatsApp: "2348045678901",
+    landlordSince: "2023",
+    landlordVerified: true,
+    landlordListings: 2,
+    title: "1-Bedroom Apartment",
+    area: "Gbagada",
+    lga: "Lagos Mainland",
+    address: "9 Gbagada Express Way, Gbagada, Lagos",
+    type: "1 Bedroom",
+    rentPerYear: 600000,
+    cautionFee: 300000,
+    serviceCharge: 80000,
+    totalMoveIn: 980000,
+    isVerified: true,
+    isMonthly: false,
+    beds: 1,
+    baths: 1,
+    amenities: ["Water", "Parking"],
+    description: "Clean 1-bedroom apartment in calm Gbagada neighbourhood. Easy access to the Gbagada-Oworonshoki Expressway.",
+    images: [
+      "https://images.unsplash.com/photo-1574362848149-11496d93a7c7?w=800&q=80",
+      "https://images.unsplash.com/photo-1536376072261-38c75010e6c9?w=800&q=80",
+      "https://images.unsplash.com/photo-1523217582562-09d0def993a6?w=800&q=80",
+      "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&q=80"
+    ],
+    views: 274,
+    createdAt: "2025-02-20"
+  },
+  {
+    id: "L005",
+    landlordId: "default",
+    landlordName: "Funke Balogun",
+    landlordPhone: "2348067890123",
+    landlordWhatsApp: "2348067890123",
+    landlordSince: "2020",
+    landlordVerified: true,
+    landlordListings: 4,
+    title: "2-Bedroom Terrace",
+    area: "Ajah",
+    lga: "Eti-Osa",
+    address: "Coastal Estate Road, Ajah, Lagos",
+    type: "2 Bedroom",
+    rentPerYear: 1200000,
+    cautionFee: 600000,
+    serviceCharge: 150000,
+    totalMoveIn: 1950000,
+    isVerified: true,
+    isMonthly: true,
+    beds: 2,
+    baths: 2,
+    amenities: ["Water", "Parking", "Security", "Generator"],
+    description: "Modern 2-bedroom terrace in a gated estate in Ajah. Close to Shoprite Mall and Abraham Adesanya roundabout.",
+    images: [
+      "https://images.unsplash.com/photo-1605276374104-dee2a0ed3cd6?w=800&q=80",
+      "https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=800&q=80",
+      "https://images.unsplash.com/photo-1583608205776-bfd35f0d9f83?w=800&q=80",
+      "https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?w=800&q=80"
+    ],
+    views: 398,
+    createdAt: "2025-01-25"
+  },
+  {
+    id: "L006",
+    landlordId: "default",
+    landlordName: "Segun Adeola",
+    landlordPhone: "2348078901234",
+    landlordWhatsApp: "2348078901234",
+    landlordSince: "2018",
+    landlordVerified: true,
+    landlordListings: 6,
+    title: "3-Bedroom Duplex",
+    area: "Magodo Phase 2",
+    lga: "Ikeja",
+    address: "Plot 12, Shangisha Road, Magodo GRA Phase 2, Lagos",
+    type: "Duplex",
+    rentPerYear: 2500000,
+    cautionFee: 1250000,
+    serviceCharge: 300000,
+    totalMoveIn: 4050000,
+    isVerified: true,
+    isMonthly: true,
+    beds: 3,
+    baths: 3,
+    amenities: ["Water", "Parking", "Security", "Generator", "AC"],
+    description: "Executive 3-bedroom duplex in Magodo GRA Phase 2. Spacious compound, BQ inclusive, 24/7 security.",
+    images: [
+      "https://images.unsplash.com/photo-1600585154526-990dced4db0d?w=800&q=80",
+      "https://images.unsplash.com/photo-1600047509358-9dc75507daeb?w=800&q=80",
+      "https://images.unsplash.com/photo-1600210491369-e753d80a41f3?w=800&q=80",
+      "https://images.unsplash.com/photo-1600573472591-ee6b68d14c68?w=800&q=80"
+    ],
+    views: 521,
+    createdAt: "2025-01-05"
+  }
+];
+
+// Get ALL listings (defaults + any landlord-added ones)
+function getAllListings() {
+  const landlordListings = JSON.parse(
+    localStorage.getItem('pw_listings') || '[]'
+  );
+  return [...DEFAULT_LISTINGS, ...landlordListings];
+}
+
+// Get a single listing by ID
+function getListingById(id) {
+  return getAllListings().find(l => l.id === id);
+}
+
+// Save a new listing (landlord creates)
+function saveListing(listing) {
+  const existing = JSON.parse(localStorage.getItem('pw_listings') || '[]');
+  existing.push(listing);
+  localStorage.setItem('pw_listings', JSON.stringify(existing));
+}
+
+// Delete a listing by ID (landlord only)
+function deleteListing(id) {
+  const existing = JSON.parse(localStorage.getItem('pw_listings') || '[]');
+  const updated = existing.filter(l => l.id !== id);
+  localStorage.setItem('pw_listings', JSON.stringify(updated));
+}
+
+// Get listings for a specific landlord
+function getLandlordListings(landlordEmail) {
+  const all = JSON.parse(localStorage.getItem('pw_listings') || '[]');
+  return all.filter(l => l.landlordId === landlordEmail);
+}
+
+// Format price as Nigerian Naira
+function formatNaira(amount) {
+  return '₦' + Number(amount).toLocaleString('en-NG');
+}
+
+// Generate unique listing ID
+function generateListingId() {
+  return 'LL' + Date.now().toString(36).toUpperCase();
+}
+
+
+=== FILE 1: listings.html ===
+
+Create listings.html that:
+- Links style.css and a new listings.css
+- Uses the SAME header/navbar as index.html 
+  (same fonts: Cormorant Garamond + Manrope, same brand mark,
+   same nav links, same mobile menu button)
+- Loads listings-data.js before listings.js
+- Has this page structure:
+
+HEADER (dark navy background, same as index.html hero style):
+  - "🏠 Browse all properties" breadcrumb in muted white
+  - "Lagos Listings" H1 in white, bold
+  - "Verified homes directly from landlords. 
+     No agents. No hidden fees." subtitle in muted white
+  - Full-width search bar: dark semi-transparent bg, 
+    white placeholder, search icon left, 
+    "Search 🔍" button right
+  - "342 properties found" result count below search
+
+MAIN BODY (two-column layout):
+  LEFT: filter sidebar (280px wide, sticky)
+    - "Filters" heading + "✕ Clear all" red button
+    - AREA checkboxes: Yaba, Lekki Phase 1, Surulere, Ajah, 
+      Gbagada, Ikorodu, Ojodu Berger, Ikeja GRA, 
+      Victoria Island, Magodo Phase 2, Ketu, Ogba
+    - PROPERTY TYPE radio buttons: All, Self-contain, 
+      1 Bedroom, 2 Bedroom, 3 Bedroom, Duplex, Bungalow
+    - MAX RENT dropdown: Any, ₦200k, ₦500k, ₦800k, 
+      ₦1.2M, ₦2M
+    - AMENITIES checkboxes: Water, Parking, Security, 
+      Generator, AC
+    - Verified Only toggle
+    - Pay Monthly toggle
+    - On mobile: sidebar hidden, "Show Filters" button 
+      at top reveals it as a drawer
+
+  RIGHT: listings grid
+    - Sort dropdown: Newest, Price Low-High, 
+      Price High-Low, Most Viewed
+    - "X properties found" count
+    - Responsive grid: 2 columns desktop, 1 column mobile
+    - Each listing card:
+        - Property image (top, 200px height, object-cover)
+        - Top-left badges: "🛡️ Verified" (amber) 
+          and/or "📅 Monthly" (green) if applicable
+        - Top-right: view count pill (dark semi-transparent)
+        - Title (bold, 15px)
+        - Location (muted, 12px, with 📍)
+        - Beds/baths meta row
+        - PRICE SECTION (border-top):
+            Annual rent in large DM Mono font
+            "Move-in: ₦X,XXX,XXX" in muted with amber amount
+        - "View Details →" amber button
+        - Clicking card OR button goes to: 
+          listing-detail.html?id=[listing.id]
+    - Empty state if no results match filters
+    - Pagination: Previous / 1 2 3 ... / Next
+
+Load all listings using getAllListings() from listings-data.js
+Filter and render dynamically in JavaScript.
+
+
+=== FILE 2: listing-detail.html ===
+
+Create listing-detail.html that:
+- Links style.css and a new listing-detail.css
+- Uses same header/navbar as all other pages
+- Loads listings-data.js before listing-detail.js
+- On load: reads ?id= from URL, calls getListingById(id),
+  if not found redirects to listings.html
+
+PAGE STRUCTURE:
+
+BREADCRUMB BAR (white, border-bottom):
+  "← Back to Listings" button
+
+2-COLUMN LAYOUT (desktop):
+  LEFT COLUMN (60%):
+    1. IMAGE GALLERY:
+       - Main image: full width, 400px height, 
+         border-radius 16px
+       - 4 thumbnails below in a row: 76px height
+         Clicking thumbnail swaps the main image
+         Active thumbnail: amber 3px border
+
+    2. PROPERTY INFO CARD:
+       - Badges: Verified + Monthly + Type
+       - H1: property title
+       - 📍 address (muted)
+       - Meta: beds / baths / views
+       - Description paragraph
+
+    3. AMENITIES CARD:
+       - Grid of amenity chips with emoji icons:
+         💧 Water | 🚗 Parking | 🔒 Security 
+         ⚡ Generator | ❄️ AC | 🛗 Lift
+       
+    4. PRICE BREAKDOWN CARD (navy 2px border):
+       Annual Rent: ₦X,XXX,XXX
+       Caution Fee: ₦X,XXX,XXX
+       Service Charge: ₦X,XXX,XXX
+       ─────────────────────────
+       Total Move-in: ₦X,XXX,XXX (amber, large)
+
+    5. PAY MONTHLY CARD (if listing.isMonthly):
+       "📅 Pay Monthly Option Available"
+       "Instead of ₦X upfront, pay ₦X/month"
+       Emerald background, emerald border
+
+    6. RENT BURDEN CALCULATOR CARD:
+       "🧮 Can you afford this?"
+       Dropdown: income range options
+         Below ₦50,000/month → maps to ₦600,000/yr
+         ₦50k–₦150k/month   → maps to ₦1,200,000/yr
+         ₦150k–₦300k/month  → maps to ₦2,700,000/yr
+         Above ₦300k/month  → maps to ₦4,500,000/yr
+       Logic: ratio = rentPerYear / mappedIncome
+         ratio ≤ 0.30 → green "✅ Affordable"
+         ratio ≤ 0.50 → yellow "⚠️ You'll feel stretched"
+         ratio > 0.50 → red "🚨 High Burden"
+
+  RIGHT COLUMN (40%, sticky):
+    1. CONTACT CARD (amber 2px border):
+       "Interested in this property?"
+       "Message the landlord directly — no agents."
+       - Name input
+       - Phone input  
+       - Message textarea
+       - "📱 Contact via WhatsApp" green button
+         → Opens: https://wa.me/[landlord.landlordWhatsApp]
+           ?text=Hello+[landlordName],+I'm+interested+
+           in+[title]+at+[address]
+       - Success state after clicking: 
+         "✅ Message Sent!" with green background
+
+    2. LANDLORD CARD:
+       "LISTED BY" label
+       - Landlord name (bold)
+       - Member since [year]
+       - [X] active listings
+       - "🛡️ Verified Landlord" amber pill 
+         (only if landlordVerified)
+
+    3. SIMILAR PROPERTIES (2 cards same area):
+       Small horizontal cards with image + title + price
+
+
+=== FILE 3: create-listing.html ===
+
+Create create-listing.html that:
+- Auth guard: if pw_current_user.role !== "landlord",
+  redirect to auth.html#landlord
+- Links style.css and create-listing.css
+- Uses same header as other pages but with 
+  "Save Draft" button right and landlord name shown
+- Loads listings-data.js before create-listing.js
+
+LAYOUT: centered single column, max-width 700px
+
+4-STEP PROGRESS BAR at top:
+  Step 1: Property Details (active on load)
+  Step 2: Pricing
+  Step 3: Amenities & Photos
+  Step 4: Contact Info
+  Connecting lines between steps
+  Done steps: filled navy circle with checkmark
+  Active step: filled amber circle
+  Pending steps: empty grey circle
+
+STEP 1 — Property Details (white card):
+  - Listing Title* (text input)
+  - Specific Area (text input, e.g. Onike)
+  - Full Address* (text input)
+  - LGA* (select): Yaba, Surulere, Lekki, Ajah, Gbagada,
+    Ikorodu, Ojodu, Ikeja, Victoria Island, Magodo, 
+    Ketu, Ogba
+  - Property Type* (select): Self-contain, 1 Bedroom, 
+    2 Bedroom, 3 Bedroom, Duplex, Bungalow
+  - Number of Bedrooms (number input)
+  - Number of Bathrooms (number input)
+  - Description (textarea, 4 rows, 500 char limit 
+    with live counter)
+  - Available From (date input)
+
+STEP 2 — Pricing (white card):
+  - Annual Rent (₦)* (number input, DM Mono font)
+  - Caution Fee (₦) (number input)
+  - Service Charge (₦) (number input)
+  - LIVE PREVIEW BOX (navy gradient background):
+      Annual Rent:    ₦X,XXX,XXX
+      Caution Fee:    ₦X,XXX,XXX
+      Service Charge: ₦X,XXX,XXX
+      ──────────────────────────
+      Total Move-in:  ₦X,XXX,XXX  ← updates as user types
+  - "Enable Pay Monthly" toggle checkbox (green)
+
+STEP 3 — Amenities & Photos (white card):
+  - Amenities checklist (3-column grid):
+      💧 Water | 🚗 Parking | 🔒 Security 
+      ⚡ Generator | ❄️ AC | 🛗 Lift
+      Checked state: navy border + light blue background
+  - Photo URLs section (4 text inputs):
+      Label: "Property Image URLs (use Unsplash or 
+      any image URL)"
+      Placeholder: "https://images.unsplash.com/..."
+      Helper: "💡 Go to unsplash.com and copy any 
+      property photo URL"
+
+STEP 4 — Contact Info (white card):
+  - Your Full Name* (pre-filled from pw_current_user)
+  - WhatsApp Number* (with +234 hint, 
+    pre-filled from auth if available)
+  - Phone Number (pre-filled)
+  - Preview of how WhatsApp link will work:
+      "Tenants will message: wa.me/[number]"
+
+NAVIGATION BUTTONS:
+  - Step 1-3: "← Back" ghost + "Continue →" navy
+  - Step 4: "← Back" ghost + "🚀 Publish Listing" amber
+
+ON SUBMIT:
+  1. Validate all required fields
+  2. Build listing object:
+     {
+       id: generateListingId(),
+       landlordId: currentUser.email,
+       landlordName: currentUser.firstName + ' ' + currentUser.lastName,
+       landlordPhone: formData.phone,
+       landlordWhatsApp: formData.whatsapp,
+       landlordSince: new Date().getFullYear().toString(),
+       landlordVerified: false,
+       landlordListings: 1,
+       title: formData.title,
+       area: formData.area,
+       lga: formData.lga,
+       address: formData.address,
+       type: formData.type,
+       rentPerYear: Number(formData.rent),
+       cautionFee: Number(formData.caution),
+       serviceCharge: Number(formData.service),
+       totalMoveIn: rent + caution + service,
+       isVerified: false,
+       isMonthly: formData.monthly,
+       beds: Number(formData.beds),
+       baths: Number(formData.baths),
+       amenities: formData.amenities,
+       description: formData.description,
+       images: formData.images.filter(u => u.trim()),
+       views: 0,
+       createdAt: new Date().toISOString().split('T')[0]
+     }
+  3. Call saveListing(listingObject)
+  4. Show success screen:
+     "🎉 Listing Published!"
+     "Your property [title] is now live on Property Warehouse."
+     Summary box showing title, area, rent, total move-in
+     "View My Listings →" button → landlord-dashboard.html
+     "Add Another Property" button → resets form to step 1
+
+
+=== UPDATE: landlord-dashboard.js ===
+
+In landlord-dashboard.js, make these changes:
+1. Add <script src="listings-data.js"></script> to 
+   landlord-dashboard.html BEFORE landlord-dashboard.js
+2. Replace the hardcoded LISTINGS array with:
+   const LISTINGS = getLandlordListings(currentUser.email);
+   But if LISTINGS is empty (new landlord), show an empty 
+   state: "You haven't listed any properties yet."
+   with a "+ Add Your First Property" amber button 
+   linking to create-listing.html
+3. The "+ Add New Property" button in the dashboard 
+   should link to create-listing.html
+4. Add a delete button to each listing row that calls 
+   deleteListing(id) and re-renders the table
+
+
+=== UPDATE: index.html ===
+
+In index.html, make these two small changes:
+1. The "Browse Listings" button in the hero should 
+   link to listings.html
+2. The search bar "Search" button should link to 
+   listings.html (with query params if possible)
+3. Add <script src="listings-data.js"></script> 
+   just before </body>
+
+
+=== DESIGN SYSTEM (match existing pages) ===
+
+Use same fonts as auth.html:
+  Cormorant Garamond (headings) + Manrope (body)
+
+Use same colours:
+  --gold: #C9963A
+  --navy: #0D1B2A  
+  --green: #1A8A5A
+  --red: #C0392B
+  --bg: #F5F4F0
+  --border: #E8E5DE
+
+Use same card style as other pages:
+  background: white
+  border-radius: 16px
+  border: 1px solid #E8E5DE
+  box-shadow: 0 1px 4px rgba(13,27,42,0.04)
+
+All new CSS goes into separate files:
+  listings.css, listing-detail.css, create-listing.css
+
+
+=== NAVIGATION LINKS TO ADD ===
+
+In listings.html navbar: 
+  "Listings" link should be active/highlighted
+
+In listing-detail.html: 
+  back button goes to listings.html
+
+In create-listing.html:
+  show landlord name in header
+  "+ List Property" button goes to create-listing.html
+
+Make sure ALL pages link to each other correctly:
+  index.html → Browse Listings → listings.html
+  listings.html → listing card → listing-detail.html?id=X
+  listing-detail.html → ← Back → listings.html
+  landlord-dashboard.html → + Add Property → create-listing.html
+  create-listing.html → success → landlord-dashboard.html

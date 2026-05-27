@@ -1,0 +1,270 @@
+/* ═══ PAGE BASE ═══ */
+.ld-det-page { background: #f6f4f1; min-height: 100vh; }
+
+/* ═══ HEADER ═══ */
+.ldet-header {
+  position: sticky; top: 0; z-index: 100;
+  height: 68px; padding: 0 40px;
+  background: rgba(255,255,255,0.97); backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(0,0,0,.07);
+  display: flex; align-items: center; gap: 32px;
+}
+.ldet-brand { min-width: unset; }
+.ldet-nav { flex: 1; justify-content: center; }
+.ldet-nav a {
+  font-size: 14px; font-weight: 600; color: #09182a; text-decoration: none;
+  padding-bottom: 4px; border-bottom: 2px solid transparent;
+  transition: color .2s, border-color .2s;
+}
+.ldet-nav a:hover { color: #a97e4b; }
+.ldet-nav a.active { border-bottom-color: #09182a; }
+.ldet-header-actions { display: flex; align-items: center; gap: 16px; }
+.ldet-menu-btn {
+  display: none; flex-direction: column; gap: 5px;
+  background: none; border: none; cursor: pointer; padding: 6px; margin-left: auto;
+}
+.ldet-menu-btn span { display: block; width: 22px; height: 2px; background: #09182a; border-radius: 2px; }
+.ldet-drawer {
+  display: none; position: fixed; inset: 68px 0 0 0;
+  background: #fff; z-index: 99; flex-direction: column;
+  padding: 20px 24px; border-top: 1px solid #eee;
+}
+.ldet-drawer.open { display: flex; }
+.ldet-drawer a {
+  display: block; padding: 14px 0; font-size: 16px; font-weight: 600;
+  color: #09182a; text-decoration: none; border-bottom: 1px solid #f0eeeb;
+}
+
+/* ═══ BREADCRUMB ═══ */
+.ldet-breadcrumb {
+  background: #fff; border-bottom: 1px solid #e8e5de;
+  padding: 14px 40px; display: flex; align-items: center; gap: 10px;
+}
+.ldet-back {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-size: 13px; font-weight: 700; color: #09182a; text-decoration: none;
+  transition: color .2s;
+}
+.ldet-back:hover { color: #a97e4b; }
+.ldet-bc-sep { color: #c8c3bb; font-size: 14px; }
+.ldet-bc-cur { font-size: 13px; font-weight: 600; color: #5d6876; }
+
+/* ═══ LOADING ═══ */
+.ldet-loading {
+  text-align: center; padding: 80px 20px;
+  font-size: 14px; color: #5d6876; font-weight: 600;
+}
+
+/* ═══ BODY LAYOUT ═══ */
+.ldet-body { max-width: 1180px; margin: 0 auto; padding: 32px 40px 60px; }
+.ldet-layout { display: grid; grid-template-columns: 1fr 380px; gap: 28px; align-items: start; }
+
+/* ═══ LEFT COLUMN ═══ */
+.ldet-left { display: flex; flex-direction: column; gap: 20px; }
+
+/* Gallery */
+.ldet-gallery { }
+.ldet-main-img {
+  width: 100%; height: 400px; object-fit: cover;
+  border-radius: 18px; display: block; margin-bottom: 10px;
+}
+.ldet-thumbs { display: flex; gap: 8px; }
+.ldet-thumb {
+  flex: 1; height: 76px; object-fit: cover; border-radius: 10px;
+  cursor: pointer; border: 3px solid transparent; transition: border-color .2s;
+}
+.ldet-thumb.active { border-color: #a97e4b; }
+.ldet-thumb:hover { border-color: #a97e4b; }
+
+/* Info card */
+.ldet-card {
+  background: #fff; border: 1px solid #e8e5de;
+  border-radius: 18px; padding: 24px;
+  box-shadow: 0 1px 4px rgba(13,27,42,.04);
+}
+.ldet-badges { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+.ldet-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 5px 12px; border-radius: 20px;
+  font-size: 12px; font-weight: 800;
+}
+.ldet-badge-verified { background: #a97e4b; color: #fff; }
+.ldet-badge-monthly { background: #15935f; color: #fff; }
+.ldet-badge-type { background: #f0eeeb; color: #5d6876; }
+.ldet-title {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 30px; font-weight: 700; color: #09182a;
+  margin-bottom: 8px; letter-spacing: -0.02em; line-height: 1.1;
+}
+.ldet-address {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 13px; color: #5d6876; margin-bottom: 14px;
+}
+.ldet-meta {
+  display: flex; gap: 20px; padding: 12px 0; border-top: 1px solid #f0eeeb;
+  border-bottom: 1px solid #f0eeeb; margin-bottom: 16px;
+}
+.ldet-meta-item {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 13px; font-weight: 700; color: #09182a;
+}
+.ldet-meta-item svg { color: #5d6876; }
+.ldet-desc { font-size: 14px; color: #5d6876; line-height: 1.75; }
+
+/* Amenities */
+.ldet-amenities-grid {
+  display: flex; flex-wrap: wrap; gap: 10px; padding-top: 4px;
+}
+.ldet-amenity-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 14px; background: #f6f4f1; border: 1px solid #e8e5de;
+  border-radius: 20px; font-size: 13px; font-weight: 700; color: #09182a;
+}
+
+/* Price breakdown */
+.ldet-price-card {
+  background: #fff; border: 2px solid #09182a;
+  border-radius: 18px; padding: 22px;
+}
+.ldet-price-card h3 {
+  font-size: 12px; font-weight: 800; letter-spacing: 1.5px;
+  color: #5d6876; text-transform: uppercase; margin-bottom: 16px;
+}
+.ldet-price-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 9px 0; border-bottom: 1px solid #f0eeeb;
+  font-size: 14px;
+}
+.ldet-price-row:last-child { border-bottom: none; }
+.ldet-price-label { font-weight: 600; color: #5d6876; }
+.ldet-price-val { font-weight: 800; color: #09182a; }
+.ldet-price-divider { border: none; border-top: 2px dashed #e0ddd9; margin: 8px 0; }
+.ldet-total-row {
+  display: flex; justify-content: space-between; align-items: center; padding-top: 12px;
+}
+.ldet-total-label { font-size: 14px; font-weight: 800; color: #09182a; }
+.ldet-total-val {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 26px; font-weight: 700; color: #a97e4b;
+}
+
+/* Monthly card */
+.ldet-monthly-card {
+  background: #e8f8f0; border: 1.5px solid #15935f;
+  border-radius: 18px; padding: 18px 22px;
+}
+.ldet-monthly-card h4 {
+  font-size: 14px; font-weight: 800; color: #0f7a4f; margin-bottom: 6px;
+}
+.ldet-monthly-card p { font-size: 13px; color: #186645; line-height: 1.6; }
+.ldet-monthly-amt {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 22px; font-weight: 700; color: #15935f;
+}
+
+/* Rent burden calculator */
+.ldet-calc-card { }
+.ldet-calc-card h4 {
+  font-size: 14px; font-weight: 800; color: #09182a; margin-bottom: 12px;
+}
+.ldet-calc-select {
+  width: 100%; padding: 10px 12px; border: 1px solid #e0ddd9;
+  border-radius: 10px; font-family: "Manrope", sans-serif;
+  font-size: 13px; font-weight: 600; color: #09182a;
+  background: #fff; outline: none; cursor: pointer; margin-bottom: 14px;
+}
+.ldet-calc-result {
+  display: none; padding: 14px; border-radius: 12px;
+  font-size: 13px; font-weight: 700; line-height: 1.5;
+}
+.ldet-calc-result.green { display: block; background: #e8f8f0; color: #0f7a4f; border: 1px solid #a3d9bc; }
+.ldet-calc-result.yellow { display: block; background: #fef9e7; color: #8a6a00; border: 1px solid #f0d870; }
+.ldet-calc-result.red { display: block; background: #fdecea; color: #8b1c1c; border: 1px solid #e8a09a; }
+
+/* ═══ RIGHT COLUMN ═══ */
+.ldet-right { position: sticky; top: 84px; display: flex; flex-direction: column; gap: 20px; }
+
+/* Contact card */
+.ldet-contact-card {
+  background: #fff; border: 2px solid #a97e4b;
+  border-radius: 18px; padding: 24px;
+}
+.ldet-contact-card h3 { font-size: 15px; font-weight: 800; color: #09182a; margin-bottom: 4px; }
+.ldet-contact-card > p { font-size: 13px; color: #5d6876; margin-bottom: 18px; line-height: 1.5; }
+.ldet-form-field { margin-bottom: 12px; }
+.ldet-form-field label { display: block; font-size: 11px; font-weight: 800; color: #5d6876; margin-bottom: 5px; letter-spacing: 0.5px; }
+.ldet-form-field input,
+.ldet-form-field textarea {
+  width: 100%; padding: 10px 12px; border: 1px solid #e0ddd9;
+  border-radius: 10px; font-family: "Manrope", sans-serif;
+  font-size: 13px; color: #09182a; outline: none;
+  transition: border-color .2s; resize: none;
+}
+.ldet-form-field input:focus,
+.ldet-form-field textarea:focus { border-color: #a97e4b; }
+.ldet-wa-btn {
+  width: 100%; padding: 13px; background: #25D366; color: #fff;
+  border: none; border-radius: 12px; font-family: "Manrope", sans-serif;
+  font-size: 14px; font-weight: 800; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  transition: opacity .2s; text-decoration: none; margin-top: 4px;
+}
+.ldet-wa-btn:hover { opacity: .88; }
+.ldet-wa-success {
+  display: none; padding: 14px; background: #e8f8f0; border: 1px solid #a3d9bc;
+  border-radius: 12px; text-align: center;
+  font-size: 13px; font-weight: 700; color: #0f7a4f;
+}
+.ldet-wa-success.show { display: block; }
+
+/* Landlord card */
+.ldet-landlord-card { }
+.ldet-ll-label {
+  font-size: 10px; font-weight: 800; letter-spacing: 1.5px;
+  color: #9a9490; margin-bottom: 12px; text-transform: uppercase;
+}
+.ldet-ll-name { font-size: 16px; font-weight: 800; color: #09182a; margin-bottom: 4px; }
+.ldet-ll-meta { font-size: 12px; color: #5d6876; margin-bottom: 10px; line-height: 1.7; }
+.ldet-ll-verified {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: #a97e4b; color: #fff;
+  padding: 5px 12px; border-radius: 20px;
+  font-size: 11px; font-weight: 800;
+}
+
+/* Similar */
+.ldet-similar-title {
+  font-size: 13px; font-weight: 800; color: #09182a;
+  text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px;
+}
+.ldet-sim-cards { display: flex; flex-direction: column; gap: 10px; }
+.ldet-sim-card {
+  display: flex; gap: 12px; background: #fff;
+  border: 1px solid #e8e5de; border-radius: 14px;
+  padding: 10px; cursor: pointer; transition: box-shadow .2s;
+  text-decoration: none;
+}
+.ldet-sim-card:hover { box-shadow: 0 6px 20px rgba(13,27,42,.09); }
+.ldet-sim-img {
+  width: 72px; height: 72px; object-fit: cover;
+  border-radius: 10px; flex-shrink: 0;
+}
+.ldet-sim-info { display: flex; flex-direction: column; justify-content: center; gap: 3px; }
+.ldet-sim-name { font-size: 13px; font-weight: 800; color: #09182a; line-height: 1.3; }
+.ldet-sim-price { font-size: 13px; font-weight: 700; color: #a97e4b; }
+.ldet-sim-area { font-size: 11px; color: #5d6876; }
+
+/* ═══ RESPONSIVE ═══ */
+@media (max-width: 960px) {
+  .ldet-layout { grid-template-columns: 1fr; }
+  .ldet-right { position: static; }
+  .ldet-body { padding: 20px 20px 48px; }
+  .ldet-header { padding: 0 20px; }
+  .ldet-nav, .ldet-header-actions { display: none; }
+  .ldet-menu-btn { display: flex; }
+  .ldet-breadcrumb { padding: 12px 20px; }
+}
+@media (max-width: 560px) {
+  .ldet-main-img { height: 240px; }
+  .ldet-title { font-size: 22px; }
+}
