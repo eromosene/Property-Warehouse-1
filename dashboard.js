@@ -25,26 +25,6 @@ const userLast  = currentUser?.lastName  || "";
 const userFull  = `${userFirst} ${userLast}`.trim();
 const initials  = (userFirst[0] + (userLast[0] || userFirst[1] || "")).toUpperCase();
 
-const SAVED_HOMES = [
-    { id:1, name:"3 Bed Apartment", location:"Lekki Phase 1, Lagos",   price:"₦2,400,000/yr", img:IMGS[0], liked:true },
-    { id:2, name:"2 Bed Flat",      location:"Ikoyi, Lagos Island",    price:"₦1,800,000/yr", img:IMGS[1], liked:true },
-    { id:3, name:"4 Bed Duplex",    location:"Yaba, Mainland",         price:"₦2,800,000/yr", img:IMGS[2], liked:true },
-    { id:4, name:"2 Bed Apartment", location:"Ajah, Lagos",            price:"₦1,200,000/yr", img:IMGS[3], liked:true },
-    { id:5, name:"3 Bed Terrace",   location:"Ikeja, Lagos",           price:"₦1,950,000/yr", img:IMGS[4], liked:false }
-];
-
-const RECOMMENDED = [
-    { id:10, name:"Luxury 3 Bedroom Apartment", location:userArea+", Lagos",  price:"₦2,400,000/yr", movein:"₦2,800,000", img:IMGS[0], beds:3, baths:3, parking:true, views:342 },
-    { id:11, name:"2 Bedroom Terrace Duplex",   location:"Ajah, Lagos",       price:"₦1,500,000/yr", movein:"₦1,750,000", img:IMGS[1], beds:2, baths:3, parking:true, views:298 },
-    { id:12, name:"Studio Apartment",           location:"Surulere, Lagos",   price:"₦800,000/yr",  movein:"₦900,000",   img:IMGS[2], beds:1, baths:1, parking:true, views:189 },
-    { id:13, name:"3 Bedroom Flat",             location:"Yaba, Mainland",    price:"₦1,900,000/yr", movein:"₦2,200,000", img:IMGS[3], beds:3, baths:2, parking:true, views:156 }
-];
-
-const MESSAGES = [
-    { name:"Mr. Adeyemi Johnson", initials:"AJ", verified:true, text:"Hi "+userFirst+", the apartment is still available. When would you like to inspect?", time:"2m ago",    unread:true,  img:IMGS[4] },
-    { name:"Blessing Okafor",     initials:"BO", verified:true, text:"Thanks for your interest! I have an opening this Saturday at 11am.",                  time:"1h ago",    unread:true,  img:IMGS[1] },
-    { name:"Tunde Bakare",        initials:"TB", verified:true, text:"Please let me know if you need more information.",                                     time:"Yesterday", unread:false, img:IMGS[3] }
-];
 
 const ACTIVITIES = [
     { type:"saved",   icon:"heart",    desc:"You saved Luxury 3 Bed Apartment in "+userArea,  time:"2 hours ago"      },
@@ -180,20 +160,31 @@ function populateUser() {
 function renderSaved() {
     const track = document.getElementById("savedTrack");
     if (!track) return;
-    track.innerHTML = SAVED_HOMES.map(h => `
-        <div class="saved-card" data-id="${h.id}" tabindex="0" role="button" aria-label="View ${h.name}">
+
+    const homes = getSavedListings();
+
+    if (!homes.length) {
+        track.innerHTML = `<div style="padding:20px 8px;font-size:13px;font-weight:700;color:#5d6876;">
+            No saved homes yet.&nbsp;
+            <a href="listings.html" style="color:#a97e4b;text-decoration:underline;">Browse listings →</a>
+        </div>`;
+        return;
+    }
+
+    track.innerHTML = homes.map(h => `
+        <div class="saved-card" data-id="${h.id}" tabindex="0" role="button" aria-label="View ${h.title}">
             <div class="saved-card-img">
-                <img src="${h.img}" alt="${h.name}" loading="lazy">
-                <button class="saved-heart ${h.liked ? "liked" : ""}" type="button" data-id="${h.id}" aria-label="Save property">
-                    <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" ${h.liked?"fill='#e53e3e' stroke='#e53e3e'":""}/></svg>
+                <img src="${(h.images && h.images[0]) || IMGS[0]}" alt="${h.title}" loading="lazy">
+                <button class="saved-heart liked" type="button" data-id="${h.id}" aria-label="Remove from saved">
+                    <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" fill="#e53e3e" stroke="#e53e3e"/></svg>
                 </button>
             </div>
             <div class="saved-card-body">
-                <div class="saved-location">${h.location}</div>
-                <div class="saved-name">${h.name}</div>
+                <div class="saved-location">${h.area}, Lagos</div>
+                <div class="saved-name">${h.title}</div>
                 <div class="saved-price-row">
-                    <span class="saved-price">${h.price}</span>
-                    <span class="verified-badge">Verified</span>
+                    <span class="saved-price">${formatNaira(h.rentPerYear)}/yr</span>
+                    ${h.isVerified ? '<span class="verified-badge">Verified</span>' : ''}
                 </div>
             </div>
         </div>`).join("");
@@ -201,86 +192,118 @@ function renderSaved() {
     track.querySelectorAll(".saved-heart").forEach(btn => {
         btn.addEventListener("click", e => {
             e.stopPropagation();
-            const liked = btn.classList.toggle("liked");
-            const path  = btn.querySelector("svg path");
-            path.setAttribute("fill",   liked ? "#e53e3e" : "none");
-            path.setAttribute("stroke", liked ? "#e53e3e" : "currentColor");
+            const id = btn.dataset.id;
+            toggleFavourite(id);
+            const card = btn.closest(".saved-card");
+            if (card) {
+                card.style.transition = "opacity .3s";
+                card.style.opacity = "0";
+                setTimeout(() => renderSaved(), 320);
+            }
         });
     });
 
     track.querySelectorAll(".saved-card").forEach(card => {
         const open = e => {
             if (e.target.closest(".saved-heart")) return;
-            const prop = SAVED_HOMES.find(h => h.id === +card.dataset.id);
-            if (prop) openQV({ ...prop, beds:3, baths:2, parking:true });
+            window.location.href = `listing-detail.html?id=${card.dataset.id}`;
         };
         card.addEventListener("click", open);
         card.addEventListener("keydown", e => { if (e.key === "Enter") open(e); });
     });
 
-    /* Arrows */
-    document.querySelector(".saved-prev")?.addEventListener("click", () => {
-        const w = track.querySelector(".saved-card")?.offsetWidth + 12 || 192;
-        track.scrollBy({ left:-w, behavior:"smooth" });
-    });
-    document.querySelector(".saved-next")?.addEventListener("click", () => {
-        const w = track.querySelector(".saved-card")?.offsetWidth + 12 || 192;
-        track.scrollBy({ left:w, behavior:"smooth" });
-    });
+    /* Arrows — attach only once */
+    const prevBtn = document.querySelector(".saved-prev");
+    const nextBtn = document.querySelector(".saved-next");
+    if (prevBtn && !prevBtn.dataset.bound) {
+        prevBtn.dataset.bound = "1";
+        prevBtn.addEventListener("click", () => {
+            const w = track.querySelector(".saved-card")?.offsetWidth + 12 || 192;
+            track.scrollBy({ left: -w, behavior: "smooth" });
+        });
+    }
+    if (nextBtn && !nextBtn.dataset.bound) {
+        nextBtn.dataset.bound = "1";
+        nextBtn.addEventListener("click", () => {
+            const w = track.querySelector(".saved-card")?.offsetWidth + 12 || 192;
+            track.scrollBy({ left: w, behavior: "smooth" });
+        });
+    }
 }
 
 function renderRec() {
     const grid = document.getElementById("recGrid");
     if (!grid) return;
-    grid.innerHTML = RECOMMENDED.map(p => `
-        <div class="rec-card" data-id="${p.id}" tabindex="0" role="button" aria-label="View ${p.name}">
+
+    const all = getAllListings().slice(0, 4);
+
+    grid.innerHTML = all.map(p => `
+        <div class="rec-card" data-id="${p.id}" tabindex="0" role="button" aria-label="View ${p.title}">
             <div class="rec-card-img">
-                <img src="${p.img}" alt="${p.name}" loading="lazy">
+                <img src="${(p.images && p.images[0]) || IMGS[0]}" alt="${p.title}" loading="lazy">
                 <div class="rec-badges">
-                    <span class="rec-badge verified">✓ Verified</span>
-                    <span class="rec-badge monthly">● Monthly</span>
+                    ${p.isVerified ? '<span class="rec-badge verified">✓ Verified</span>' : ''}
+                    ${p.isMonthly  ? '<span class="rec-badge monthly">● Monthly</span>'   : ''}
                 </div>
-                <span class="rec-views">👁 ${p.views}</span>
+                <span class="rec-views">👁 ${p.views || 0}</span>
             </div>
             <div class="rec-card-body">
-                <div class="rec-name">${p.name}</div>
-                <div class="rec-loc">${p.location}</div>
+                <div class="rec-name">${p.title}</div>
+                <div class="rec-loc">${p.area}, Lagos</div>
                 <div class="rec-amenities">
                     <span class="rec-amenity">${iconSVG("bed")} ${p.beds} Beds</span>
                     <span class="rec-amenity">${iconSVG("bath")} ${p.baths} Baths</span>
-                    ${p.parking ? `<span class="rec-amenity">${iconSVG("parking")} Parking</span>` : ""}
+                    ${p.amenities && p.amenities.includes("Parking") ? `<span class="rec-amenity">${iconSVG("parking")} Parking</span>` : ""}
                 </div>
-                <div class="rec-price">${p.price}</div>
-                <div class="rec-movein">Move-in: <span>${p.movein}</span></div>
+                <div class="rec-price">${formatNaira(p.rentPerYear)}/yr</div>
+                <div class="rec-movein">Move-in: <span>${formatNaira(p.totalMoveIn || p.rentPerYear)}</span></div>
             </div>
         </div>`).join("");
 
     grid.querySelectorAll(".rec-card").forEach(card => {
-        const open = () => {
-            const prop = RECOMMENDED.find(p => p.id === +card.dataset.id);
-            if (prop) openQV(prop);
-        };
+        const open = () => { window.location.href = `listing-detail.html?id=${card.dataset.id}`; };
         card.addEventListener("click", open);
         card.addEventListener("keydown", e => { if (e.key === "Enter") open(); });
     });
 }
 
+function timeAgo(iso) {
+    if (!iso) return "";
+    const diff = (Date.now() - new Date(iso)) / 1000;
+    if (diff < 3600)  return Math.max(1, Math.floor(diff / 60)) + "m ago";
+    if (diff < 86400) return Math.floor(diff / 3600) + "h ago";
+    if (diff < 172800) return "Yesterday";
+    return new Date(iso).toLocaleDateString("en-NG", { day: "numeric", month: "short" });
+}
+
 function renderMessages() {
     const list = document.getElementById("msgList");
     if (!list) return;
-    list.innerHTML = MESSAGES.map(m => `
+
+    const inquiries = getInquiries().slice(0, 5);
+
+    if (!inquiries.length) {
+        list.innerHTML = `<div style="padding:16px 0;font-size:13px;font-weight:600;color:#5d6876;">
+            No inquiries yet — contact a landlord from any listing page.</div>`;
+        return;
+    }
+
+    list.innerHTML = inquiries.map(inq => {
+        const initials = (inq.landlordName || "LL").split(" ").map(w => w[0]).join("").slice(0,2).toUpperCase();
+        return `
         <div class="msg-item">
-            <div class="msg-avatar">${m.initials}</div>
+            <div class="msg-avatar">${initials}</div>
             <div class="msg-body">
                 <div class="msg-name-row">
-                    <span class="msg-name">${m.name}</span>
-                    <span class="msg-verified">✓ Verified Landlord</span>
-                    <span class="msg-time">${m.time}</span>
+                    <span class="msg-name">${inq.landlordName || "Landlord"}</span>
+                    <span class="msg-verified">✓ Landlord</span>
+                    <span class="msg-time">${timeAgo(inq.sentAt)}</span>
                 </div>
-                <div class="msg-text">${m.text}</div>
+                <div class="msg-text">You inquired about <strong>${inq.listingTitle || "a property"}</strong> in ${inq.area || "Lagos"}</div>
             </div>
-            ${m.unread ? `<div class="msg-unread-dot"></div>` : ""}
-        </div>`).join("");
+            <div class="msg-unread-dot"></div>
+        </div>`;
+    }).join("");
 }
 
 function renderActivity() {
@@ -377,13 +400,22 @@ function activateSection(section) {
     closeSidebar();
 }
 
+const SECTION_SCROLL = {
+    saved:    ".db-section--saved",
+    messages: ".db-section--messages"
+};
+
 document.querySelectorAll(".db-nav-item, .db-bnav-item").forEach(link => {
     link.addEventListener("click", e => {
         const sec = link.dataset.section;
         if (!sec) return;
         e.preventDefault();
         activateSection(sec);
-        if (sec !== "dashboard") toast(`${sec.charAt(0).toUpperCase()+sec.slice(1)} coming soon!`);
+        if (SECTION_SCROLL[sec]) {
+            document.querySelector(SECTION_SCROLL[sec])?.scrollIntoView({ behavior: "smooth", block: "start" });
+        } else if (sec !== "dashboard") {
+            toast(`${sec.charAt(0).toUpperCase() + sec.slice(1)} coming soon!`);
+        }
     });
 });
 
