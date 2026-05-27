@@ -32,13 +32,7 @@ const userFirst = currentUser?.firstName || "Adeyemi";
 const userLast  = currentUser?.lastName  || "Johnson";
 const userFull  = `${userFirst} ${userLast}`.trim();
 
-const LISTINGS = [
-    { id:1, name:"Luxury 3 Bedroom Duplex",   area:"Lekki Phase 1",  status:"verified",  inquiries:56, rent:"₦2,400,000", occ:95,  perf:"Excellent", score:4.9, img:IMGS[0] },
-    { id:2, name:"2 Bedroom Apartment",        area:"Yaba, Mainland", status:"occupied",  inquiries:32, rent:"₦1,200,000", occ:100, perf:"Excellent", score:4.7, img:IMGS[1] },
-    { id:3, name:"4 Bedroom Terrace Duplex",   area:"Ajah, Lagos",    status:"available", inquiries:18, rent:"₦2,000,000", occ:0,   perf:"Good",      score:4.2, img:IMGS[2] },
-    { id:4, name:"Studio Apartment",           area:"Surulere, Lagos",status:"occupied",  inquiries:24, rent:"₦800,000",   occ:100, perf:"Good",      score:4.3, img:IMGS[3] },
-    { id:5, name:"3 Bedroom Flat",             area:"Gbagada, Lagos", status:"available", inquiries:12, rent:"₦1,500,000", occ:0,   perf:"Average",   score:3.8, img:IMGS[4] }
-];
+let LISTINGS = getLandlordListings(currentUser.email);
 
 const MESSAGES = [
     { name:"Amaka Nwosu",    text:"Hi, is this Lekki apartment still available? I'm interested in scheduling an inspection.",  time:"2m ago",    unread:true,  img:PEOPLE[0] },
@@ -109,47 +103,95 @@ function populateUser() {
 ══════════════════════════════════════════════════ */
 function renderListings() {
     const tbody = document.getElementById("ldTableBody");
+    const table = document.getElementById("ldListingsTable");
     if (!tbody) return;
-    tbody.innerHTML = LISTINGS.map(l => `
+
+    LISTINGS = getLandlordListings(currentUser.email);
+
+    if (!LISTINGS.length) {
+        if (table) table.style.display = "none";
+        let empty = document.getElementById("ldEmptyListings");
+        if (!empty) {
+            empty = document.createElement("div");
+            empty.id = "ldEmptyListings";
+            empty.style.cssText = "text-align:center;padding:48px 20px;";
+            empty.innerHTML = `
+                <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="#c8c3bb" stroke-width="1.5"
+                  style="display:block;margin:0 auto 16px"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+                <p style="font-size:15px;font-weight:700;color:#5d6876;margin-bottom:16px">You haven't listed any properties yet.</p>
+                <a href="create-listing.html"
+                   style="display:inline-flex;align-items:center;gap:8px;background:#a97e4b;color:#fff;
+                          padding:12px 24px;border-radius:12px;font-size:14px;font-weight:800;text-decoration:none;">
+                   + Add Your First Property
+                </a>`;
+            tbody.closest(".ld-table-wrap").appendChild(empty);
+        }
+        return;
+    }
+
+    const emptyEl = document.getElementById("ldEmptyListings");
+    if (emptyEl) emptyEl.remove();
+    if (table) table.style.display = "";
+
+    tbody.innerHTML = LISTINGS.map(l => {
+        const img      = (l.images && l.images[0]) || "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=80&q=60";
+        const name     = l.title || l.name || "Untitled";
+        const area     = l.area  || "—";
+        const status   = l.isVerified ? "verified" : "available";
+        const inquiries = l.views || 0;
+        const rent     = formatNaira(l.rentPerYear || 0);
+        return `
         <tr>
             <td>
                 <div class="ld-prop-cell">
-                    <div class="ld-prop-thumb"><img src="${l.img}" alt="${l.name}" loading="lazy"></div>
-                    <span class="ld-prop-name">${l.name}</span>
+                    <div class="ld-prop-thumb"><img src="${img}" alt="${name}" loading="lazy"></div>
+                    <a class="ld-prop-name" href="listing-detail.html?id=${l.id}" style="text-decoration:none;color:inherit">${name}</a>
                 </div>
             </td>
-            <td class="ld-prop-area-cell">${l.area}</td>
+            <td class="ld-prop-area-cell">${area}</td>
             <td>
-                <span class="ld-status-badge ${l.status}">
+                <span class="ld-status-badge ${status}">
                     <svg viewBox="0 0 8 8" width="6" height="6"><circle cx="4" cy="4" r="4" fill="currentColor"/></svg>
-                    ${statusLabel(l.status)}
+                    ${statusLabel(status)}
                 </span>
             </td>
-            <td class="ld-td-num">${l.inquiries}</td>
-            <td class="ld-td-num">${l.rent}</td>
+            <td class="ld-td-num">${inquiries}</td>
+            <td class="ld-td-num">${rent}</td>
             <td>
                 <div class="ld-occ-bar-wrap">
-                    <div class="ld-occ-bar"><div class="ld-occ-bar-fill" style="width:${l.occ}%"></div></div>
-                    <span class="ld-occ-pct">${l.occ}%</span>
+                    <div class="ld-occ-bar"><div class="ld-occ-bar-fill" style="width:0%"></div></div>
+                    <span class="ld-occ-pct">—</span>
                 </div>
             </td>
             <td>
                 <div class="ld-perf-cell">
-                    <span class="ld-perf-label ${l.perf.toLowerCase()}">${l.perf}</span>
-                    <span class="ld-perf-score">${l.score}</span>
+                    <span class="ld-perf-label good">Active</span>
                 </div>
             </td>
             <td>
-                <button class="ld-row-menu" type="button" aria-label="More options" data-id="${l.id}">
-                    <svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="19" r="1.5" fill="currentColor" stroke="none"/></svg>
+                <button class="ld-row-menu ld-delete-btn" type="button"
+                  aria-label="Delete listing" data-id="${l.id}"
+                  title="Delete listing"
+                  style="color:#c0392b">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                      <path d="M10 11v6m4-6v6"/><path d="M9 6V4h6v2"/>
+                    </svg>
                 </button>
             </td>
-        </tr>`).join("");
+        </tr>`;
+    }).join("");
 
-    tbody.querySelectorAll(".ld-row-menu").forEach(btn => {
+    tbody.querySelectorAll(".ld-delete-btn").forEach(btn => {
         btn.addEventListener("click", () => {
-            const listing = LISTINGS.find(l => l.id === +btn.dataset.id);
-            if (listing) toast(`Options for ${listing.name}`);
+            const id = btn.dataset.id;
+            const listing = LISTINGS.find(l => l.id === id);
+            if (!listing) return;
+            if (confirm(`Delete "${listing.title || listing.name}"? This cannot be undone.`)) {
+                deleteListing(id);
+                toast(`"${listing.title || listing.name}" deleted.`);
+                renderListings();
+            }
         });
     });
 }
@@ -294,7 +336,7 @@ document.getElementById("ldLogoutBtn")?.addEventListener("click", e => {
 /* ══════════════════════════════════════════════════
    INTERACTIVE BUTTONS
 ══════════════════════════════════════════════════ */
-document.getElementById("ldAddBtn")?.addEventListener("click",       () => toast("Add property form coming soon!"));
+/* ldAddBtn is now an <a> link to create-listing.html */
 document.getElementById("ldViewAll")?.addEventListener("click",      e => { e.preventDefault(); toast("Viewing all listings…"); });
 document.querySelector(".ld-add-insp-btn")?.addEventListener("click",() => toast("Inspection scheduler coming soon!"));
 document.querySelector(".ld-promo-btn")?.addEventListener("click",   () => toast("Promotion feature coming soon!"));

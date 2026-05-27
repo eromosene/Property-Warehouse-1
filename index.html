@@ -60,7 +60,7 @@
                 </p>
 
                 <div class="hero-actions">
-                    <a class="primary-button" href="#listings">
+                    <a class="primary-button" href="listings.html">
                         <span>Browse Listings</span>
                         <svg viewBox="0 0 24 24" aria-hidden="true">
                             <path d="M5 12h13m-5-5 5 5-5 5" />
@@ -95,7 +95,7 @@
         </section>
 
         <section class="proof-strip" aria-label="Platform numbers and partners">
-            <form class="search-panel" id="listings">
+            <form class="search-panel" id="listings" action="listings.html" method="get" onsubmit="return redirectSearch(this)">
                 <label>
                     <span>AREA</span>
                     <select aria-label="Select area">
@@ -249,6 +249,17 @@
     </main>
 
     <script src="script.js"></script>
+    <script src="listings-data.js"></script>
+    <script>
+      function redirectSearch(form) {
+        const area = form.querySelector('select[aria-label="Select area"]').value;
+        const type = form.querySelector('select[aria-label="Select property type"]').value;
+        const params = new URLSearchParams();
+        if (area && area !== 'Select Area') params.set('q', area);
+        window.location.href = 'listings.html' + (params.toString() ? '?' + params.toString() : '');
+        return false;
+      }
+    </script>
 </body>
 
 </html>
