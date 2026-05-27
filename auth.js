@@ -101,7 +101,7 @@ document.getElementById("tenant-login")?.addEventListener("submit", (e) => {
 
     localStorage.setItem("pw_current_user", JSON.stringify({ ...stored, role: "tenant" }));
     showToast("Welcome back, " + stored.firstName + "! Redirecting…");
-    setTimeout(() => { window.location.href = "dashboard.html"; }, 1200);
+    setTimeout(() => { window.location.href = "tenant-dashboard.html"; }, 1200);
 });
 
 /* TENANT SIGN UP */
@@ -127,7 +127,7 @@ document.getElementById("tenant-signup")?.addEventListener("submit", (e) => {
     localStorage.setItem("pw_tenant", JSON.stringify(userData));
     localStorage.setItem("pw_current_user", JSON.stringify(userData));
     showToast("Account created! Welcome, " + firstName + "! Redirecting…");
-    setTimeout(() => { window.location.href = "dashboard.html"; }, 1400);
+    setTimeout(() => { window.location.href = "tenant-dashboard.html"; }, 1400);
 });
 
 /* LANDLORD LOGIN */
