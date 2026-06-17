@@ -994,14 +994,13 @@ body.ld-page {
     .ld-right {
         width: 100%;
         max-width: 100%;
-        display: flex;
-        flex-direction: column;
-        gap: 14px;
+        display: contents;
     }
     
     /* Mobile Intro */
     .ld-mobile-intro {
         display: block;
+        order: -1;
     }
     
     .ld-mobile-greeting h2 {
