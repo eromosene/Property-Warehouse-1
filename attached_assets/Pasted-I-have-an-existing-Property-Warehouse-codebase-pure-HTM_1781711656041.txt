@@ -1,0 +1,154 @@
+I have an existing Property Warehouse codebase (pure HTML/CSS/JS, no framework).
+I need you to add 3 features across the whole site. Here are the full details:
+
+---
+
+## FEATURE 1 — Per-Listing Inline Inquiry Chatbox + WhatsApp Link
+
+On every listing card (in listings.html) and on the listing detail page
+(listing-detail.html), add two action elements directly below the listing content:
+
+### A) WhatsApp Button (Individual Landlord)
+- A green WhatsApp button/icon link
+- Opens: https://wa.me/{listing.landlordWhatsApp}?text=Hello%2C%20I%20am%20interested%20in%20your%20property%20%22{listing.title}%22%20listed%20on%20Property%20Warehouse.
+- Label: "Chat on WhatsApp"
+- Use the landlordWhatsApp field already in each listing object in listings-data.js
+
+### B) Inquiry Message Icon / Chatbox
+- A message bubble icon button labeled "Send Inquiry"
+- When clicked, it toggles open a small inline chat panel directly below
+  that listing card (not a modal — inline, like a reply box)
+- The chat panel contains:
+  - A header: "Send a message to {landlord.landlordName}"
+  - Name input field (if user is not logged in)
+  - Phone number input field
+  - Message textarea (placeholder: "Hi, I'm interested in this property...")
+  - A Send button
+- On submit:
+  - Save to localStorage under key 'pw_inquiries' using the existing addInquiry()
+    function in listings-data.js with this shape:
+    { listingId, listingTitle, landlordName, senderName, senderPhone, message, sentAt }
+  - Show a success message: "Message sent! The landlord will contact you shortly."
+  - Collapse the chatbox after 3 seconds
+- If the user is logged in (check localStorage 'pw_current_user'),
+  prefill name and phone from their profile
+
+Only one chatbox should be open at a time — opening one closes any other open one.
+
+---
+
+## FEATURE 2 — Floating Platform Feedback Bubble
+
+Add a floating action button on EVERY page of the site.
+
+### The Bubble
+- Position: fixed, bottom-right corner (bottom: 24px, right: 24px)
+- A circular button with a chat/comment icon inside
+- Sits ABOVE any other fixed elements (z-index: 9999)
+- Has a tooltip on hover: "Feedback & Support"
+- Use Property Warehouse brand colors (dark navy #0a1628 + gold accent #c9a84c)
+- The bubble has a subtle pulse animation to draw attention only on first
+  visit per session — use sessionStorage flag 'pw_bubble_seen' to stop
+  pulsing after first interaction
+
+### The Panel
+- Clicking the bubble opens a slide-up panel anchored to bottom-right,
+  appearing above the bubble
+- Panel width: 320px, rounded corners, box shadow
+- Panel contains:
+  - Header: "Talk to Us" with a close (×) button
+  - A type selector: three pill buttons — "Feedback" | "Complaint" | "Suggestion"
+    (one always selected, default: Feedback)
+  - Name input
+  - Email input
+  - Message textarea (min 3 rows)
+  - Submit button: "Send Message"
+  - Divider line below the submit button
+  - A secondary WhatsApp community link:
+    Text: "Prefer to chat directly? Join our WhatsApp community →"
+    Link: https://chat.whatsapp.com/EHIitALME7RLuWP2wThMcL?mode=gi_t
+    Opens in new tab (target="_blank" rel="noopener noreferrer")
+    Style as a small green WhatsApp-colored text link with an inline
+    WhatsApp SVG icon before the text. Smaller font than the main form text.
+
+- On submit:
+  - Save to localStorage key 'pw_feedback':
+    { type, name, email, message, page: window.location.pathname, sentAt }
+  - Show inline success: "Thanks! We've received your message."
+  - Reset form and close panel after 3 seconds
+- Pressing Escape or clicking outside the panel closes it
+
+### Inject it globally
+- Create a new file: feedback-bubble.js
+- Create a new file: feedback-bubble.css
+- feedback-bubble.js injects the bubble HTML into document.body automatically
+  on DOMContentLoaded — no manual HTML needed in any page
+- Add <link rel="stylesheet" href="feedback-bubble.css"> in the <head> of ALL
+  existing HTML pages
+- Add <script src="feedback-bubble.js"></script> before </body> of ALL
+  existing HTML pages
+
+Pages to update:
+index.html, listings.html, listing-detail.html, auth.html, dashboard.html,
+landlord-dashboard.html, create-listing.html, heatmap.html, how-it-works.html
+
+---
+
+## FEATURE 3 — Landlord Dashboard: View Inquiries
+
+In landlord-dashboard.html, add an "Inquiries" tab/section that:
+- Reads from localStorage 'pw_inquiries'
+- Filters to show only inquiries matching the logged-in landlord's listings
+  (match by listingId against getLandlordListings(currentUser.email))
+- Displays each inquiry as a card:
+  - Sender name + phone number (phone as a clickable tel: link)
+  - Which listing the inquiry is about
+  - The full message content
+  - Time sent, formatted as relative time (e.g. "2 hours ago", "3 days ago")
+  - A "Reply on WhatsApp" button that opens:
+    https://wa.me/{senderPhone}?text=Hello%20{senderName}%2C%20thank%20you%20for%20your%20interest%20in%20my%20property%20on%20Property%20Warehouse.
+- Show empty state if no inquiries:
+  "No inquiries yet. Share your listings to get messages!"
+- New/unread inquiries (received since last dashboard visit) should have
+  a subtle highlight or "New" badge. Track last visit time in localStorage
+  as 'pw_dashboard_last_seen'.
+
+---
+
+## DESIGN RULES
+- Match the existing Property Warehouse design system exactly:
+  - Fonts: Manrope (body), Playfair Display / Cormorant Garamond (headings)
+  - Dark navy: #0a1628
+  - Gold accent: #c9a84c
+  - Border radius: consistent with existing cards (12px–16px)
+  - Transitions: 0.2s–0.3s ease
+- All new CSS must NOT conflict with existing styles — prefix every new
+  class with pw- (e.g. pw-bubble, pw-inquiry-card, pw-chat-panel)
+- Mobile responsive:
+  - Feedback panel: on screens below 480px, panel should be full width
+    minus 32px margin, still anchored bottom-right
+  - Inline chatbox: full width of the listing card on mobile
+  - WhatsApp and inquiry buttons: stack vertically on mobile, side by side
+    on desktop
+- No external libraries — vanilla JS only
+- No backend calls — everything is localStorage
+- Do not break any existing functionality. The existing search, filters,
+  auth flow, and listing creation must all still work after your changes.
+
+---
+
+## FILE SUMMARY
+
+New files to create:
+- feedback-bubble.js
+- feedback-bubble.css
+
+Files to modify:
+- listings.html — add WhatsApp + inquiry chatbox buttons to each listing card
+- listings.js — add chatbox open/close logic and inquiry form submit handler
+- listing-detail.html — add WhatsApp + inquiry chatbox below property info
+- listing-detail.js — add same chatbox logic
+- landlord-dashboard.html — add Inquiries tab to existing tab navigation
+- landlord-dashboard.js — add inquiry fetching, filtering and rendering logic
+- ALL .html files listed above — add feedback-bubble.css link and
+  feedback-bubble.js script tag
