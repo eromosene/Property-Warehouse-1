@@ -201,6 +201,14 @@ const DEFAULT_LISTINGS = [
 
 function getAllListings() {
   const landlordListings = JSON.parse(localStorage.getItem('pw_listings') || '[]');
+  // Exclude pending/flagged/rejected listings from public view — admin must approve first
+  const approvedLandlordListings = landlordListings.filter(l => !l.status || l.status === 'active');
+  return [...DEFAULT_LISTINGS, ...approvedLandlordListings];
+}
+
+function getAllListingsAdmin() {
+  // Returns ALL listings including pending/flagged/rejected — for admin use only
+  const landlordListings = JSON.parse(localStorage.getItem('pw_listings') || '[]');
   return [...DEFAULT_LISTINGS, ...landlordListings];
 }
 
@@ -210,6 +218,8 @@ function getListingById(id) {
 
 function saveListing(listing) {
   const existing = JSON.parse(localStorage.getItem('pw_listings') || '[]');
+  // New landlord-created listings default to 'pending' — admin must approve before going live
+  if (!listing.status) listing.status = 'pending';
   existing.push(listing);
   localStorage.setItem('pw_listings', JSON.stringify(existing));
 }

@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard — Property Warehouse</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Manrope:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body class="adm-body">
+
+<!-- LOGIN OVERLAY -->
+<div class="adm-login-overlay" id="admLoginOverlay">
+  <div class="adm-login-box">
+    <div class="adm-login-logo">
+      <div class="adm-brand-mark">PW</div>
+      <div class="adm-brand-text">
+        <span>PROPERTY WAREHOUSE</span>
+        <span>ADMIN PORTAL</span>
+      </div>
+    </div>
+    <h2>Admin Login</h2>
+    <p>Sign in to access the Property Warehouse admin dashboard.</p>
+    <div class="adm-form-group">
+      <label>Email Address</label>
+      <input type="email" id="admLoginEmail" placeholder="admin@propertywarehouse.ng" autocomplete="username">
+    </div>
+    <div class="adm-form-group">
+      <label>Password</label>
+      <input type="password" id="admLoginPassword" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <button class="adm-login-btn" id="admLoginBtn">Login as Admin</button>
+    <div class="adm-login-error" id="admLoginError">Invalid admin credentials. Please try again.</div>
+  </div>
+</div>
+
+<!-- MAIN DASHBOARD (hidden until logged in) -->
+<div class="adm-layout hidden" id="admDashboard">
+
+  <!-- SIDEBAR OVERLAY (mobile) -->
+  <div class="adm-sidebar-overlay" id="admSidebarOverlay"></div>
+
+  <!-- SIDEBAR -->
+  <aside class="adm-sidebar" id="admSidebar">
+    <div class="adm-sidebar-logo">
+      <div class="adm-logo-mark">PW</div>
+      <div class="adm-logo-text">
+        <span>PROPERTY WAREHOUSE</span>
+        <span>ADMIN</span>
+      </div>
+    </div>
+    <nav class="adm-nav">
+      <button class="adm-nav-item active" data-section="overview">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Overview
+      </button>
+      <button class="adm-nav-item" data-section="users">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Users
+        <span class="adm-nav-badge" id="navBadgeUsers">0</span>
+      </button>
+      <button class="adm-nav-item" data-section="listings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Listings
+        <span class="adm-nav-badge pending" id="navBadgeListings">0</span>
+      </button>
+      <button class="adm-nav-item" data-section="inquiries">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        Inquiries
+      </button>
+      <button class="adm-nav-item" data-section="feedback">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+        Feedback
+        <span class="adm-nav-badge urgent" id="navBadgeFeedback">0</span>
+      </button>
+      <button class="adm-nav-item" data-section="verification">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Verification Queue
+        <span class="adm-nav-badge gold" id="navBadgeVerif">0</span>
+      </button>
+      <button class="adm-nav-item" data-section="finance">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        Finance
+      </button>
+      <button class="adm-nav-item" data-section="analytics">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Analytics
+      </button>
+      <button class="adm-nav-item" data-section="announcements">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 17H2a3 3 0 0 0 3-3V9a7 7 0 0 1 14 0v5a3 3 0 0 0 3 3zm-8.27 4a2 2 0 0 1-3.46 0"/></svg>
+        Announcements
+      </button>
+      <button class="adm-nav-item" data-section="settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Settings
+      </button>
+    </nav>
+    <div class="adm-sidebar-footer">
+      <div class="adm-admin-avatar-sm" id="sidebarAvatar">AJ
+        <span class="adm-online-dot"></span>
+      </div>
+      <div class="adm-sidebar-footer-text">
+        <div class="adm-admin-name" id="sidebarAdminName">Adeyemi Johnson</div>
+        <div class="adm-admin-role">Super Admin</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="adm-main">
+
+    <!-- DEMO BANNER -->
+    <div class="adm-demo-banner" id="admDemoBanner">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      DEMO MODE — Sample Data &nbsp;<span>Real data is not being shown. Toggle Demo Mode off to see live data.</span>
+    </div>
+
+    <!-- HEADER -->
+    <header class="adm-header">
+      <button class="adm-hamburger" id="admHamburger">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+
+      <div class="adm-header-title">
+        <h1 id="admPageTitle">Overview</h1>
+        <p id="admPageSubtitle">Welcome back. Here's what's happening on your platform.</p>
+      </div>
+
+      <div class="adm-header-search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="admHeaderSearch" placeholder="Search anything...">
+      </div>
+
+      <div class="adm-demo-toggle" id="admDemoToggle">
+        <span>Demo Mode</span>
+        <div class="adm-toggle-switch"></div>
+      </div>
+
+      <div class="adm-date-range" id="admDateRange">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span id="admDateRangeLabel">May 1 - May 31, 2025</span>
+      </div>
+
+      <div style="position:relative;">
+        <button class="adm-notif-btn" id="admNotifBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <span class="adm-notif-badge" id="admNotifCount">4</span>
+        </button>
+        <div class="adm-notif-dropdown" id="admNotifDropdown">
+          <div class="adm-notif-header">
+            <span>Notifications</span>
+            <button id="admMarkAllRead">Mark all as read</button>
+          </div>
+          <div id="admNotifList"></div>
+        </div>
+      </div>
+
+      <div class="adm-profile-chip" id="admProfileChip">
+        <div class="adm-profile-avatar" id="admHeaderAvatar">AJ</div>
+        <div class="adm-profile-info">
+          <div class="adm-profile-name" id="admHeaderName">Adeyemi Johnson</div>
+          <div class="adm-profile-role">Super Admin</div>
+        </div>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        <div class="adm-profile-dropdown" id="admProfileDropdown">
+          <a href="#">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            Profile
+          </a>
+          <a href="#" onclick="admNavigateTo('settings'); return false;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4"/></svg>
+            Settings
+          </a>
+          <button class="logout" id="admLogoutBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            Logout
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- PAGE CONTENT -->
+    <main class="adm-page-content" id="admPageContent">
+
+      <!-- ═══ SECTION: OVERVIEW ═══ -->
+      <section class="adm-section active" id="sectionOverview">
+        <div class="adm-stats-row cols-5" id="overviewStats"></div>
+
+        <div class="adm-grid-60-40">
+          <div class="adm-card">
+            <div class="adm-card-header">
+              <h3>Platform Activity</h3>
+              <select id="activityPeriod" style="font-size:12px;padding:4px 8px;border:1.5px solid #e5e7eb;border-radius:6px;font-family:inherit;">
+                <option value="monthly">Monthly</option>
+                <option value="weekly">Weekly</option>
+                <option value="yearly">Yearly</option>
+              </select>
+            </div>
+            <div class="adm-chart-container"><canvas id="chartPlatformActivity"></canvas></div>
+          </div>
+          <div class="adm-card">
+            <div class="adm-card-header"><h3>Top Areas This Week</h3></div>
+            <ol class="adm-rank-list" id="topAreasList"></ol>
+          </div>
+        </div>
+
+        <div class="adm-grid-3">
+          <div class="adm-card">
+            <div class="adm-card-header">
+              <h3>Recent Signups</h3>
+              <button class="adm-view-all" onclick="admNavigateTo('users')">
+                View all users <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+              </button>
+            </div>
+            <div id="recentSignupsList"></div>
+          </div>
+          <div class="adm-card">
+            <div class="adm-card-header">
+              <h3>Listings Pending Approval</h3>
+              <button class="adm-view-all" onclick="admNavigateTo('listings')">
+                View all <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+              </button>
+            </div>
+            <div id="pendingListingsList"></div>
+          </div>
+          <div class="adm-card">
+            <div class="adm-card-header">
+              <h3>Recent Feedback</h3>
+              <button class="adm-view-all" onclick="admNavigateTo('feedback')">
+                View all <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+              </button>
+            </div>
+            <div id="recentFeedbackList"></div>
+          </div>
+        </div>
+
+        <div class="adm-grid-60-40">
+          <div class="adm-card">
+            <div class="adm-card-header">
+              <h3>Latest Platform Activity</h3>
+              <button class="adm-view-all" onclick="admNavigateTo('settings')">View all logs <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></button>
+            </div>
+            <div id="activityLogList"></div>
+          </div>
+          <div>
+            <div class="adm-card adm-mb20">
+              <div class="adm-card-header"><h3>Quick Actions</h3></div>
+              <button class="adm-quick-action" onclick="admNavigateTo('announcements')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 17H2a3 3 0 0 0 3-3V9a7 7 0 0 1 14 0v5a3 3 0 0 0 3 3zm-8.27 4a2 2 0 0 1-3.46 0"/></svg>
+                Add Announcement
+              </button>
+              <button class="adm-quick-action" onclick="admNavigateTo('finance')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Export Report
+              </button>
+              <button class="adm-quick-action" onclick="admNavigateTo('listings')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                Review Flagged
+              </button>
+              <div class="adm-quick-action" style="cursor:default;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg>
+                Maintenance Mode
+                <button class="adm-toggle" id="quickMaintToggle" style="margin-left:auto;" onclick="admToggleMaintenance(this)"></button>
+              </div>
+            </div>
+            <div class="adm-card">
+              <div class="adm-card-header"><h3>System Health</h3></div>
+              <div class="adm-health-item"><span>Server Status</span><span class="adm-health-status operational"><span class="adm-health-dot green"></span>Operational</span></div>
+              <div class="adm-health-item"><span>Database</span><span class="adm-health-status operational"><span class="adm-health-dot green"></span>Operational</span></div>
+              <div class="adm-health-item"><span>Payment Gateway</span><span class="adm-health-status operational"><span class="adm-health-dot green"></span>Operational</span></div>
+              <div class="adm-health-item"><span>Email Service</span><span class="adm-health-status operational"><span class="adm-health-dot green"></span>Operational</span></div>
+              <div style="margin-top:14px;">
+                <div class="adm-flex-between adm-f12 adm-mb20" style="margin-bottom:6px;">
+                  <span>Storage Usage</span><span id="storageUsageLabel" class="adm-text-muted adm-f12">0 KB used</span>
+                </div>
+                <div class="adm-progress"><div class="adm-progress-bar" id="storageUsageBar" style="width:2%"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="adm-platform-summary" id="platformSummary"></div>
+      </section>
+
+      <!-- ═══ SECTION: USERS ═══ -->
+      <section class="adm-section" id="sectionUsers">
+        <div class="adm-tabs">
+          <button class="adm-tab active" data-tab="tabTenants">Tenants</button>
+          <button class="adm-tab" data-tab="tabLandlords">Landlords</button>
+        </div>
+
+        <div class="adm-tab-content active" id="tabTenants">
+          <div class="adm-stats-row cols-4" id="tenantStats"></div>
+          <div class="adm-grid-main-side">
+            <div>
+              <div class="adm-filter-bar">
+                <input type="text" id="tenantSearch" placeholder="Search tenants..." oninput="renderTenantsTable()">
+                <select id="tenantAreaFilter" onchange="renderTenantsTable()"><option value="">All Areas</option></select>
+                <button class="adm-btn adm-btn-outline adm-btn-sm" onclick="exportCSV('tenants')">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                  Export CSV
+                </button>
+              </div>
+              <div class="adm-card">
+                <div class="adm-table-wrap">
+                  <table class="adm-table">
+                    <thead><tr>
+                      <th>User</th><th>Email</th><th>Phone</th><th>Area</th><th>Budget</th>
+                      <th>Join Date</th><th>Saved</th><th>Status</th><th>Actions</th>
+                    </tr></thead>
+                    <tbody id="tenantsTableBody"></tbody>
+                  </table>
+                </div>
+                <div class="adm-pagination" id="tenantsPagination"></div>
+              </div>
+            </div>
+            <div id="usersSidebar"></div>
+          </div>
+        </div>
+
+        <div class="adm-tab-content" id="tabLandlords">
+          <div class="adm-stats-row cols-4" id="landlordStats"></div>
+          <div class="adm-grid-main-side">
+            <div>
+              <div class="adm-filter-bar">
+                <input type="text" id="landlordSearch" placeholder="Search landlords..." oninput="renderLandlordsTable()">
+                <select id="landlordAreaFilter" onchange="renderLandlordsTable()"><option value="">All LGAs</option></select>
+                <button class="adm-btn adm-btn-outline adm-btn-sm" onclick="exportCSV('landlords')">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                  Export CSV
+                </button>
+              </div>
+              <div class="adm-card">
+                <div class="adm-table-wrap">
+                  <table class="adm-table">
+                    <thead><tr>
+                      <th>Landlord</th><th>Email</th><th>Phone</th><th>LGA</th><th>Listings</th>
+                      <th>Join Date</th><th>Verified</th><th>Status</th><th>Actions</th>
+                    </tr></thead>
+                    <tbody id="landlordsTableBody"></tbody>
+                  </table>
+                </div>
+                <div class="adm-pagination" id="landlordsPagination"></div>
+              </div>
+            </div>
+            <div id="landlordsSidebar"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══ SECTION: LISTINGS ═══ -->
+      <section class="adm-section" id="sectionListings">
+        <div class="adm-grid-main-side">
+          <div>
+            <div class="adm-filter-bar">
+              <input type="text" id="listingSearch" placeholder="Search listings..." oninput="renderListingsTable()">
+              <select id="listingAreaFilter" onchange="renderListingsTable()"><option value="">All Areas</option></select>
+              <select id="listingTypeFilter" onchange="renderListingsTable()"><option value="">All Types</option></select>
+              <button class="adm-btn adm-btn-outline adm-btn-sm" onclick="exportCSV('listings')">Export</button>
+            </div>
+            <div class="adm-status-pills" id="listingStatusPills"></div>
+            <div class="adm-card">
+              <div class="adm-table-wrap">
+                <table class="adm-table">
+                  <thead><tr>
+                    <th>Property</th><th>Landlord</th><th>Area</th><th>Price/yr</th>
+                    <th>Status</th><th>Views</th><th>Inquiries</th><th>Date Added</th><th>Actions</th>
+                  </tr></thead>
+                  <tbody id="listingsTableBody"></tbody>
+                </table>
+              </div>
+              <div class="adm-pagination" id="listingsPagination"></div>
+            </div>
+          </div>
+          <div id="listingsSidebar"></div>
+        </div>
+      </section>
+
+      <!-- ═══ SECTION: INQUIRIES ═══ -->
+      <section class="adm-section" id="sectionInquiries">
+        <p style="font-size:12px;color:#6b7280;margin-bottom:16px;">Manage and respond to all property inquiries across the platform.</p>
+        <div class="adm-stats-row cols-4" id="inquiryStats"></div>
+        <div class="adm-grid-main-side">
+          <div>
+            <div class="adm-filter-bar">
+              <input type="text" id="inquirySearch" placeholder="Search by name, phone, message..." oninput="renderInquiriesTable()">
+              <select id="inquiryStatusFilter" onchange="renderInquiriesTable()">
+                <option value="">All Status</option>
+                <option value="new">New</option><option value="read">Read</option>
+                <option value="replied">Replied</option><option value="closed">Closed</option>
+              </select>
+              <button class="adm-btn adm-btn-outline adm-btn-sm" onclick="exportCSV('inquiries')">Export</button>
+            </div>
+            <div class="adm-card">
+              <div class="adm-table-wrap">
+                <table class="adm-table">
+                  <thead><tr>
+                    <th>Inquirer</th><th>Message Preview</th><th>Listing</th><th>Landlord</th>
+                    <th>Sent At</th><th>Status</th><th>Actions</th>
+                  </tr></thead>
+                  <tbody id="inquiriesTableBody"></tbody>
+                </table>
+              </div>
+              <div class="adm-pagination" id="inquiriesPagination"></div>
+            </div>
+          </div>
+          <div id="inquiriesSidebar"></div>
+        </div>
+      </section>
+
+      <!-- ═══ SECTION: FEEDBACK ═══ -->
+      <section class="adm-section" id="sectionFeedback">
+        <div class="adm-stats-row cols-4" id="feedbackStats"></div>
+        <div class="adm-grid-main-side">
+          <div>
+            <div class="adm-filter-bar">
+              <select id="fbTypeFilter" onchange="renderFeedbackGrid()"><option value="">All Types</option><option value="feedback">Feedback</option><option value="complaint">Complaint</option><option value="suggestion">Suggestion</option></select>
+              <select id="fbStatusFilter" onchange="renderFeedbackGrid()"><option value="">All Status</option><option value="new">New</option><option value="in_review">In Review</option><option value="resolved">Resolved</option></select>
+              <input type="text" id="fbSearch" placeholder="Search feedback..." oninput="renderFeedbackGrid()">
+              <button class="adm-btn adm-btn-outline adm-btn-sm" onclick="exportCSV('feedback')">Export CSV</button>
+            </div>
+            <div id="feedbackGrid"></div>
+          </div>
+          <div id="feedbackSidebar"></div>
+        </div>
+      </section>
+
+      <!-- ═══ SECTION: VERIFICATION QUEUE ═══ -->
+      <section class="adm-section" id="sectionVerification">
+        <div style="background:rgba(201,168,76,0.1);border:1.5px solid var(--adm-gold);border-radius:10px;padding:14px 18px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+          <div>
+            <div style="font-size:15px;font-weight:700;color:var(--adm-navy);" id="verifBannerText">Verification Queue</div>
+            <div style="font-size:12.5px;color:var(--adm-text-muted);">Review and approve landlord verification requests</div>
+          </div>
+          <div style="display:flex;gap:12px;flex-wrap:wrap;">
+            <div style="text-align:center;"><div style="font-size:18px;font-weight:800;color:var(--adm-green);" id="verifApprovedCount">0</div><div style="font-size:11px;color:var(--adm-text-muted);">Verified This Month</div></div>
+            <div style="text-align:center;"><div style="font-size:18px;font-weight:800;color:var(--adm-orange);" id="verifPendingCount">0</div><div style="font-size:11px;color:var(--adm-text-muted);">Pending This Month</div></div>
+            <div style="text-align:center;"><div style="font-size:18px;font-weight:800;color:var(--adm-red);" id="verifRejectedCount">0</div><div style="font-size:11px;color:var(--adm-text-muted);">Rejected This Month</div></div>
+          </div>
+        </div>
+        <div class="adm-grid-main-side">
+          <div>
+            <div class="adm-card adm-mb20" id="verifQueueList"></div>
+            <div class="adm-card">
+              <div class="adm-card-header"><h3>Verification History</h3></div>
+              <div class="adm-table-wrap">
+                <table class="adm-table">
+                  <thead><tr><th>Landlord</th><th>Email</th><th>Action</th><th>Date</th><th>Admin</th><th>Notes</th></tr></thead>
+                  <tbody id="verifHistoryBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <div id="verifSidebar"></div>
+        </div>
+      </section>
+
+      <!-- ═══ SECTION: FINANCE ═══ -->
+      <section class="adm-section" id="sectionFinance">
+        <div class="adm-sub-tabs" id="financeSubTabs">
+          <button class="adm-sub-tab active" data-subtab="financeOverview">Overview</button>
+          <button class="adm-sub-tab" data-subtab="financeTransactions">Transactions</button>
+          <button class="adm-sub-tab" data-subtab="financeListingFees">Listing Fees</button>
+          <button class="adm-sub-tab" data-subtab="financePayouts">Payouts</button>
+          <button class="adm-sub-tab" data-subtab="financeBadges">Badges</button>
+          <button class="adm-sub-tab" data-subtab="financeReferrals">Referrals</button>
+          <button class="adm-sub-tab" data-subtab="financeDisputes">Disputes</button>
+          <button class="adm-sub-tab" data-subtab="financeReports">Reports</button>
+        </div>
+
+        <div class="adm-sub-tab-content active" id="financeOverview">
+          <div class="adm-stats-row cols-4" id="financeStats"></div>
+          <div class="adm-grid-60-40">
+            <div class="adm-card"><div class="adm-card-header"><h3>Monthly Revenue Breakdown</h3></div><div class="adm-chart-container"><canvas id="chartRevenueBreakdown"></canvas></div></div>
+            <div class="adm-card"><div class="adm-card-header"><h3>Revenue by Source</h3></div><div class="adm-chart-container"><canvas id="chartRevenueSource"></canvas></div></div>
+          </div>
+          <div class="adm-grid-60-40">
+            <div class="adm-card">
+              <div class="adm-card-header"><h3>Recent Transactions</h3><button class="adm-view-all" onclick="document.querySelector('[data-subtab=financeTransactions]').click()">View all <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></button></div>
+              <div class="adm-table-wrap"><table class="adm-table"><thead><tr><th>TXN ID</th><th>Tenant</th><th>Landlord</th><th>Amount</th><th>Fee (3%)</th><th>Net</th><th>Status</th></tr></thead><tbody id="recentTxnBody"></tbody></table></div>
+            </div>
+            <div class="adm-card" id="finQuickSummary"></div>
+          </div>
+          <div class="adm-grid-3">
+            <div class="adm-card" id="topEarningLandlords"></div>
+            <div class="adm-card"><div class="adm-card-header"><h3>Revenue by Payment Method</h3></div><div class="adm-chart-container"><canvas id="chartPaymentMethod"></canvas></div></div>
+            <div class="adm-card" id="platformFeeCollection"></div>
+          </div>
+          <div class="adm-grid-3">
+            <div class="adm-card" id="payoutOverview"></div>
+            <div class="adm-card" id="disputeOverview"></div>
+            <div class="adm-card" id="upcomingEvents"></div>
+          </div>
+        </div>
+
+        <div class="adm-sub-tab-content" id="financeTransactions">
+          <div class="adm-filter-bar">
+            <input type="text" id="txnSearch" placeholder="Search transactions..." oninput="renderTransactionsTable()">
+            <select id="txnStatusFilter" onchange="renderTransactionsTable()"><option value="">All Status</option><option value="paid">Paid</option><option value="pending">Pending</option><option value="failed">Failed</option></select>
+            <button class="adm-btn adm-btn-outline adm-btn-sm" onclick="exportCSV('transactions')">Export</button>
+          </div>
+          <div class="adm-card">
+            <div class="adm-table-wrap"><table class="adm-table">
+              <thead><tr><th>TXN ID</th><th>Date</th><th>Tenant</th><th>Landlord</th><th>Listing</th><th>Gross</th><th>Fee (3%)</th><th>Net</th><th>Method</th><th>Status</th></tr></thead>
+              <tbody id="txnTableBody"></tbody>
+            </table></div>
+          </div>
+        </div>
+
+        <div class="adm-sub-tab-content" id="financeListingFees">
+          <div class="adm-card">
+            <div class="adm-card-header"><h3>Listing Fees</h3></div>
+            <div class="adm-table-wrap"><table class="adm-table">
+              <thead><tr><th>Landlord</th><th>Email</th><th>Tier</th><th>Amount Paid</th><th>Payment Date</th><th>Expiry</th><th>Status</th><th>Actions</th></tr></thead>
+              <tbody id="listingFeesBody"></tbody>
+            </table></div>
+          </div>
+        </div>
+
+        <div class="adm-sub-tab-content" id="financePayouts">
+          <div class="adm-stats-row cols-3" id="payoutStats"></div>
+          <div class="adm-card">
+            <div class="adm-card-header"><h3>Payouts</h3><button class="adm-btn adm-btn-gold adm-btn-sm" onclick="admShowToast('Payout run initiated','success')">Manage Payouts</button></div>
+            <div class="adm-table-wrap"><table class="adm-table">
+              <thead><tr><th>Landlord</th><th>Listing</th><th>Gross</th><th>Fee Deducted</th><th>Net Payout</th><th>Method</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead>
+              <tbody id="payoutsBody"></tbody>
+            </table></div>
+          </div>
+        </div>
+
+        <div class="adm-sub-tab-content" id="financeBadges">
+          <div class="adm-card">
+            <div class="adm-card-header"><h3>Verified Landlord Badges</h3></div>
+            <div class="adm-table-wrap"><table class="adm-table">
+              <thead><tr><th>Landlord</th><th>Email</th><th>Amount Paid</th><th>Date</th><th>Expiry</th><th>Status</th><th>Actions</th></tr></thead>
+              <tbody id="badgesBody"></tbody>
+            </table></div>
+          </div>
+        </div>
+
+        <div class="adm-sub-tab-content" id="financeReferrals">
+          <div class="adm-stats-row cols-3" id="referralStats"></div>
+          <div class="adm-card">
+            <div class="adm-card-header"><h3>Referral Partners</h3></div>
+            <div class="adm-table-wrap"><table class="adm-table">
+              <thead><tr><th>Partner</th><th>Category</th><th>Referrals</th><th>Per Referral</th><th>Total Earned</th><th>Last Payment</th><th>Status</th></tr></thead>
+              <tbody id="referralsBody"></tbody>
+            </table></div>
+          </div>
+        </div>
+
+        <div class="adm-sub-tab-content" id="financeDisputes">
+          <div class="adm-card">
+            <div class="adm-card-header"><h3>Disputes</h3></div>
+            <div class="adm-table-wrap"><table class="adm-table">
+              <thead><tr><th>Tenant</th><th>Landlord</th><th>Listing</th><th>Amount</th><th>Reason</th><th>Opened</th><th>Status</th><th>Actions</th></tr></thead>
+              <tbody id="disputesBody"></tbody>
+            </table></div>
+          </div>
+        </div>
+
+        <div class="adm-sub-tab-content" id="financeReports">
+          <div class="adm-card" style="max-width:600px;">
+            <div class="adm-card-header"><h3>Generate Report</h3></div>
+            <p style="font-size:13px;color:var(--adm-text-muted);margin-bottom:20px;">Generate a formatted text report of platform financial data for the selected period.</p>
+            <div class="adm-form-group">
+              <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;">Report Type</label>
+              <select id="reportType" style="width:100%;padding:10px 12px;border:1.5px solid var(--adm-border);border-radius:6px;font-family:inherit;font-size:13px;">
+                <option value="monthly_revenue">Monthly Revenue</option>
+                <option value="payout_report">Payout Report</option>
+                <option value="transaction_fee">Transaction Fee Report</option>
+                <option value="dispute_report">Dispute Report</option>
+                <option value="ytd_summary">YTD Summary</option>
+              </select>
+            </div>
+            <div class="adm-form-group" style="margin-top:14px;">
+              <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;">Date Range</label>
+              <div style="display:flex;gap:10px;">
+                <input type="date" id="reportDateFrom" style="flex:1;padding:10px 12px;border:1.5px solid var(--adm-border);border-radius:6px;font-family:inherit;font-size:13px;">
+                <input type="date" id="reportDateTo" style="flex:1;padding:10px 12px;border:1.5px solid var(--adm-border);border-radius:6px;font-family:inherit;font-size:13px;">
+              </div>
+            </div>
+            <button class="adm-btn adm-btn-primary" style="margin-top:16px;" onclick="generateReport()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Generate Report
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══ SECTION: ANALYTICS ═══ -->
+      <section class="adm-section" id="sectionAnalytics">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+          <p style="font-size:12.5px;color:var(--adm-text-muted);">Track platform performance, user behavior, and business intelligence.</p>
+          <button class="adm-btn adm-btn-gold adm-btn-sm" onclick="generateReport()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export Report
+          </button>
+        </div>
+        <div class="adm-sub-tabs" id="analyticsSubTabs">
+          <button class="adm-sub-tab active" data-subtab="analyticsOverview">Overview</button>
+          <button class="adm-sub-tab" data-subtab="analyticsUsers">User Analytics</button>
+          <button class="adm-sub-tab" data-subtab="analyticsListings">Listing Analytics</button>
+          <button class="adm-sub-tab" data-subtab="analyticsFinancial">Financial Analytics</button>
+          <button class="adm-sub-tab" data-subtab="analyticsConversion">Conversion Analytics</button>
+        </div>
+
+        <div class="adm-sub-tab-content active" id="analyticsOverview">
+          <div class="adm-stats-row cols-4" id="analyticsStats"></div>
+          <div class="adm-grid-3">
+            <div class="adm-card"><div class="adm-card-header"><h3>Weekly Signups</h3><select style="font-size:11px;padding:3px 7px;border:1px solid #e5e7eb;border-radius:4px;font-family:inherit;">
+              <option>Last 8 Weeks</option></select></div><div class="adm-chart-container"><canvas id="chartWeeklySignups"></canvas></div></div>
+            <div class="adm-card"><div class="adm-card-header"><h3>Inquiries by Area</h3><select style="font-size:11px;padding:3px 7px;border:1px solid #e5e7eb;border-radius:4px;font-family:inherit;"><option>This Month</option></select></div><div id="inquiriesByAreaList"></div></div>
+            <div class="adm-card"><div class="adm-card-header"><h3>Tenant Budget Distribution</h3></div><div class="adm-chart-container"><canvas id="chartBudgetDist"></canvas></div></div>
+          </div>
+          <div class="adm-grid-60-40">
+            <div class="adm-card">
+              <div class="adm-card-header"><h3>Top Performing Listings</h3></div>
+              <div class="adm-table-wrap"><table class="adm-table">
+                <thead><tr><th>Property</th><th>Area</th><th>Inquiries</th><th>Views</th><th>Saves</th><th>Occupancy</th><th>Performance</th></tr></thead>
+                <tbody id="topListingsBody"></tbody>
+              </table></div>
+            </div>
+            <div class="adm-card" id="platformOverviewWidget"></div>
+          </div>
+          <div class="adm-grid-3">
+            <div class="adm-card"><div class="adm-card-header"><h3>User Growth Overview</h3><select style="font-size:11px;padding:3px 7px;border:1px solid #e5e7eb;border-radius:4px;font-family:inherit;"><option>This Year</option></select></div><div class="adm-chart-container"><canvas id="chartUserGrowth"></canvas></div></div>
+            <div class="adm-card"><div class="adm-card-header"><h3>Traffic by Source</h3></div><div class="adm-chart-container" style="max-height:220px;"><canvas id="chartTrafficSource"></canvas></div></div>
+            <div class="adm-card" id="topKeywordsWidget"></div>
+          </div>
+          <div class="adm-grid-60-40">
+            <div class="adm-card">
+              <div class="adm-card-header"><h3>Top Active Landlords by Listings</h3></div>
+              <div class="adm-table-wrap"><table class="adm-table">
+                <thead><tr><th>Landlord</th><th>Listings</th><th>Active</th><th>Inquiries</th><th>Revenue</th></tr></thead>
+                <tbody id="topLandlordsBody"></tbody>
+              </table></div>
+            </div>
+            <div class="adm-card"><div class="adm-card-header"><h3>Device Usage</h3></div><div class="adm-chart-container" style="max-height:220px;"><canvas id="chartDeviceUsage"></canvas></div></div>
+          </div>
+        </div>
+
+        <div class="adm-sub-tab-content" id="analyticsUsers">
+          <div class="adm-stats-row cols-4" id="userAnalyticsStats"></div>
+          <div class="adm-grid-2">
+            <div class="adm-card"><div class="adm-card-header"><h3>Signup Trends (6 Months)</h3></div><div class="adm-chart-container"><canvas id="chartSignupTrends"></canvas></div></div>
+            <div class="adm-card"><div class="adm-card-header"><h3>User Area Distribution</h3></div><div id="userAreaDistList"></div></div>
+          </div>
+          <div class="adm-grid-2">
+            <div class="adm-card"><div class="adm-card-header"><h3>Budget Segments</h3></div><div id="budgetSegmentsList"></div></div>
+            <div class="adm-card"><div class="adm-card-header"><h3>Verification Rates</h3></div><div id="verifRatesList"></div></div>
+          </div>
+        </div>
+
+        <div class="adm-sub-tab-content" id="analyticsListings">
+          <div class="adm-stats-row cols-4" id="listingAnalyticsStats"></div>
+          <div class="adm-grid-2">
+            <div class="adm-card"><div class="adm-card-header"><h3>Listings by Type</h3></div><div class="adm-chart-container"><canvas id="chartListingsByType"></canvas></div></div>
+            <div class="adm-card"><div class="adm-card-header"><h3>Listings by Price Range</h3></div><div id="listingsByPriceList"></div></div>
+          </div>
+          <div class="adm-grid-2">
+            <div class="adm-card"><div class="adm-card-header"><h3>Area Popularity</h3></div><div id="areaPopularityList"></div></div>
+            <div class="adm-card"><div class="adm-card-header"><h3>Listing Status Breakdown</h3></div><div class="adm-chart-container" style="max-height:220px;"><canvas id="chartListingStatus"></canvas></div></div>
+          </div>
+        </div>
+
+        <div class="adm-sub-tab-content" id="analyticsFinancial">
+          <div class="adm-stats-row cols-4" id="financialAnalyticsStats"></div>
+          <div class="adm-grid-2">
+            <div class="adm-card"><div class="adm-card-header"><h3>Revenue Trends</h3></div><div class="adm-chart-container"><canvas id="chartRevenueTrends"></canvas></div></div>
+            <div class="adm-card"><div class="adm-card-header"><h3>Fee Breakdown</h3></div><div class="adm-chart-container"><canvas id="chartFeeBreakdown"></canvas></div></div>
+          </div>
+          <div class="adm-grid-2">
+            <div class="adm-card"><div class="adm-card-header"><h3>Monthly Payout Trends</h3></div><div class="adm-chart-container"><canvas id="chartPayoutTrends"></canvas></div></div>
+            <div class="adm-card" id="finSummaryAnalytics"></div>
+          </div>
+        </div>
+
+        <div class="adm-sub-tab-content" id="analyticsConversion">
+          <div class="adm-stats-row cols-4" id="conversionStats"></div>
+          <div class="adm-grid-2">
+            <div class="adm-card"><div class="adm-card-header"><h3>Conversion Funnel</h3></div><div id="conversionFunnel"></div></div>
+            <div class="adm-card"><div class="adm-card-header"><h3>View-to-Inquiry Rate by Area</h3></div><div id="conversionByArea"></div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══ SECTION: ANNOUNCEMENTS ═══ -->
+      <section class="adm-section" id="sectionAnnouncements">
+        <div class="adm-card adm-mb20">
+          <div class="adm-card-header"><h3>Active Announcements</h3></div>
+          <div class="adm-ann-grid" id="activeAnnouncements">
+            <div class="adm-empty" style="grid-column:1/-1;padding:24px;">
+              <p style="font-size:13.5px;color:var(--adm-text-muted);">No active announcements. Create one below.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="adm-grid-60-40">
+          <div class="adm-ann-form">
+            <h3>Create New Announcement</h3>
+            <div class="adm-form-group">
+              <label>Title</label>
+              <input type="text" id="annTitle" placeholder="e.g. Platform Maintenance Notice" oninput="updateAnnPreview()">
+            </div>
+            <div class="adm-form-group">
+              <label>Message</label>
+              <textarea id="annMessage" placeholder="Write your announcement message..." oninput="updateAnnPreview()" style="min-height:80px;"></textarea>
+            </div>
+            <div class="adm-form-group">
+              <label>Target Audience</label>
+              <div class="adm-audience-pills" id="annAudiencePills">
+                <button class="adm-audience-pill active" data-audience="all" onclick="selectAudience(this)">All Users</button>
+                <button class="adm-audience-pill" data-audience="tenants" onclick="selectAudience(this)">Tenants Only</button>
+                <button class="adm-audience-pill" data-audience="landlords" onclick="selectAudience(this)">Landlords Only</button>
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+              <div class="adm-form-group">
+                <label>Start Date</label>
+                <input type="date" id="annStartDate">
+              </div>
+              <div class="adm-form-group">
+                <label>End Date</label>
+                <input type="date" id="annEndDate">
+              </div>
+            </div>
+            <button class="adm-btn adm-btn-primary" style="margin-top:8px;" onclick="publishAnnouncement()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 17H2a3 3 0 0 0 3-3V9a7 7 0 0 1 14 0v5a3 3 0 0 0 3 3zm-8.27 4a2 2 0 0 1-3.46 0"/></svg>
+              Publish Announcement
+            </button>
+          </div>
+
+          <div>
+            <div class="adm-card">
+              <div class="adm-card-header"><h3>Preview</h3></div>
+              <div class="adm-preview-box" id="annPreviewBox">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <span id="annPreviewText">Your announcement will appear here...</span>
+              </div>
+              <div style="font-size:12px;color:var(--adm-text-muted);">
+                <div class="adm-flex-between" style="padding:6px 0;border-bottom:1px solid var(--adm-grey-light);">
+                  <span>Target Audience</span><span id="previewAudience" class="adm-fw600">All Users</span>
+                </div>
+                <div class="adm-flex-between" style="padding:6px 0;border-bottom:1px solid var(--adm-grey-light);">
+                  <span>Start Date</span><span id="previewStart" class="adm-fw600">—</span>
+                </div>
+                <div class="adm-flex-between" style="padding:6px 0;">
+                  <span>End Date</span><span id="previewEnd" class="adm-fw600">—</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="adm-card adm-mt16">
+          <div class="adm-card-header"><h3>Past Announcements</h3></div>
+          <div class="adm-table-wrap">
+            <table class="adm-table">
+              <thead><tr><th>Title</th><th>Target Audience</th><th>Ran From</th><th>To</th><th>Impressions</th><th>Status</th><th>Actions</th></tr></thead>
+              <tbody id="pastAnnouncementsBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══ SECTION: SETTINGS ═══ -->
+      <section class="adm-section" id="sectionSettings">
+        <p style="font-size:12.5px;color:var(--adm-text-muted);margin-bottom:20px;">Manage platform configuration, security, and preferences.</p>
+        <div class="adm-settings-layout">
+          <div class="adm-settings-mini-nav">
+            <button class="adm-settings-nav-item active" data-spanel="settingsSecurity">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Admin Security
+            </button>
+            <button class="adm-settings-nav-item" data-spanel="settingsRules">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Platform Rules
+            </button>
+            <button class="adm-settings-nav-item" data-spanel="settingsMaintenance">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg>Maintenance Mode
+            </button>
+            <button class="adm-settings-nav-item" data-spanel="settingsIntegrations">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M13 6h3a2 2 0 0 1 2 2v7"/><line x1="6" y1="9" x2="6" y2="21"/></svg>Integrations
+            </button>
+            <button class="adm-settings-nav-item" data-spanel="settingsEmail">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>Email Settings
+            </button>
+            <button class="adm-settings-nav-item" data-spanel="settingsActivityLogs">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Activity Logs
+            </button>
+            <button class="adm-settings-nav-item" data-spanel="settingsBackup">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.51"/></svg>Backup &amp; Data
+            </button>
+          </div>
+
+          <div class="adm-settings-content">
+            <!-- Admin Security -->
+            <div class="adm-settings-panel active" id="settingsSecurity">
+              <div class="adm-grid-2">
+                <div class="adm-card">
+                  <div class="adm-card-header"><h3>Change Admin Password</h3></div>
+                  <div class="adm-form-group" style="margin-bottom:14px;">
+                    <label style="font-size:12.5px;font-weight:600;display:block;margin-bottom:5px;">Current Password</label>
+                    <input type="password" id="currentPwd" class="adm-form-group input" style="width:100%;padding:10px 12px;border:1.5px solid #e5e7eb;border-radius:6px;font-family:inherit;font-size:13px;" placeholder="••••••••">
+                  </div>
+                  <div class="adm-form-group" style="margin-bottom:14px;">
+                    <label style="font-size:12.5px;font-weight:600;display:block;margin-bottom:5px;">New Password</label>
+                    <input type="password" id="newPwd" style="width:100%;padding:10px 12px;border:1.5px solid #e5e7eb;border-radius:6px;font-family:inherit;font-size:13px;" placeholder="••••••••">
+                  </div>
+                  <div class="adm-form-group" style="margin-bottom:18px;">
+                    <label style="font-size:12.5px;font-weight:600;display:block;margin-bottom:5px;">Confirm New Password</label>
+                    <input type="password" id="confirmPwd" style="width:100%;padding:10px 12px;border:1.5px solid #e5e7eb;border-radius:6px;font-family:inherit;font-size:13px;" placeholder="••••••••">
+                  </div>
+                  <button class="adm-btn adm-btn-primary" onclick="changeAdminPassword()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    Update Password
+                  </button>
+                </div>
+                <div class="adm-card">
+                  <div class="adm-card-header"><h3>Admin Activity Log</h3><button class="adm-view-all" onclick="document.querySelector('[data-spanel=settingsActivityLogs]').click()">View all logs <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></button></div>
+                  <div class="adm-table-wrap">
+                    <table class="adm-table">
+                      <thead><tr><th>Action</th><th>Section</th><th>Timestamp</th></tr></thead>
+                      <tbody id="activityLogShort"></tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Platform Rules -->
+            <div class="adm-settings-panel" id="settingsRules">
+              <div class="adm-card">
+                <div class="adm-card-header"><h3>Platform Rules &amp; Configuration</h3><button class="adm-btn adm-btn-gold adm-btn-sm" onclick="savePlatformRules()">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                  Save Changes
+                </button></div>
+                <p style="font-size:13px;color:var(--adm-text-muted);margin-bottom:20px;">Configure platform-wide rules and limits that govern the marketplace.</p>
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;" id="platformRulesGrid"></div>
+              </div>
+            </div>
+
+            <!-- Maintenance Mode -->
+            <div class="adm-settings-panel" id="settingsMaintenance">
+              <div class="adm-card">
+                <div class="adm-card-header"><h3>Maintenance Mode</h3></div>
+                <p style="font-size:13px;color:var(--adm-text-muted);margin-bottom:20px;">When enabled, the entire platform will display a maintenance banner to all users.</p>
+                <div class="adm-toggle-row" style="margin-bottom:20px;">
+                  <div>
+                    <div class="adm-toggle-label">Current Status: <span id="maintStatusLabel" style="color:var(--adm-red);">OFF — Currently OFF</span></div>
+                  </div>
+                  <button class="adm-toggle" id="maintToggle" onclick="admToggleMaintenance(this)"></button>
+                </div>
+                <p style="font-size:12.5px;color:var(--adm-text-muted);margin-bottom:12px;">Preview — This is how the maintenance banner will appear to users:</p>
+                <div class="adm-maint-preview">
+                  <div class="adm-mp-text">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    We're currently upgrading Property Warehouse — The platform is temporarily unavailable. We'll be back online shortly.
+                  </div>
+                  <button class="adm-mp-btn">Notify me when we're back</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Integrations -->
+            <div class="adm-settings-panel" id="settingsIntegrations">
+              <div class="adm-card">
+                <div class="adm-card-header"><h3>Active Integrations</h3></div>
+                <p style="font-size:13px;color:var(--adm-text-muted);margin-bottom:20px;">These are placeholder displays for planned integrations. Actual API connections are not yet live.</p>
+                <div id="integrationsGrid"></div>
+                <button class="adm-btn adm-btn-outline" style="margin-top:16px;" onclick="admShowToast('Integration setup coming soon','success')">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  Connect New Integration
+                </button>
+              </div>
+            </div>
+
+            <!-- Email Settings -->
+            <div class="adm-settings-panel" id="settingsEmail">
+              <div class="adm-card">
+                <div class="adm-card-header"><h3>Email Configuration</h3></div>
+                <p style="font-size:13px;color:var(--adm-text-muted);margin-bottom:20px;">These are placeholder email configuration settings. Actual email delivery is not yet configured.</p>
+                <div style="display:grid;gap:12px;max-width:500px;" id="emailSettingsGrid"></div>
+                <button class="adm-btn adm-btn-outline" style="margin-top:16px;" onclick="admShowToast('Test email would be sent in production','success')">Send Test Email</button>
+              </div>
+            </div>
+
+            <!-- Activity Logs -->
+            <div class="adm-settings-panel" id="settingsActivityLogs">
+              <div class="adm-card">
+                <div class="adm-card-header"><h3>Full Activity Log</h3><button class="adm-btn adm-btn-outline adm-btn-sm" onclick="clearActivityLog()">Clear Log</button></div>
+                <div class="adm-table-wrap">
+                  <table class="adm-table">
+                    <thead><tr><th>Action</th><th>Section</th><th>User</th><th>Timestamp</th></tr></thead>
+                    <tbody id="fullActivityLog"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <!-- Backup & Data -->
+            <div class="adm-settings-panel" id="settingsBackup">
+              <div class="adm-card">
+                <div class="adm-card-header"><h3>Backup &amp; Data</h3></div>
+                <p style="font-size:13px;color:var(--adm-text-muted);margin-bottom:20px;">Export and manage your platform data stored in the browser.</p>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+                  <div style="padding:16px;border:1.5px solid var(--adm-border);border-radius:10px;">
+                    <div style="font-weight:700;font-size:14px;margin-bottom:8px;">Export All Data</div>
+                    <p style="font-size:12.5px;color:var(--adm-text-muted);margin-bottom:12px;">Download a JSON export of all platform localStorage data.</p>
+                    <button class="adm-btn adm-btn-primary adm-btn-sm" onclick="exportAllData()">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                      Export JSON
+                    </button>
+                  </div>
+                  <div style="padding:16px;border:1.5px solid var(--adm-border);border-radius:10px;">
+                    <div style="font-weight:700;font-size:14px;margin-bottom:8px;color:var(--adm-red);">Clear All Data</div>
+                    <p style="font-size:12.5px;color:var(--adm-text-muted);margin-bottom:12px;">Permanently delete all platform data from localStorage. Cannot be undone.</p>
+                    <button class="adm-btn adm-btn-red adm-btn-sm" onclick="if(confirm('This will delete ALL platform data. Are you sure?')) clearAllData()">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                      Clear All Data
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <footer class="adm-footer">
+      <span>&copy; 2025 Property Warehouse Admin. All rights reserved.</span>
+      <span class="adm-footer-love">Made with <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg> in Lagos, Nigeria</span>
+    </footer>
+  </div>
+</div>
+
+<!-- USER DETAIL PANEL -->
+<div class="adm-panel-overlay" id="userPanelOverlay"></div>
+<div class="adm-panel" id="userDetailPanel">
+  <div class="adm-panel-header">
+    <h3 id="userPanelTitle">User Details</h3>
+    <button class="adm-modal-close" onclick="closeUserPanel()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+  </div>
+  <div class="adm-panel-body" id="userPanelBody"></div>
+</div>
+
+<!-- LISTING EDIT MODAL -->
+<div class="adm-modal-overlay" id="listingEditModal">
+  <div class="adm-modal adm-modal-lg">
+    <div class="adm-modal-header">
+      <h3>Edit Listing</h3>
+      <button class="adm-modal-close" onclick="closeListingModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="adm-modal-body" id="listingEditBody"></div>
+    <div class="adm-modal-footer">
+      <button class="adm-btn adm-btn-outline" onclick="closeListingModal()">Cancel</button>
+      <button class="adm-btn adm-btn-primary" onclick="saveListingEdit()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="adm-toast" id="admToast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="demoData.js"></script>
+<script src="listings-data.js"></script>
+<script src="admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,1 @@
+- [Admin dashboard schema conventions](admin-schema.md) — announcement field is `isActive` (not `active`); array is newest-first via unshift

@@ -1,0 +1,561 @@
+Good choice — that gives you a real working dashboard for actual use, plus a way to demo it looking impressive to investors/partners without faking your real numbers. Here's the complete, tightened prompt incorporating everything from the reference images:
+
+---
+
+```
+I have an existing Property Warehouse codebase (pure HTML/CSS/JS, no framework,
+no backend — everything uses localStorage). Build a complete Admin Dashboard
+as new files: admin.html, admin.js, admin.css.
+
+I'm attaching 10 reference screenshots showing the exact visual design and
+layout I want. Match them closely: the dark navy sidebar (#0a1628) with gold
+accent (#c9a84c), white content area, card-based layout, and specific page
+structures shown in each image. Use Manrope for body text and Playfair
+Display/Cormorant Garamond for headings, consistent with the rest of the site.
+
+═══════════════════════════════════════════════
+GLOBAL LAYOUT (appears identically on every page)
+═══════════════════════════════════════════════
+
+LEFT SIDEBAR (fixed, dark navy #0a1628):
+- Property Warehouse logo + name at top
+- Nav items with icons, each linking to a section:
+  Overview, Users, Listings, Inquiries, Feedback, Verification Queue,
+  Finance, Analytics, Announcements, Settings
+- Badge counts next to nav items where relevant (e.g. "Users 248",
+  "Listings 12 pending", "Feedback 7", "Verification Queue 5") —
+  these badge numbers must be LIVE counts from localStorage, not static
+- Active section highlighted with gold left-border + gold text
+- Bottom of sidebar: admin avatar circle (initials), name, "Super Admin"
+  role label, small green online-status dot
+
+TOP HEADER BAR (appears on every page):
+- Page title (large) + one-line description under it
+- Search input: "Search anything..." — scoped to the current section
+  (e.g. on Listings page it searches listings; on Users page it
+  searches users/tenants/landlords)
+- Notification bell icon with unread count badge — clicking opens a
+  dropdown showing the 8 most recent notable platform events (new
+  pending listing, new complaint, new verification request, failed
+  payout, etc.), each clickable to jump to that section. Include
+  "Mark all as read" which resets the badge to 0.
+- Date range picker (e.g. "May 1 - May 31, 2025") — filters the
+  current page's stats and tables to that date range. Must be
+  functional on Overview, Finance, Analytics, and Inquiries pages
+  at minimum.
+- Admin profile chip: avatar photo/initials, name, role, dropdown
+  arrow. Clicking opens a small dropdown with "Profile", "Settings",
+  and "Logout". Logout clears 'pw_admin' from localStorage and
+  returns to the admin login screen.
+
+FOOTER (every page): "© 2025 Property Warehouse Admin. All rights
+reserved." on the left, "Made with ❤ in Lagos, Nigeria" on the right.
+
+═══════════════════════════════════════════════
+DEMO MODE TOGGLE (new — important)
+═══════════════════════════════════════════════
+
+Since the platform is new and real localStorage data will be small,
+add a "Demo Mode" toggle switch in the top header (next to the date
+picker) with a label. This must work like this:
+
+- OFF (default): every stat, chart, and table shows REAL data
+  calculated live from actual localStorage ('pw_tenant', 'pw_landlord',
+  'pw_listings', 'pw_inquiries', 'pw_feedback', 'pw_finance_transactions'
+  etc). If real numbers are small or zero, show them as they truly are
+  (e.g. "Total Users: 3"). Do not fabricate numbers in this mode.
+
+- ON: overlays realistic large-scale sample data matching the reference
+  screenshots (1,842 users, 347 listings, 4,291 inquiries, ₦8,450,000
+  revenue etc.) across every section, so the dashboard can be demoed
+  to investors or partners looking fully "alive." This sample data is
+  clearly generated in a separate demoData.js file as static mock
+  objects — it must NEVER write to or overwrite real localStorage data.
+
+- Persist the toggle state in sessionStorage (key: 'pw_demo_mode') so
+  it resets to OFF on a new browser session, preventing accidental
+  demo-mode screenshots being mistaken for real data.
+
+- Show a small persistent badge/banner when Demo Mode is ON: "DEMO MODE
+  — Sample Data" in gold, so it's never ambiguous which mode is active.
+
+═══════════════════════════════════════════════
+ADMIN AUTH
+═══════════════════════════════════════════════
+
+Before rendering the dashboard, check localStorage 'pw_admin'. If absent,
+show a fullscreen login overlay (styled consistent with auth.html):
+  Email input, Password input, "Login as Admin" button.
+
+Hardcoded credentials for now:
+  Email: admin@propertywarehouse.ng
+  Password: PWAdmin2025!
+
+On success: save { email, role: 'admin', loginAt: timestamp } to
+'pw_admin', log the login to 'pw_admin_log', show dashboard.
+On failure: show "Invalid admin credentials."
+
+Add a discreet entry point: a low-opacity link in index.html's footer
+pointing to admin.html.
+
+═══════════════════════════════════════════════
+SECTION 1 — OVERVIEW
+═══════════════════════════════════════════════
+(Reference: Image 1)
+
+5 stat cards in a row:
+  Total Users | Active Listings | Total Inquiries | Platform Revenue |
+  Open Complaints (with "X urgent" sub-label in red if any are >24hrs old)
+
+Below, two-column layout:
+LEFT (60%): "Platform Activity" line chart (Chart.js) — 3 lines: New
+Users, Listings, Inquiries, monthly, with a period dropdown (Monthly/
+Weekly/Yearly)
+
+RIGHT (40%): "Top Areas This Week" — ranked list of Lagos areas by
+inquiry count, each with a horizontal progress bar, calculated from
+real listing area + inquiry data
+
+Below that, three-column layout:
+- "Recent Signups" — last 5 tenant/landlord registrations with role
+  badge, email, time ago. "View all users" link to Users section.
+- "Listings Pending Approval" — up to 3 pending listings shown as
+  cards with thumbnail, landlord name, price, and inline Approve/Reject
+  buttons that work immediately (no page reload). "View all pending"
+  link to Listings section.
+- "Recent Feedback" — last 3 feedback/complaint/suggestion items with
+  type badge, name, time ago, preview text, "View" link. "View all
+  feedback" link to Feedback section.
+
+Below that, two-column layout:
+- "Latest Platform Activity" table — chronological feed of all
+  platform events (new user, new listing, new inquiry, verification
+  approved, new complaint) with Activity | Details | User | Time
+  columns. "View all activity logs" link.
+- "Quick Actions" panel — buttons: Add Announcement (jumps to
+  Announcements), Export Report (jumps to Finance Reports), Review
+  Flagged (jumps to flagged listings), Maintenance Mode (inline toggle
+  switch that actually works, mirrored with the one in Settings)
+- "System Health" panel — Server Status, Database, Payment Gateway,
+  Email Service (all show "Operational" — these are cosmetic/static
+  since there's no real backend), plus Storage Usage as a progress bar
+  (can be a real calculation of localStorage size used vs a soft limit)
+
+Bottom: "Platform Summary" row of 6 small stat items: Total Tenants,
+Total Landlords, Verified Listings, Total Reviews, Avg Response Time,
+Platform Uptime (last one can be static "99.9% Excellent" since
+there's no real server).
+
+═══════════════════════════════════════════════
+SECTION 2 — USERS
+═══════════════════════════════════════════════
+(Reference: Image 6)
+
+Two tabs: "Tenants" | "Landlords"
+
+Filter bar: Search input, Area dropdown, Join Date dropdown, Export
+CSV button — all in one row.
+
+4 stat cards: Total Tenants/Landlords, Active, Suspended, New This Month
+
+Table columns (Tenants): User (avatar+name) | Email | Phone | Area |
+Budget Range | Join Date | Saved Listings | Status | Actions (view/
+suspend/delete icons)
+
+Table columns (Landlords): same pattern but Area→LGA, Budget→Listings
+Count, add Verified column
+
+Right sidebar column:
+- "User Overview" donut chart: Active/Suspended/Pending breakdown
+- "Tenants by Area" (or "Landlords by LGA") — ranked bars
+- "Recent Registrations" — last 3 signups with avatar, email, time ago
+- "User Roles" table — Role | Count | Percentage
+- "Account Security Summary" — Email Verified, Phone Verified,
+  Two-Factor Enabled, Unverified Accounts (all calculated from real
+  user data where the fields exist, otherwise show as N/A rather
+  than fabricating security stats we don't actually track yet)
+
+Actions per row: View Profile (slide-in panel with full details, their
+saved listings/inquiries), Suspend/Unsuspend, Delete (confirm dialog),
+Flag as Suspicious.
+
+Pagination at bottom of table (Previous | 1 2 3 4 5 ... N | Next).
+
+═══════════════════════════════════════════════
+SECTION 3 — LISTINGS
+═══════════════════════════════════════════════
+(Reference: Image 7)
+
+Filter bar: Search, Area dropdown, Type dropdown, Status dropdown,
+Price Range dropdown, Export button.
+
+Status pill tabs (clickable, filter the table instantly):
+  All (X) | Pending Approval (X) | Active (X) | Flagged (X) | Rejected (X)
+Counts must be live from real listings data.
+
+Table columns: Property (thumbnail+title+type) | Landlord | Area (LGA) |
+Price (₦/yr) | Status | Views | Inquiries | Date Added | Actions
+
+Status badge colors: Pending=orange, Active=green, Flagged=red,
+Rejected=grey, Verified=gold with shield icon
+
+Actions per row (icon buttons): Approve (✓) | Reject (✗) | Edit (pencil,
+opens modal with all fields editable, saves back to pw_listings) |
+Flag (flag icon) | Delete (trash, confirm dialog)
+
+Right sidebar column:
+- "Listings Overview" donut: Active/Pending/Flagged/Rejected breakdown
+- "Recent Listing Activity" — chronological feed of listing-related
+  events
+- "Listings by Type" — ranked bars (Flats, Duplexes, Apartments,
+  Studios, Terraces, Detached Houses)
+- "Listings by Price Range" — ranked bars across price bands
+- "Top Performing Areas" — ranked by inquiry count
+- "Verification Status" — progress bars: Verified/Unverified/In Review
+- "Quick Actions" — Add New Listing, Bulk Approve Listings, Export All
+  Listings, View Flagged Listings
+
+Approving a listing must: set status='active' in pw_listings, remove
+it from Pending tab immediately, show success toast.
+New landlord-submitted listings default to status: 'pending' — update
+saveListing() in listings-data.js accordingly, and update
+getAllListings() to exclude pending/flagged/rejected from what tenants
+see publicly.
+
+═══════════════════════════════════════════════
+SECTION 4 — INQUIRIES
+═══════════════════════════════════════════════
+(Reference: Image 5)
+
+4 stat cards: Total Inquiries | This Week | WhatsApp Conversions
+(% that also had a WA follow-up click) | Avg Response Time
+
+Filter bar: Search, Date Range, Listing dropdown, Status dropdown,
+Export button.
+
+Table columns: Inquirer (avatar+name+phone) | Message Preview |
+Listing | Landlord | Sent At | Status (New/Read/Replied/Closed) |
+Actions (view eye icon, delete trash icon)
+
+Right sidebar:
+- "Inquiry Overview" donut: New/Read/Replied/Closed breakdown
+- "Inquiries by Source" — Website/WhatsApp Button/Direct Contact/
+  Referral/Other, ranked bars
+- "Quick Filters" — clickable stat list: New Inquiries, Unread,
+  Replied, Closed — clicking filters the table instantly
+
+Pagination at bottom.
+
+═══════════════════════════════════════════════
+SECTION 5 — FEEDBACK & COMPLAINTS
+═══════════════════════════════════════════════
+(Reference: Image 9)
+
+4 stat cards: Total Received | Open | In Review | Resolved
+
+Filter bar: Type dropdown, Status dropdown, Date Range, Search,
+Export CSV button.
+
+Content shown as CARDS in a grid (not a table) — 3 columns:
+Each card shows: type badge (Feedback=blue, Complaint=red,
+Suggestion=orange), name, time ago, page submitted from, full message,
+a Status dropdown (New/In Review/Resolved) that saves immediately,
+an "Add note..." textarea for internal admin notes, Mark Resolved
+button, Delete button.
+
+Right sidebar:
+- "Feedback by Type" donut chart
+- "Feedback by Status" — ranked bars
+- "Quick Help" panel — static helpful links (How to handle complaints,
+  Response time guidelines, Escalation process, User communication
+  tips) plus a "Download Guidelines" button (can link to a simple
+  generated text file)
+
+If pw_feedback is empty in real mode, show an empty state:
+"No feedback yet — this section will populate as users interact
+with the feedback bubble on the site."
+
+═══════════════════════════════════════════════
+SECTION 6 — VERIFICATION QUEUE
+═══════════════════════════════════════════════
+(Reference: Image 8)
+
+Top banner bar: pending count + description, then 3 stat pills
+(Verified This Month / Pending This Month / Rejected This Month),
+then a "Sort by" dropdown.
+
+List of pending verification requests as horizontal cards:
+avatar+name+email+phone | location+property type+applied date |
+documents submitted checklist (Government ID / Proof of Address /
+Property Ownership, each with a checkmark) | Approve/Reject buttons
++ "X hours/days ago" timestamp
+
+Approve action: sets landlordVerified: true on that landlord's record,
+sets isVerified: true on all their existing listings, logs the action,
+moves them out of the pending list, shows success toast.
+
+Below: "Verification History" table — Landlord | Email | Action
+(Approved/Rejected badge) | Date | Admin (who took the action) | Notes
+
+Right sidebar:
+- "Verification Summary" donut: Verified/Pending/Rejected
+- "Verification Guidelines" — static checklist of review best practices
+- "Need Help?" panel — "Contact Support" button
+
+If pw_verification_requests is empty in real mode, show 2-3 sample
+pending requests clearly, OR an empty state if you prefer strict
+real-data-only behavior — your choice, but be consistent with how
+other empty sections behave.
+
+═══════════════════════════════════════════════
+SECTION 7 — FINANCE
+═══════════════════════════════════════════════
+(Reference: Image 2)
+
+Sub-navigation tabs (horizontal, under the page title):
+  Overview | Transactions | Listing Fees | Payouts | Badges |
+  Referrals | Disputes | Reports
+
+── OVERVIEW TAB ──
+4 stat cards: Total Revenue | This Month | Pending Payouts | Open Disputes
+
+Two-column: "Monthly Revenue Breakdown" stacked bar chart (Listing
+Fees/Transaction Fees/Badge Fees/Referral Earnings, 6 months) on left;
+"Revenue by Source" donut chart on right.
+
+Three-column row: "Recent Transactions" table (5 rows, link to full
+Transactions tab) | "Quick Financial Summary" (Total/Successful/
+Pending/Failed transactions, Success Rate, Avg Transaction Value,
+"View Full Reports" button) 
+
+Three more panels: "Top Earning Landlords" ranked list | "Revenue by
+Payment Method" donut (Paystack/Bank Transfer/Card/Other) |
+"Platform Fee Collection" breakdown by fee type with total
+
+Three more panels: "Payout Overview" (Total Paid/Pending/Failed +
+success rate bar, "Manage Payouts" link) | "Dispute Overview" (Total/
+Open/Resolved + resolution rate bar, "View All Disputes" link) |
+"Upcoming Financial Events" — dated list (Payout Run, Monthly Report,
+Fee Renewals, Tax Deadline) with a "View Calendar" link
+
+── TRANSACTIONS TAB ──
+Full table of all transactions from 'pw_finance_transactions':
+TXN ID | Date | Tenant | Landlord | Listing | Gross | Platform Fee (3%)
+| Net to Landlord | Method | Status | Actions (view/refund/flag/note)
+Search + filter by type/status/date. Export button.
+
+── LISTING FEES TAB ──
+Table: Landlord | Email | Tier (Free/Standard/Premium) | Amount Paid |
+Payment Date | Expiry | Status (Active/Expiring Soon/Expired) | Actions
+(Upgrade Tier, Mark as Paid, View History)
+Summary panel: count per tier + total MRR from listing fees
+
+── PAYOUTS TAB ──
+Table: Landlord | Listing | Gross | Fee Deducted | Net Payout | Method
+| Status (Paid/Pending/Failed/On Hold) | Date | Actions (Mark Paid,
+Retry, Hold, View Transaction)
+Stat cards: Total Paid Out | Pending | Failed
+
+── BADGES TAB ──
+Table: Landlord | Email | Amount Paid | Date | Expiry | Status | Actions
+Expired rows highlighted light red, "Renew/Re-verify" action.
+
+── REFERRALS TAB ──
+Table: Partner Name | Category | Referrals Count | Amount Per Referral
+| Total Earned | Last Payment | Status
+Sample partners: Carbon, FairMoney (Rent Financing), Smooth Movers
+Lagos (Moving), Spectranet (Internet)
+Stat cards: Total Referral Earnings | Active Partners | Best Performer
+
+── DISPUTES TAB ──
+Table: Tenant | Landlord | Listing | Disputed Amount | Reason | Opened
+| Status (Open/Under Review/Resolved-Refunded/Resolved-Rejected) |
+Actions (Approve Refund, Reject with reason, Escalate, Add Note)
+Approving a refund must update the original transaction's status to
+'refunded' in pw_finance_transactions.
+
+── REPORTS TAB ──
+Report generator: Report type dropdown (Monthly Revenue/Payout Report/
+Transaction Fee Report/Dispute Report/YTD Summary), date range picker,
+"Generate Report" button.
+On generate: creates a formatted text summary of REAL calculated data
+(or demo data if Demo Mode is on) from the selected range and range,
+and triggers a download as a .txt file named
+"PW-Report-{type}-{date}.txt"
+
+All finance figures anywhere in this section must respect the
+Demo Mode toggle — real data when off, sample data when on.
+
+═══════════════════════════════════════════════
+SECTION 8 — ANALYTICS
+═══════════════════════════════════════════════
+(Reference: Image 3)
+
+Sub-navigation tabs: Overview | User Analytics | Listing Analytics |
+Financial Analytics | Conversion Analytics
+"Export Report" button top-right (gold, downloads a summary file).
+
+── OVERVIEW TAB ──
+4 stat cards: Top Search Area | Most Viewed Listing | Avg Rent (Lagos)
+| Inquiry Conversion %
+
+Three-column: "Weekly Signups" line chart (Tenants/Landlords, last 8
+weeks) | "Inquiries by Area" horizontal bars | "Tenant Budget
+Distribution" donut
+
+"Top Performing Listings" table: Property | Area | Inquiries | Views |
+Saves | Occupancy | Performance (Excellent/Very Good/Good badge based
+on occupancy rate) — alongside "Platform Overview" mini-stat list with
+sparkline trend icons (Total Users, Active Listings, Total Inquiries,
+Messages Sent, Profile Views, WhatsApp Clicks)
+
+"User Growth Overview" area chart (Tenants/Landlords over months) |
+"Traffic by Source" donut (Direct/Organic/Social/Referrals/Other) |
+"Top Search Keywords" ranked list with search counts
+
+"Top Active Landlords by Listings" table | "Device Usage" donut
+(Mobile/Desktop/Tablet)
+
+── OTHER 4 TABS ──
+Build out real content for User Analytics, Listing Analytics,
+Financial Analytics, and Conversion Analytics — do not leave them as
+empty placeholders. Use the same visual patterns (stat cards + charts
++ tables) with content relevant to each tab's focus:
+- User Analytics: signup trends, retention, area distribution, budget
+  segments, verification rates
+- Listing Analytics: listing performance, price distribution, area
+  popularity, photo count vs performance correlation
+- Financial Analytics: revenue trends, fee breakdown, payout trends
+  (can pull from the same Finance data, presented differently — more
+  visual/trend-focused vs Finance's operational/actionable focus)
+- Conversion Analytics: view-to-inquiry rate, inquiry-to-WhatsApp rate,
+  signup-to-first-inquiry time, listing-to-verification time
+
+═══════════════════════════════════════════════
+SECTION 9 — ANNOUNCEMENTS
+═══════════════════════════════════════════════
+(Reference: Image 10)
+
+"Active Announcements" section at top — cards showing title, message,
+icon, target audience badge, date range, ON/OFF toggle, edit/delete
+icons. 2 per row.
+
+Two-column below:
+LEFT: "Create New Announcement" form — Title input, Message textarea,
+Target Audience (3 pill buttons: All Users/Tenants Only/Landlords
+Only), Start Date + End Date inputs, "Publish Announcement" button
+
+RIGHT: "Preview" panel — live preview updating as you type in the
+form, showing exactly how the banner will look to users, plus
+"Display Details" (Target Audience, Start Date, End Date, Status)
+
+Below: "Past Announcements" table — Title | Target Audience | Ran From
+| To | Impressions (can be a stored/incrementing view count, or static
+if not tracked yet — be honest about which) | Status (Ended) | Actions
+
+INTEGRATION: In index.html, dashboard.html, and landlord-dashboard.html,
+add code that reads 'pw_announcements' on page load and displays any
+announcement where isActive=true AND today is within start/end date AND
+audience matches the visitor's role, as a dismissible banner above the
+navbar (gold background, dark navy text, × dismiss button). Dismissed
+announcements are tracked in sessionStorage so they don't reappear
+same-session.
+
+═══════════════════════════════════════════════
+SECTION 10 — SETTINGS
+═══════════════════════════════════════════════
+(Reference: Image 4)
+
+Left mini-sidebar within the Settings page: Admin Security | Platform
+Rules | Maintenance Mode | Integrations | Email Settings |
+Notification Settings | Activity Logs | Backup & Data | API & Webhooks
+
+── ADMIN SECURITY (default view) ──
+"Change Admin Password" card: Current/New/Confirm password fields
+(with show/hide toggle), Update Password button — validates current
+password against stored value, updates 'pw_admin_credentials'
+
+"Admin Activity Log" card (right side): Action | Section | Timestamp
+table, "View all logs" link. Auto-logs every meaningful admin action
+across the whole dashboard (approvals, suspensions, deletions,
+verification decisions, settings changes, maintenance toggles).
+
+── PLATFORM RULES & CONFIGURATION ──
+Editable fields with "Save Changes" button:
+  Minimum listing price (₦) — default 150,000
+  Maximum photos per listing — default 10
+  Free tier listing limit — default 1
+  Platform transaction fee (%) — default 3
+  Verified badge fee (₦) — default 15,000
+  Inquiry rate limit (per hour) — default 20
+These save to 'pw_admin_settings' and should be READ by the Finance
+section's fee calculations and the Listing Fee tiers, so changing
+them here actually changes behavior elsewhere.
+
+── MAINTENANCE MODE ──
+Current Status indicator (OFF/ON, colored) + toggle switch.
+Live preview box showing exactly what the banner looks like.
+Toggling this must genuinely control the maintenance overlay shown
+on index.html, listings.html, listing-detail.html, dashboard.html,
+landlord-dashboard.html — test this and confirm it works both ways.
+
+── INTEGRATIONS / EMAIL / SYSTEM INFO ──
+These can be presented as informational/cosmetic panels since there's
+no real backend (Paystack, Firebase, Slack, Google Analytics,
+Cloudinary shown as "Connected" or "Live" statically) — be upfront
+that these are placeholder/future-state displays, not live integrations.
+
+═══════════════════════════════════════════════
+LINKING ADMIN TO THE REST OF THE SITE
+═══════════════════════════════════════════════
+
+1. listings-data.js: saveListing() adds status: 'pending' to every
+   new landlord-created listing by default.
+2. getAllListings() excludes status 'pending'/'flagged'/'rejected'
+   from what's shown publicly (tenants never see unapproved listings).
+3. index.html footer: add a near-invisible link to admin.html.
+4. landlord-dashboard.js: after listing creation, show toast:
+   "Your listing has been submitted for review and will go live once
+   approved."
+5. Announcement banner + Maintenance Mode overlay logic added to:
+   index.html, listings.html, listing-detail.html, dashboard.html,
+   landlord-dashboard.html — as described above.
+
+═══════════════════════════════════════════════
+DESIGN TOKENS
+═══════════════════════════════════════════════
+
+--pw-navy: #0a1628
+--pw-gold: #c9a84c
+--pw-white: #ffffff
+--pw-light: #f8f9fa
+--pw-green: #2ecc71
+--pw-red: #e74c3c
+--pw-orange: #f39c12
+--pw-grey: #5d6876
+
+All new CSS classes prefixed adm- to avoid conflicts with existing
+site styles. Cards: white bg, 16px radius, box-shadow 0 2px 12px
+rgba(0,0,0,0.08). Charts via Chart.js (cdnjs). Fully responsive —
+sidebar collapses to hamburger on mobile, tables scroll horizontally.
+
+═══════════════════════════════════════════════
+FILES
+═══════════════════════════════════════════════
+
+New: admin.html, admin.js, admin.css, demoData.js
+Modify: listings-data.js, landlord-dashboard.js, index.html,
+listings.html, listing-detail.html, dashboard.html,
+landlord-dashboard.html
+
+Do not break any existing functionality — test that search, filters,
+auth, listing creation, and all dashboards still work exactly as
+before after these changes.
+
+I'm attaching 10 reference screenshots below — match their layout,
+spacing, and visual details closely for each corresponding section.
+```
+
+---
+
+Attach all 10 of your reference images to that prompt when you send it to Replit — since it can see images directly, it'll match the visual details far more precisely than my text descriptions alone. Send me screenshots once it's built and we'll do a functional review pass.

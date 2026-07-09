@@ -344,6 +344,9 @@ function publishListing() {
     <p>Annual Rent: <span>${formatNaira(rent)}</span></p>
     <p>Total Move-in: <span>${formatNaira(rent + caution + service)}</span></p>
     ${docsNote}
+    <p style="margin-top:.75rem;padding:.6rem .9rem;background:#fff8ec;border-left:3px solid #e8a838;border-radius:4px;font-size:.85rem;color:#5a4a2a">
+      ⏳ Your listing has been submitted for review and will go live once approved by our team.
+    </p>
   `;
   window.scrollTo({ top: 0, behavior: 'smooth' });
 
