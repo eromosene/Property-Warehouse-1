@@ -45,7 +45,7 @@ const DEMO_DATA = {
     { id: "DL001", title: "4 Bedroom Duplex", type: "Duplex", area: "Lekki Phase 1", lga: "Eti-Osa", landlordName: "David Okonkwo", landlordEmail: "david.okonkwo@landlord.com", rentPerYear: 3500000, status: "pending", views: 0, inquiries: 0, dateAdded: "2025-05-30", isVerified: false, images: ["https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=400&q=80"] },
     { id: "DL002", title: "2 Bedroom Apartment", type: "2 Bedroom", area: "Yaba", lga: "Lagos Mainland", landlordName: "Kemi Balogun", landlordEmail: "kemi.balogun@landlord.com", rentPerYear: 1200000, status: "pending", views: 0, inquiries: 0, dateAdded: "2025-05-31", isVerified: false, images: ["https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400&q=80"] },
     { id: "DL003", title: "Studio Apartment", type: "Self-contain", area: "Ajah", lga: "Eti-Osa", landlordName: "Sade Martins", landlordEmail: "sade.martins@landlord.com", rentPerYear: 800000, status: "pending", views: 0, inquiries: 0, dateAdded: "2025-06-01", isVerified: false, images: ["https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400&q=80"] },
-    { id: "DL004", title: "3 Bedroom Flat", type: "3 Bedroom", area: "Lekki Phase 1", lga: "Eti-Osa", landlordName: "Adeyemi Johnson", landlordEmail: "adeyemi.johnson@landlord.com", rentPerYear: 2800000, status: "active", views: 1890, inquiries: 214, dateAdded: "2025-01-08", isVerified: true, images: ["https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=400&q=80"] },
+    { id: "DL004", title: "3 Bedroom Flat", type: "3 Bedroom", area: "Lekki Phase 1", lga: "Eti-Osa", landlordName: "Technology Integration Group", landlordEmail: "adeyemi.johnson@landlord.com", rentPerYear: 2800000, status: "active", views: 1890, inquiries: 214, dateAdded: "2025-01-08", isVerified: true, images: ["https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=400&q=80"] },
     { id: "DL005", title: "4 Bedroom Terrace", type: "Terrace", area: "Lekki Phase 1", lga: "Eti-Osa", landlordName: "David Okonkwo", landlordEmail: "david.okonkwo@landlord.com", rentPerYear: 4500000, status: "active", views: 1890, inquiries: 214, dateAdded: "2025-01-05", isVerified: true, images: ["https://images.unsplash.com/photo-1605276374104-dee2a0ed3cd6?w=400&q=80"] },
     { id: "DL006", title: "2 Bedroom Flat", type: "2 Bedroom", area: "Yaba", lga: "Lagos Mainland", landlordName: "Kemi Balogun", landlordEmail: "kemi.balogun@landlord.com", rentPerYear: 950000, status: "active", views: 1420, inquiries: 187, dateAdded: "2025-01-15", isVerified: true, images: ["https://images.unsplash.com/photo-1574362848149-11496d93a7c7?w=400&q=80"] },
     { id: "DL007", title: "1 Bedroom Apartment", type: "1 Bedroom", area: "Ajah", lga: "Eti-Osa", landlordName: "Amaka Nwosu", landlordEmail: "amaka.nwosu@landlord.com", rentPerYear: 750000, status: "flagged", views: 340, inquiries: 28, dateAdded: "2025-02-10", isVerified: false, images: ["https://images.unsplash.com/photo-1574362848149-11496d93a7c7?w=400&q=80"] },
@@ -55,12 +55,12 @@ const DEMO_DATA = {
   inquiries: [
     { id: "INQ001", name: "Amaka Nwosu", phone: "0803 456 7890", email: "amaka.nwosu@gmail.com", messagePreview: "Hi, is this apartment still available? I'm interested in scheduling a viewing.", listingTitle: "3 Bedroom Flat", listingId: "DL004", landlordName: "David Okonkwo", sentAt: new Date(Date.now() - 2 * 3600000).toISOString(), status: "new", source: "website" },
     { id: "INQ002", name: "Tunde Adebayo", phone: "0706 234 5678", email: "tunde.adebayo@gmail.com", messagePreview: "Please I want to schedule a viewing for this property.", listingTitle: "2 Bedroom Apartment", listingId: "DL006", landlordName: "Kemi Balogun", sentAt: new Date(Date.now() - 3 * 3600000).toISOString(), status: "new", source: "whatsapp" },
-    { id: "INQ003", name: "Kemi Balogun", phone: "0905 678 9012", email: "kemi.balogun@outlook.com", messagePreview: "What are the payment terms and when can I move in?", listingTitle: "4 Bedroom Duplex", listingId: "DL005", landlordName: "Adeyemi Johnson", sentAt: new Date(Date.now() - 5 * 3600000).toISOString(), status: "read", source: "website" },
+    { id: "INQ003", name: "Kemi Balogun", phone: "0905 678 9012", email: "kemi.balogun@outlook.com", messagePreview: "What are the payment terms and when can I move in?", listingTitle: "4 Bedroom Duplex", listingId: "DL005", landlordName: "Technology Integration Group", sentAt: new Date(Date.now() - 5 * 3600000).toISOString(), status: "read", source: "website" },
     { id: "INQ004", name: "Femi Adesanya", phone: "0812 345 6789", email: "femi.adesanya@yahoo.com", messagePreview: "Is the rent inclusive of service charge and other fees?", listingTitle: "Studio Apartment", listingId: "DL003", landlordName: "Sade Martins", sentAt: new Date(Date.now() - 6 * 3600000).toISOString(), status: "read", source: "website" },
     { id: "INQ005", name: "Bola Adekunle", phone: "0912 456 7890", email: "bola.adekunle@gmail.com", messagePreview: "Good evening, please can I get more pictures of the property?", listingTitle: "3 Bedroom Flat", listingId: "DL004", landlordName: "David Okonkwo", sentAt: new Date(Date.now() - 24 * 3600000).toISOString(), status: "replied", source: "whatsapp" },
     { id: "INQ006", name: "Ngozi Obi", phone: "0801 234 1234", email: "ngozi.obi@gmail.com", messagePreview: "Hello, is the property document available for review?", listingTitle: "2 Bedroom Flat", listingId: "DL006", landlordName: "Kemi Balogun", sentAt: new Date(Date.now() - 24 * 3600000).toISOString(), status: "replied", source: "direct" },
     { id: "INQ007", name: "Sade Martins", phone: "0817 654 3210", email: "sade.martins@gmail.com", messagePreview: "I like the property. What is the deposit requirement?", listingTitle: "4 Bedroom Terrace", listingId: "DL005", landlordName: "David Okonkwo", sentAt: new Date(Date.now() - 2 * 24 * 3600000).toISOString(), status: "replied", source: "website" },
-    { id: "INQ008", name: "David Okonkwo", phone: "0801 234 5678", email: "david.okonkwo@gmail.com", messagePreview: "Please I want to confirm if the property is still available.", listingTitle: "5 Bedroom House", listingId: "DL004", landlordName: "Adeyemi Johnson", sentAt: new Date(Date.now() - 2 * 24 * 3600000).toISOString(), status: "closed", source: "referral" }
+    { id: "INQ008", name: "David Okonkwo", phone: "0801 234 5678", email: "david.okonkwo@gmail.com", messagePreview: "Please I want to confirm if the property is still available.", listingTitle: "5 Bedroom House", listingId: "DL004", landlordName: "Technology Integration Group", sentAt: new Date(Date.now() - 2 * 24 * 3600000).toISOString(), status: "closed", source: "referral" }
   ],
 
   feedback: [
@@ -79,9 +79,9 @@ const DEMO_DATA = {
   ],
 
   verificationHistory: [
-    { landlordName: "Babatunde Fashola", email: "b.fashola@landlord.com", action: "approved", date: new Date(Date.now() - 10 * 24 * 3600000).toISOString(), admin: "Adeyemi Johnson", notes: "All documents verified and authentic." },
-    { landlordName: "Ngozi Adeyemi", email: "ngozi.adeyemi@landlord.com", action: "rejected", date: new Date(Date.now() - 15 * 24 * 3600000).toISOString(), admin: "Adeyemi Johnson", notes: "Property ownership document expired." },
-    { landlordName: "Segun Adeola", email: "segun.adeola@landlord.com", action: "approved", date: new Date(Date.now() - 20 * 24 * 3600000).toISOString(), admin: "Adeyemi Johnson", notes: "Documents verified. Legitimate property owner." }
+    { landlordName: "Babatunde Fashola", email: "b.fashola@landlord.com", action: "approved", date: new Date(Date.now() - 10 * 24 * 3600000).toISOString(), admin: "Technology Integration Group", notes: "All documents verified and authentic." },
+    { landlordName: "Ngozi Adeyemi", email: "ngozi.adeyemi@landlord.com", action: "rejected", date: new Date(Date.now() - 15 * 24 * 3600000).toISOString(), admin: "Technology Integration Group", notes: "Property ownership document expired." },
+    { landlordName: "Segun Adeola", email: "segun.adeola@landlord.com", action: "approved", date: new Date(Date.now() - 20 * 24 * 3600000).toISOString(), admin: "Technology Integration Group", notes: "Documents verified. Legitimate property owner." }
   ],
 
   finance: {
@@ -95,7 +95,7 @@ const DEMO_DATA = {
     transactions: [
       { id: "TXN-7382", date: "2025-05-30", tenant: "Amaka Nwosu", landlord: "David Okonkwo", listing: "3 Bed Flat, Lekki", gross: 1200000, fee: 36000, net: 1164000, method: "Paystack", status: "paid" },
       { id: "TXN-7381", date: "2025-05-29", tenant: "Tunde Adebayo", landlord: "Kemi Balogun", listing: "2 Bed Apt, Yaba", gross: 800000, fee: 24000, net: 776000, method: "Bank Transfer", status: "paid" },
-      { id: "TXN-7380", date: "2025-05-28", tenant: "Chioma Eze", landlord: "Adeyemi Johnson", listing: "4 Bed Duplex, Ajah", gross: 2000000, fee: 60000, net: 1940000, method: "Paystack", status: "paid" },
+      { id: "TXN-7380", date: "2025-05-28", tenant: "Chioma Eze", landlord: "Technology Integration Group", listing: "4 Bed Duplex, Ajah", gross: 2000000, fee: 60000, net: 1940000, method: "Paystack", status: "paid" },
       { id: "TXN-7379", date: "2025-05-27", tenant: "Femi Adesanya", landlord: "Ngozi Obi", listing: "3 Bed Terrace, Lekki", gross: 1500000, fee: 45000, net: 1455000, method: "Card Payment", status: "pending" },
       { id: "TXN-7378", date: "2025-05-26", tenant: "Bola Adekunle", landlord: "Sade Martins", listing: "Studio, Surulere", gross: 950000, fee: 28500, net: 921500, method: "Paystack", status: "paid" },
       { id: "TXN-7377", date: "2025-05-25", tenant: "Ngozi Obi", landlord: "David Okonkwo", listing: "5 Bed House, Ikoyi", gross: 4500000, fee: 135000, net: 4365000, method: "Bank Transfer", status: "paid" },
@@ -112,7 +112,7 @@ const DEMO_DATA = {
     topLandlords: [
       { name: "David Okonkwo", earnings: 650000, listings: 8 },
       { name: "Kemi Balogun", earnings: 520000, listings: 6 },
-      { name: "Adeyemi Johnson", earnings: 410000, listings: 5 },
+      { name: "Technology Integration Group", earnings: 410000, listings: 5 },
       { name: "Amaka Nwosu", earnings: 360000, listings: 4 },
       { name: "Tunde Adebayo", earnings: 290000, listings: 3 }
     ],
@@ -124,7 +124,7 @@ const DEMO_DATA = {
     payouts: [
       { landlord: "David Okonkwo", listing: "3 Bed Flat, Lekki", gross: 1200000, fee: 36000, net: 1164000, method: "Bank Transfer", status: "paid", date: "2025-05-30" },
       { landlord: "Kemi Balogun", listing: "2 Bed Apt, Yaba", gross: 800000, fee: 24000, net: 776000, method: "Bank Transfer", status: "paid", date: "2025-05-29" },
-      { landlord: "Adeyemi Johnson", listing: "4 Bed Duplex", gross: 2000000, fee: 60000, net: 1940000, method: "Bank Transfer", status: "pending", date: "2025-06-01" },
+      { landlord: "Technology Integration Group", listing: "4 Bed Duplex", gross: 2000000, fee: 60000, net: 1940000, method: "Bank Transfer", status: "pending", date: "2025-06-01" },
       { landlord: "Ngozi Obi", listing: "3 Bed Terrace", gross: 1500000, fee: 45000, net: 1455000, method: "Bank Transfer", status: "on_hold", date: "2025-05-28" }
     ],
     badges: [
@@ -141,7 +141,7 @@ const DEMO_DATA = {
     listingFees: [
       { landlord: "David Okonkwo", email: "david.okonkwo@landlord.com", tier: "Premium", amount: 50000, paymentDate: "2025-01-10", expiry: "2026-01-10", status: "active" },
       { landlord: "Kemi Balogun", email: "kemi.balogun@landlord.com", tier: "Standard", amount: 25000, paymentDate: "2025-01-12", expiry: "2026-01-12", status: "active" },
-      { landlord: "Adeyemi Johnson", email: "adeyemi.johnson@landlord.com", tier: "Standard", amount: 25000, paymentDate: "2025-01-20", expiry: "2026-01-20", status: "active" },
+      { landlord: "Technology Integration Group", email: "adeyemi.johnson@landlord.com", tier: "Standard", amount: 25000, paymentDate: "2025-01-20", expiry: "2026-01-20", status: "active" },
       { landlord: "Amaka Nwosu", email: "amaka.nwosu@landlord.com", tier: "Free", amount: 0, paymentDate: "2025-02-01", expiry: "2025-08-01", status: "expiring" },
       { landlord: "Tunde Adebayo", email: "tunde.adebayo@landlord.com", tier: "Standard", amount: 25000, paymentDate: "2024-06-01", expiry: "2025-06-01", status: "expired" }
     ]
@@ -210,7 +210,7 @@ const DEMO_DATA = {
     topLandlordsByListings: [
       { initials: "DO", name: "David Okonkwo", listings: 8, active: 8, inquiries: 456, revenue: 1280000 },
       { initials: "KB", name: "Kemi Balogun", listings: 6, active: 6, inquiries: 342, revenue: 960000 },
-      { initials: "AJ", name: "Adeyemi Johnson", listings: 5, active: 5, inquiries: 298, revenue: 840000 },
+      { initials: "AJ", name: "Technology Integration Group", listings: 5, active: 5, inquiries: 298, revenue: 840000 },
       { initials: "AN", name: "Amaka Nwosu", listings: 4, active: 4, inquiries: 276, revenue: 720000 },
       { initials: "TA", name: "Tunde Adebayo", listings: 3, active: 3, inquiries: 214, revenue: 600000 }
     ]
@@ -220,7 +220,7 @@ const DEMO_DATA = {
     { icon: "user-plus", type: "New user registered", details: "Adebayo Femi (Tenant)", user: "Self-registration", time: new Date(Date.now() - 2 * 3600000).toISOString() },
     { icon: "home", type: "New listing submitted", details: "4 Bedroom Duplex in Lekki Phase 1", user: "David Okonkwo", time: new Date(Date.now() - 3 * 3600000).toISOString() },
     { icon: "message-circle", type: "New inquiry received", details: "About 3 Bed Flat in Yaba", user: "Tunde Adebayo", time: new Date(Date.now() - 4 * 3600000).toISOString() },
-    { icon: "check-circle", type: "Verification approved", details: "Chidi Eze (Landlord)", user: "Adeyemi Johnson", time: new Date(Date.now() - 5 * 3600000).toISOString() },
+    { icon: "check-circle", type: "Verification approved", details: "Chidi Eze (Landlord)", user: "Technology Integration Group", time: new Date(Date.now() - 5 * 3600000).toISOString() },
     { icon: "alert-triangle", type: "New complaint received", details: "Listing not available", user: "Amaka Nwosu", time: new Date(Date.now() - 6 * 3600000).toISOString() }
   ],
 

@@ -69,7 +69,7 @@ function admShowToast(msg, type='') {
 
 function admLogAction(action, section, details='') {
   const log = JSON.parse(localStorage.getItem(ADMIN_LOG_KEY) || '[]');
-  log.unshift({ action, section, details, user: 'Adeyemi Johnson', time: new Date().toISOString() });
+  log.unshift({ action, section, details, user: 'Technology Integration Group', time: new Date().toISOString() });
   if (log.length > 200) log.length = 200;
   localStorage.setItem(ADMIN_LOG_KEY, JSON.stringify(log));
 }
@@ -92,7 +92,7 @@ function admCheckAuth() {
 function showDashboard(admin) {
   $('admLoginOverlay').classList.add('hidden');
   $('admDashboard').classList.remove('hidden');
-  const name = admin.name || 'Adeyemi Johnson';
+  const name = admin.name || 'Technology Integration Group';
   const parts = name.split(' ');
   const inits = initials(parts[0], parts[1]);
   $('sidebarAvatar').innerHTML = inits + '<span class="adm-online-dot"></span>';
@@ -111,7 +111,7 @@ function doLogin() {
   const creds = getStoredCreds();
   const err   = $('admLoginError');
   if (email === creds.email && pwd === creds.password) {
-    const admin = { email, role: 'admin', name: 'Adeyemi Johnson', loginAt: new Date().toISOString() };
+    const admin = { email, role: 'admin', name: 'Technology Integration Group', loginAt: new Date().toISOString() };
     localStorage.setItem(ADMIN_KEY, JSON.stringify(admin));
     admLogAction('Admin login', 'Auth', 'Login from ' + email);
     err.style.display = 'none';
@@ -1217,7 +1217,7 @@ function approveVerification(id) {
       if (l) { l.landlordVerified = true; l.verified = true; localStorage.setItem(landlordKey, JSON.stringify(l)); }
       // Update verif history
       const hist = JSON.parse(localStorage.getItem('pw_verif_history')||'[]');
-      hist.unshift({ landlordName:r.name, email:r.email, action:'approved', date:new Date().toISOString(), admin:'Adeyemi Johnson', notes:'Documents verified.' });
+      hist.unshift({ landlordName:r.name, email:r.email, action:'approved', date:new Date().toISOString(), admin:'Technology Integration Group', notes:'Documents verified.' });
       localStorage.setItem('pw_verif_history', JSON.stringify(hist));
     }
   }
@@ -1235,7 +1235,7 @@ function rejectVerification(id) {
       r.status = 'rejected';
       localStorage.setItem('pw_verification_requests', JSON.stringify(requests));
       const hist = JSON.parse(localStorage.getItem('pw_verif_history')||'[]');
-      hist.unshift({ landlordName:r.name, email:r.email, action:'rejected', date:new Date().toISOString(), admin:'Adeyemi Johnson', notes:'Documents incomplete.' });
+      hist.unshift({ landlordName:r.name, email:r.email, action:'rejected', date:new Date().toISOString(), admin:'Technology Integration Group', notes:'Documents incomplete.' });
       localStorage.setItem('pw_verif_history', JSON.stringify(hist));
     }
   }
