@@ -2,11 +2,11 @@
    LANDLORD DASHBOARD JS — Property Warehouse
 ══════════════════════════════════════════════════ */
 
-/* ── Auth guard ── */
-const currentUser = JSON.parse(localStorage.getItem("pw_current_user") || "null");
-if (!currentUser || currentUser.role !== "landlord") {
-    window.location.href = "auth.html";
-}
+/* ── Auth guard ──
+   Resolved asynchronously in boot() at the bottom of this file (was a synchronous
+   localStorage read before the backend existed). Everything below that references
+   currentUser is only ever called after boot() has set it. */
+let currentUser = null;
 
 /* ══════════════════════════════════════════════════
    STATIC DATA
@@ -28,11 +28,7 @@ const PEOPLE = [
     "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&crop=face"
 ];
 
-const userFirst = currentUser?.firstName || "Adeyemi";
-const userLast  = currentUser?.lastName  || "Johnson";
-const userFull  = `${userFirst} ${userLast}`.trim();
-
-let LISTINGS = getLandlordListings(currentUser.email);
+let LISTINGS = [];
 
 const MESSAGES = [
     { name:"Amaka Nwosu",    text:"Hi, is this Lekki apartment still available? I'm interested in scheduling an inspection.",  time:"2m ago",    unread:true,  img:PEOPLE[0] },
@@ -86,6 +82,9 @@ function statusLabel(s) {
    POPULATE USER
 ══════════════════════════════════════════════════ */
 function populateUser() {
+    const userFirst = currentUser?.firstName || "Adeyemi";
+    const userLast  = currentUser?.lastName  || "Johnson";
+    const userFull  = `${userFirst} ${userLast}`.trim();
     const greet = `${greeting()}, ${userFirst}`;
 
     const gEl = document.getElementById("ldGreeting");
@@ -101,31 +100,46 @@ function populateUser() {
 /* ══════════════════════════════════════════════════
    RENDER LISTINGS TABLE
 ══════════════════════════════════════════════════ */
-function renderListings() {
+function showListingsMessage(html) {
+    const tbody = document.getElementById("ldTableBody");
+    const table = document.getElementById("ldListingsTable");
+    if (table) table.style.display = "none";
+    let empty = document.getElementById("ldEmptyListings");
+    if (!empty) {
+        empty = document.createElement("div");
+        empty.id = "ldEmptyListings";
+        empty.style.cssText = "text-align:center;padding:48px 20px;";
+        tbody.closest(".ld-table-wrap").appendChild(empty);
+    }
+    empty.innerHTML = html;
+}
+
+async function renderListings() {
     const tbody = document.getElementById("ldTableBody");
     const table = document.getElementById("ldListingsTable");
     if (!tbody) return;
 
-    LISTINGS = getLandlordListings(currentUser.email);
+    const res = await PWApi.request('/api/landlord/listings');
+    if (!res.ok) {
+        showListingsMessage(`
+            <p style="font-size:15px;font-weight:700;color:#c0392b;margin-bottom:16px">
+              ${res.error === 'network' ? "Couldn't reach the server. Check your connection and try again." : "Couldn't load your listings."}
+            </p>
+            <button onclick="renderListings()" style="padding:10px 20px;border-radius:10px;border:none;background:#a97e4b;color:#fff;font-weight:800;cursor:pointer;font-family:inherit">Retry</button>`);
+        return;
+    }
+    LISTINGS = res.data.listings;
 
     if (!LISTINGS.length) {
-        if (table) table.style.display = "none";
-        let empty = document.getElementById("ldEmptyListings");
-        if (!empty) {
-            empty = document.createElement("div");
-            empty.id = "ldEmptyListings";
-            empty.style.cssText = "text-align:center;padding:48px 20px;";
-            empty.innerHTML = `
-                <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="#c8c3bb" stroke-width="1.5"
-                  style="display:block;margin:0 auto 16px"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
-                <p style="font-size:15px;font-weight:700;color:#5d6876;margin-bottom:16px">You haven't listed any properties yet.</p>
-                <a href="create-listing.html"
-                   style="display:inline-flex;align-items:center;gap:8px;background:#a97e4b;color:#fff;
-                          padding:12px 24px;border-radius:12px;font-size:14px;font-weight:800;text-decoration:none;">
-                   + Add Your First Property
-                </a>`;
-            tbody.closest(".ld-table-wrap").appendChild(empty);
-        }
+        showListingsMessage(`
+            <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="#c8c3bb" stroke-width="1.5"
+              style="display:block;margin:0 auto 16px"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+            <p style="font-size:15px;font-weight:700;color:#5d6876;margin-bottom:16px">You haven't listed any properties yet.</p>
+            <a href="create-listing.html"
+               style="display:inline-flex;align-items:center;gap:8px;background:#a97e4b;color:#fff;
+                      padding:12px 24px;border-radius:12px;font-size:14px;font-weight:800;text-decoration:none;">
+               + Add Your First Property
+            </a>`);
         return;
     }
 
@@ -183,15 +197,21 @@ function renderListings() {
     }).join("");
 
     tbody.querySelectorAll(".ld-delete-btn").forEach(btn => {
-        btn.addEventListener("click", () => {
+        btn.addEventListener("click", async () => {
             const id = btn.dataset.id;
             const listing = LISTINGS.find(l => l.id === id);
             if (!listing) return;
-            if (confirm(`Delete "${listing.title || listing.name}"? This cannot be undone.`)) {
-                deleteListing(id);
-                toast(`"${listing.title || listing.name}" deleted.`);
-                renderListings();
+            if (!confirm(`Delete "${listing.title || listing.name}"? This cannot be undone.`)) return;
+
+            btn.disabled = true;
+            const res = await PWApi.request('/api/listings/' + encodeURIComponent(id), { method: 'DELETE' });
+            if (!res.ok) {
+                toast(res.error === 'network' ? "Couldn't reach the server. Please try again." : 'Failed to delete listing.');
+                btn.disabled = false;
+                return;
             }
+            toast(`"${listing.title || listing.name}" deleted.`);
+            renderListings();
         });
     });
 }
@@ -337,9 +357,9 @@ document.querySelectorAll(".ld-user-dropdown a[data-section]").forEach(link => {
 /* ══════════════════════════════════════════════════
    LOGOUT
 ══════════════════════════════════════════════════ */
-document.getElementById("ldLogoutBtn")?.addEventListener("click", e => {
+document.getElementById("ldLogoutBtn")?.addEventListener("click", async e => {
     e.preventDefault();
-    localStorage.removeItem("pw_current_user");
+    await PWAuth.logout();
     window.location.href = "auth.html";
 });
 
@@ -379,14 +399,26 @@ function pwRelTime(isoStr) {
     return `${months} month${months > 1 ? "s" : ""} ago`;
 }
 
-function renderInquiries() {
+async function renderInquiries() {
     const container = document.getElementById("ldInqList");
     if (!container) return;
 
     const lastSeen = localStorage.getItem("pw_dashboard_last_seen");
     const now = new Date().toISOString();
 
-    const landlordListingIds = getLandlordListings(currentUser.email).map(l => l.id);
+    // Inquiries themselves are still localStorage-only (Phase 2+) — only "which listings are
+    // mine" now comes from the real API, mirroring how this function always independently
+    // looked up the landlord's listings rather than relying on renderListings()'s state.
+    const listingsRes = await PWApi.request('/api/landlord/listings');
+    if (!listingsRes.ok) {
+        container.innerHTML = `
+            <div class="pw-inq-empty">
+                <svg viewBox="0 0 24 24" width="44" height="44" fill="none" stroke="#c8c3bb" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                <p>Couldn't load inquiries right now.</p>
+            </div>`;
+        return;
+    }
+    const landlordListingIds = listingsRes.data.listings.map(l => l.id);
     const allInquiries = JSON.parse(localStorage.getItem("pw_inquiries") || "[]");
     const myInquiries  = allInquiries.filter(inq => landlordListingIds.includes(inq.listingId));
 
@@ -438,13 +470,33 @@ function renderInquiries() {
 }
 
 /* ══════════════════════════════════════════════════
-   INIT
+   INIT — resolves the session before rendering anything user-specific.
 ══════════════════════════════════════════════════ */
-document.addEventListener("DOMContentLoaded", () => {
+async function boot() {
+    PWOverlay.showLoading("Loading your dashboard…");
+
+    const { user, networkError } = await PWAuth.getSession();
+
+    if (networkError) {
+        PWOverlay.showError("Couldn't reach the server. Check your connection and try again.", {
+            retry: () => window.location.reload(),
+        });
+        return;
+    }
+    if (!user || user.role !== "landlord") {
+        window.location.href = "auth.html";
+        return;
+    }
+
+    currentUser = user;
+    PWOverlay.hide();
+
     populateUser();
     renderListings();
     renderMessages();
     renderInspections();
     renderPayments();
     renderInquiries();
-});
+}
+
+document.addEventListener("DOMContentLoaded", boot);

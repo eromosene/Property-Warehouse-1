@@ -3,11 +3,10 @@
    All logic for the admin panel
 ══════════════════════════════════════════════════ */
 
-/* ── Constants ── */
-const ADMIN_EMAIL    = 'admin@propertywarehouse.ng';
-const ADMIN_PASSWORD = 'PWAdmin2025!';
-const ADMIN_CREDS_KEY = 'pw_admin_credentials';
-const ADMIN_KEY      = 'pw_admin';
+/* ── Constants ──
+   ADMIN_EMAIL/ADMIN_PASSWORD/ADMIN_CREDS_KEY/ADMIN_KEY used to live here and back a purely
+   client-side login check. The admin account (and its password hash) now lives in the
+   backend's database, seeded from backend/.env — see /api/auth/admin/login below. */
 const ADMIN_LOG_KEY  = 'pw_admin_log';
 const SETTINGS_KEY   = 'pw_admin_settings';
 const DEMO_MODE_KEY  = 'pw_demo_mode';
@@ -77,15 +76,17 @@ function admLogAction(action, section, details='') {
 /* ══════════════════════════════════════════════════
    AUTH
 ══════════════════════════════════════════════════ */
-function getStoredCreds() {
-  const c = JSON.parse(localStorage.getItem(ADMIN_CREDS_KEY) || 'null');
-  return c || { email: ADMIN_EMAIL, password: ADMIN_PASSWORD };
-}
-
-function admCheckAuth() {
-  const admin = JSON.parse(localStorage.getItem(ADMIN_KEY) || 'null');
-  if (admin && admin.role === 'admin') {
-    showDashboard(admin);
+// Auto-login if a valid admin session cookie already exists (was a synchronous localStorage
+// read before the backend existed — now an async /api/auth/me check). A network failure here
+// just leaves the login form showing, which is already a safe, usable default state.
+async function admCheckAuth() {
+  const { user, networkError } = await PWAuth.getSession();
+  if (networkError) {
+    console.warn('Could not reach the backend to check for an existing admin session.');
+    return;
+  }
+  if (user && user.role === 'admin') {
+    showDashboard(user);
   }
 }
 
@@ -105,25 +106,31 @@ function showDashboard(admin) {
 $('admLoginBtn').addEventListener('click', doLogin);
 $('admLoginPassword').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
 
-function doLogin() {
+async function doLogin() {
   const email = $('admLoginEmail').value.trim();
   const pwd   = $('admLoginPassword').value;
-  const creds = getStoredCreds();
   const err   = $('admLoginError');
-  if (email === creds.email && pwd === creds.password) {
-    const admin = { email, role: 'admin', name: 'Technology Integration Group', loginAt: new Date().toISOString() };
-    localStorage.setItem(ADMIN_KEY, JSON.stringify(admin));
+  const btn   = $('admLoginBtn');
+
+  btn.disabled = true;
+  const res = await PWAuth.adminLogin({ email, password: pwd });
+  btn.disabled = false;
+
+  if (res.ok) {
     admLogAction('Admin login', 'Auth', 'Login from ' + email);
     err.style.display = 'none';
-    showDashboard(admin);
+    showDashboard(res.data.user);
   } else {
+    err.textContent = res.error === 'network'
+      ? "Couldn't reach the server. Please try again."
+      : 'Invalid admin credentials.';
     err.style.display = 'block';
   }
 }
 
-$('admLogoutBtn').addEventListener('click', () => {
+$('admLogoutBtn').addEventListener('click', async () => {
   admLogAction('Admin logout', 'Auth');
-  localStorage.removeItem(ADMIN_KEY);
+  await PWAuth.logout();
   location.reload();
 });
 
@@ -337,10 +344,19 @@ $('admProfileChip').addEventListener('click', e => {
 /* ══════════════════════════════════════════════════
    SIDEBAR BADGES
 ══════════════════════════════════════════════════ */
-function updateNavBadges() {
+// Shared real (non-demo) admin listings fetch, used by the nav badge, table, and sidebar.
+// Returns { ok, listings, error } so callers needing a retry UI (the table) can distinguish
+// "fetch failed" from "zero listings", while callers that just want a best-effort count (the
+// nav badge, sidebar chart) can treat a failure as "0" via the `listings` array.
+async function fetchAdminListings() {
+  const res = await PWApi.request('/api/admin/listings');
+  return { ok: res.ok, listings: res.ok ? res.data.listings : [], error: res.error };
+}
+
+async function updateNavBadges() {
   const tenants   = getData('users_tenants', []);
   const landlords = getData('users_landlords', []);
-  const listings  = isDemoMode ? DEMO_DATA.listings : JSON.parse(localStorage.getItem('pw_listings')||'[]');
+  const listings  = isDemoMode ? DEMO_DATA.listings : (await fetchAdminListings()).listings;
   const feedback  = getData('feedback', []);
   const verif     = getData('verification', []);
 
@@ -780,10 +796,31 @@ function deleteUser(id, type) {
 ══════════════════════════════════════════════════ */
 let listingPage = 1;
 let listingStatusFilter = 'all';
+// Populated on every successful renderListingsTable() fetch; openListingEdit() reads from this
+// instead of re-fetching, since it's only ever triggered from an Edit click on an already-
+// rendered row (i.e. always after this has run at least once).
+let adminListingsCache = [];
 
-function renderListingsTable() {
-  const rawListings = isDemoMode ? DEMO_DATA.listings :
-    [...(typeof DEFAULT_LISTINGS!=='undefined'?DEFAULT_LISTINGS:[]), ...JSON.parse(localStorage.getItem('pw_listings')||'[]')];
+async function renderListingsTable() {
+  const tbody = $('listingsTableBody');
+  if (!tbody) return;
+
+  let rawListings;
+  if (isDemoMode) {
+    rawListings = DEMO_DATA.listings;
+  } else {
+    const res = await fetchAdminListings();
+    if (!res.ok) {
+      tbody.innerHTML = `<tr><td colspan="9"><div class="adm-empty">
+        <p style="color:#c0392b;font-weight:700">${res.error === 'network' ? "Couldn't reach the server. Check your connection." : "Couldn't load listings."}</p>
+        <button onclick="renderListingsTable()" style="margin-top:10px;padding:8px 18px;border-radius:8px;border:none;background:#a97e4b;color:#fff;font-weight:800;cursor:pointer;font-family:inherit">Retry</button>
+      </div></td></tr>`;
+      return;
+    }
+    rawListings = res.listings;
+  }
+  adminListingsCache = rawListings;
+
   const search  = ($('listingSearch')||{}).value?.toLowerCase()||'';
   const areaF   = ($('listingAreaFilter')||{}).value||'';
   const typeF   = ($('listingTypeFilter')||{}).value||'';
@@ -817,8 +854,6 @@ function renderListingsTable() {
 
   const start = (listingPage-1)*PER_PAGE;
   const page  = filtered.slice(start, start+PER_PAGE);
-  const tbody = $('listingsTableBody');
-  if (!tbody) return;
   if (!filtered.length) { tbody.innerHTML=`<tr><td colspan="9"><div class="adm-empty"><p>No listings found</p></div></td></tr>`; return; }
 
   tbody.innerHTML = page.map(l => {
@@ -849,8 +884,11 @@ function renderListingsTable() {
 
 function setListingFilter(status) { listingStatusFilter=status; listingPage=1; renderListingsTable(); }
 
-function renderListingsSidebar() {
-  const all = isDemoMode ? DEMO_DATA.listings : [...(typeof DEFAULT_LISTINGS!=='undefined'?DEFAULT_LISTINGS:[]), ...JSON.parse(localStorage.getItem('pw_listings')||'[]')];
+async function renderListingsSidebar() {
+  // Fetches independently rather than reading adminListingsCache, since this is called
+  // alongside (not after) renderListingsTable() and shouldn't race it — mirrors the original
+  // code, where both functions always independently derived their own copy of the data.
+  const all = isDemoMode ? DEMO_DATA.listings : (await fetchAdminListings()).listings;
   const counts = { active:0, pending:0, flagged:0, rejected:0 };
   all.forEach(l => { const s = l.status||'active'; if(counts[s]!==undefined) counts[s]++; });
   $('listingsSidebar').innerHTML = `
@@ -872,12 +910,14 @@ function renderListingsSidebar() {
   }, 100);
 }
 
-function approveListing(id) {
+async function approveListing(id) {
   admLogAction('Listing approved', 'Listings', id);
   if (!isDemoMode) {
-    const listings = JSON.parse(localStorage.getItem('pw_listings')||'[]');
-    const i = listings.findIndex(l=>l.id===id);
-    if (i > -1) { listings[i].status = 'active'; localStorage.setItem('pw_listings', JSON.stringify(listings)); }
+    const res = await PWApi.request('/api/admin/listings/' + encodeURIComponent(id) + '/approve', { method: 'PATCH' });
+    if (!res.ok) {
+      admShowToast(res.error === 'network' ? "Couldn't reach the server. Please try again." : 'Failed to approve listing.', 'error');
+      return;
+    }
   }
   const card = document.getElementById('pcard-'+id);
   if (card) card.style.opacity = '0.3';
@@ -886,40 +926,48 @@ function approveListing(id) {
   renderListingsTable();
 }
 
-function rejectListing(id) {
+async function rejectListing(id) {
   admLogAction('Listing rejected', 'Listings', id);
   if (!isDemoMode) {
-    const listings = JSON.parse(localStorage.getItem('pw_listings')||'[]');
-    const i = listings.findIndex(l=>l.id===id);
-    if (i > -1) { listings[i].status = 'rejected'; localStorage.setItem('pw_listings', JSON.stringify(listings)); }
+    const res = await PWApi.request('/api/admin/listings/' + encodeURIComponent(id) + '/reject', { method: 'PATCH' });
+    if (!res.ok) {
+      admShowToast(res.error === 'network' ? "Couldn't reach the server. Please try again." : 'Failed to reject listing.', 'error');
+      return;
+    }
   }
   admShowToast('Listing rejected', 'error');
   updateNavBadges();
   renderListingsTable();
 }
 
-function deleteListingAdmin(id) {
+async function deleteListingAdmin(id) {
   if (isDemoMode) { admShowToast('Cannot modify data in Demo Mode'); return; }
+  const res = await PWApi.request('/api/admin/listings/' + encodeURIComponent(id), { method: 'DELETE' });
+  if (!res.ok) {
+    admShowToast(res.error === 'network' ? "Couldn't reach the server. Please try again." : 'Failed to delete listing.', 'error');
+    return;
+  }
   admLogAction('Listing deleted', 'Listings', id);
-  const listings = JSON.parse(localStorage.getItem('pw_listings')||'[]');
-  localStorage.setItem('pw_listings', JSON.stringify(listings.filter(l=>l.id!==id)));
   admShowToast('Listing deleted', 'success');
   renderListingsTable();
+  updateNavBadges();
 }
 
-function bulkApproveListings() {
+async function bulkApproveListings() {
   admLogAction('Bulk approve listings', 'Listings');
   if (!isDemoMode) {
-    const listings = JSON.parse(localStorage.getItem('pw_listings')||'[]');
-    listings.forEach(l => { if (l.status==='pending') l.status='active'; });
-    localStorage.setItem('pw_listings', JSON.stringify(listings));
+    const res = await PWApi.request('/api/admin/listings/bulk-approve', { method: 'POST' });
+    if (!res.ok) {
+      admShowToast(res.error === 'network' ? "Couldn't reach the server. Please try again." : 'Failed to bulk-approve listings.', 'error');
+      return;
+    }
   }
   admShowToast('All pending listings approved', 'success');
   renderListingsTable(); updateNavBadges();
 }
 
 function openListingEdit(id) {
-  const all = isDemoMode ? DEMO_DATA.listings : [...(typeof DEFAULT_LISTINGS!=='undefined'?DEFAULT_LISTINGS:[]), ...JSON.parse(localStorage.getItem('pw_listings')||'[]')];
+  const all = isDemoMode ? DEMO_DATA.listings : adminListingsCache;
   const l = all.find(x=>x.id===id) || {};
   $('listingEditBody').innerHTML = `
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
@@ -939,19 +987,23 @@ function openListingEdit(id) {
 
 function closeListingModal() { $('listingEditModal').classList.remove('open'); }
 
-function saveListingEdit() {
+async function saveListingEdit() {
   if (isDemoMode) { admShowToast('Cannot modify data in Demo Mode'); return; }
-  const listings = JSON.parse(localStorage.getItem('pw_listings')||'[]');
   const id = $('listingEditModal').dataset.id;
-  const idx = listings.findIndex(l=>l.id===id);
-  if (idx > -1) {
-    $('listingEditBody').querySelectorAll('[data-key]').forEach(el => {
-      listings[idx][el.dataset.key] = el.value;
-    });
-    localStorage.setItem('pw_listings', JSON.stringify(listings));
-    admLogAction('Listing edited', 'Listings', id);
-    admShowToast('Listing updated', 'success');
+  const updates = {};
+  $('listingEditBody').querySelectorAll('[data-key]').forEach(el => {
+    // rentPerYear is a plain text input — coerce to a number so it isn't stored as a string in
+    // what the backend treats as an integer column.
+    updates[el.dataset.key] = el.dataset.key === 'rentPerYear' ? (Number(el.value) || 0) : el.value;
+  });
+
+  const res = await PWApi.request('/api/admin/listings/' + encodeURIComponent(id), { method: 'PATCH', body: JSON.stringify(updates) });
+  if (!res.ok) {
+    admShowToast(res.error === 'network' ? "Couldn't reach the server. Please try again." : 'Failed to update listing.', 'error');
+    return;
   }
+  admLogAction('Listing edited', 'Listings', id);
+  admShowToast('Listing updated', 'success');
   closeListingModal();
   renderListingsTable();
 }
@@ -1888,17 +1940,10 @@ function renderEmailSettings() {
 }
 
 function changeAdminPassword() {
-  const cur  = $('currentPwd')?.value;
-  const nw   = $('newPwd')?.value;
-  const conf = $('confirmPwd')?.value;
-  const creds = getStoredCreds();
-  if (cur !== creds.password) { admShowToast('Current password incorrect', 'error'); return; }
-  if (!nw || nw.length < 8)  { admShowToast('New password must be at least 8 characters', 'error'); return; }
-  if (nw !== conf)            { admShowToast('Passwords do not match', 'error'); return; }
-  localStorage.setItem(ADMIN_CREDS_KEY, JSON.stringify({ email: creds.email, password: nw }));
-  admLogAction('Admin password changed', 'Settings');
-  admShowToast('Password updated successfully', 'success');
-  $('currentPwd').value=''; $('newPwd').value=''; $('confirmPwd').value='';
+  // The admin password now lives in the backend's database (seeded from backend/.env), not
+  // localStorage — there's no /api/admin/me/password endpoint yet (see MIGRATION-NOTES.md),
+  // so this can no longer pretend to succeed via localStorage without lying to the admin.
+  admShowToast('Password changes aren’t available yet — update ADMIN_PASSWORD in backend/.env and reseed.', 'error');
 }
 
 /* ── Maintenance Mode ── */

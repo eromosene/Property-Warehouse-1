@@ -199,48 +199,35 @@ const DEFAULT_LISTINGS = [
   }
 ];
 
-function getAllListings() {
-  const landlordListings = JSON.parse(localStorage.getItem('pw_listings') || '[]');
-  // Exclude pending/flagged/rejected listings from public view — admin must approve first
-  const approvedLandlordListings = landlordListings.filter(l => !l.status || l.status === 'active');
-  return [...DEFAULT_LISTINGS, ...approvedLandlordListings];
+/* ── Public listing reads ──
+   Now backed by the Phase 1 API instead of localStorage — real network calls, so every caller
+   has been converted to async/await (see MIGRATION-NOTES.md "Stage 2"). DEFAULT_LISTINGS above
+   is no longer read by these functions — the backend was seeded with the same 6 listings under
+   the same L001–L006 ids, so nothing that links to those ids breaks. DEFAULT_LISTINGS is kept
+   only because admin.js's still-mocked Listings section reads it directly; that section moves
+   to the API in a later stage. */
+
+async function getAllListings() {
+  // No filters — just "give me the currently-active listings" for widgets like the tenant
+  // dashboard's Recommended-For-You list. limit=100 is a generous ceiling fine for Phase 1's
+  // small dataset; listings.html's browse page calls the API directly with real
+  // filter/sort/page params instead of going through this function (see listings.js).
+  // (listing-detail.js also calls the API directly rather than through a wrapper here, since it
+  // needs to distinguish a network failure from a real 404 to show the right error state —
+  // see its init().)
+  const res = await PWApi.request('/api/listings?limit=100');
+  return res.ok ? res.data.listings : [];
 }
 
-function getAllListingsAdmin() {
-  // Returns ALL listings including pending/flagged/rejected — for admin use only
-  const landlordListings = JSON.parse(localStorage.getItem('pw_listings') || '[]');
-  return [...DEFAULT_LISTINGS, ...landlordListings];
-}
-
-function getListingById(id) {
-  return getAllListings().find(l => l.id === id);
-}
-
-function saveListing(listing) {
-  const existing = JSON.parse(localStorage.getItem('pw_listings') || '[]');
-  // New landlord-created listings default to 'pending' — admin must approve before going live
-  if (!listing.status) listing.status = 'pending';
-  existing.push(listing);
-  localStorage.setItem('pw_listings', JSON.stringify(existing));
-}
-
-function deleteListing(id) {
-  const existing = JSON.parse(localStorage.getItem('pw_listings') || '[]');
-  const updated = existing.filter(l => l.id !== id);
-  localStorage.setItem('pw_listings', JSON.stringify(updated));
-}
-
-function getLandlordListings(landlordEmail) {
-  const all = JSON.parse(localStorage.getItem('pw_listings') || '[]');
-  return all.filter(l => l.landlordId === landlordEmail);
-}
+// getAllListingsAdmin() / saveListing() / deleteListing() / getLandlordListings() /
+// generateListingId() — removed in Stage 3. Every caller now goes straight to the API:
+// admin.js's Listings section (GET/PATCH/DELETE /api/admin/listings/*), create-listing.js
+// (POST /api/listings), and landlord-dashboard.js (GET /api/landlord/listings,
+// DELETE /api/listings/:id). DEFAULT_LISTINGS above is kept only because a few still-mocked
+// admin.js sections (Overview, Analytics, Settings export) read it directly.
 
 function formatNaira(amount) {
   return '\u20a6' + Number(amount).toLocaleString('en-NG');
-}
-
-function generateListingId() {
-  return 'LL' + Date.now().toString(36).toUpperCase();
 }
 
 /* ── Tenant Favourites ── */
@@ -258,9 +245,13 @@ function toggleFavourite(listingId) {
   localStorage.setItem('pw_favourites', JSON.stringify(favs));
   return idx === -1;
 }
-function getSavedListings() {
+async function getSavedListings() {
+  // Favourite IDs themselves are still localStorage-only (Phase 2+), but looking up the actual
+  // listing objects now has to go through the async, API-backed getAllListings() above.
   const favs = getFavourites();
-  return getAllListings().filter(l => favs.includes(l.id));
+  if (!favs.length) return [];
+  const all = await getAllListings();
+  return all.filter(l => favs.includes(l.id));
 }
 
 /* ── Inquiries ── */

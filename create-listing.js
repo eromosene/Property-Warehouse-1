@@ -4,11 +4,19 @@ const uploadedImages = [];
 const uploadedDocs   = [];
 
 /* ── Auth Guard ── */
-document.addEventListener('DOMContentLoaded', () => {
-  const raw = localStorage.getItem('pw_current_user');
-  if (!raw) { location.href = 'auth.html#landlord'; return; }
-  currentUser = JSON.parse(raw);
-  if (currentUser.role !== 'landlord') { location.href = 'auth.html#landlord'; return; }
+document.addEventListener('DOMContentLoaded', async () => {
+  PWOverlay.showLoading('Loading…');
+  const { user, networkError } = await PWAuth.getSession();
+
+  if (networkError) {
+    PWOverlay.showError("Couldn't reach the server. Check your connection and try again.", {
+      retry: () => location.reload(),
+    });
+    return;
+  }
+  if (!user || user.role !== 'landlord') { location.href = 'auth.html#landlord'; return; }
+  currentUser = user;
+  PWOverlay.hide();
 
   const name = `${currentUser.firstName || ''} ${currentUser.lastName || ''}`.trim() || currentUser.email;
   document.getElementById('clUserName').textContent = name;
@@ -276,9 +284,74 @@ function updatePricePreview() {
   document.getElementById('prevTotal').textContent   = formatNaira(total);
 }
 
+/* ── Upload helpers ──
+   Multipart uploads must NOT carry a JSON Content-Type header (the browser sets the correct
+   multipart boundary itself), so these call fetch() directly instead of going through
+   PWApi.request (which defaults to Content-Type: application/json). The client-side
+   compression in compressImage() is kept as-is — only the final "embed as base64" step is
+   replaced with a real upload. */
+async function dataUrlToBlob(dataUrl) {
+  const res = await fetch(dataUrl);
+  return res.blob();
+}
+
+async function uploadImageFiles() {
+  if (!uploadedImages.length) return { ok: true, urls: [] };
+  const formData = new FormData();
+  for (let i = 0; i < uploadedImages.length; i++) {
+    formData.append('images', await dataUrlToBlob(uploadedImages[i]), `photo-${i + 1}.jpg`);
+  }
+  try {
+    const res = await fetch(API_BASE + '/api/uploads/images', { method: 'POST', credentials: 'include', body: formData });
+    if (!res.ok) return { ok: false, networkError: false };
+    const data = await res.json();
+    return { ok: true, urls: data.urls };
+  } catch (err) {
+    return { ok: false, networkError: true };
+  }
+}
+
+async function uploadDocumentFiles() {
+  if (!uploadedDocs.length) return { ok: true, urls: [] };
+  const formData = new FormData();
+  for (const doc of uploadedDocs) {
+    formData.append('documents', await dataUrlToBlob(doc.data), doc.name);
+  }
+  try {
+    const res = await fetch(API_BASE + '/api/uploads/documents', { method: 'POST', credentials: 'include', body: formData });
+    if (!res.ok) return { ok: false, networkError: false };
+    const data = await res.json();
+    return { ok: true, urls: data.urls };
+  } catch (err) {
+    return { ok: false, networkError: true };
+  }
+}
+
+function showPublishError(msg) {
+  const publishBtn = document.getElementById('clPublishBtn');
+  let err = document.getElementById('clPublishError');
+  if (!err) {
+    err = document.createElement('p');
+    err.id = 'clPublishError';
+    err.style.cssText = 'color:#c0392b;font-weight:700;font-size:13px;margin-top:10px;text-align:center';
+    publishBtn.insertAdjacentElement('afterend', err);
+  }
+  err.textContent = msg;
+}
+
+function clearPublishError() {
+  document.getElementById('clPublishError')?.remove();
+}
+
 /* ── Publish ── */
-function publishListing() {
+async function publishListing() {
   if (!validateStep(4)) { goToStep(4); return; }
+
+  const publishBtn = document.getElementById('clPublishBtn');
+  const originalBtnText = publishBtn.textContent;
+  publishBtn.disabled = true;
+  publishBtn.textContent = 'Publishing…';
+  clearPublishError();
 
   const rent    = Number(document.getElementById('clRent').value)    || 0;
   const caution = Number(document.getElementById('clCaution').value) || 0;
@@ -286,7 +359,31 @@ function publishListing() {
 
   const urlImages = [...document.querySelectorAll('.cl-img-url')]
     .map(i => i.value.trim()).filter(u => u.length > 0);
-  const images = [...uploadedImages, ...urlImages];
+
+  // Upload any device-selected photos, then any ownership documents. Each is a separate
+  // multipart request to its own endpoint; a failure at either step stops here and leaves all
+  // form data/local previews intact so the user can just retry Publish.
+  const imageUpload = await uploadImageFiles();
+  if (!imageUpload.ok) {
+    showPublishError(imageUpload.networkError
+      ? "Couldn't reach the server to upload photos. Check your connection and try again."
+      : 'Something went wrong uploading your photos. Please try again.');
+    publishBtn.disabled = false;
+    publishBtn.textContent = originalBtnText;
+    return;
+  }
+
+  const docUpload = await uploadDocumentFiles();
+  if (!docUpload.ok) {
+    showPublishError(docUpload.networkError
+      ? "Couldn't reach the server to upload documents. Check your connection and try again."
+      : 'Something went wrong uploading your documents. Please try again.');
+    publishBtn.disabled = false;
+    publishBtn.textContent = originalBtnText;
+    return;
+  }
+
+  const images = [...imageUpload.urls, ...urlImages];
   if (!images.length) {
     images.push('https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&q=80');
   }
@@ -298,15 +395,13 @@ function publishListing() {
   const waNum = document.getElementById('clWhatsapp').value.trim();
   const name  = document.getElementById('clContactName').value.trim();
 
-  const listing = {
-    id:                generateListingId(),
-    landlordId:        currentUser.email,
+  // landlordId/landlordSince/landlordVerified/landlordListings/totalMoveIn/views/createdAt/id
+  // are no longer sent — the backend derives/assigns all of these (landlordId from the session,
+  // the rest computed or defaulted server-side).
+  const payload = {
     landlordName:      name,
     landlordPhone:     document.getElementById('clPhone').value.trim(),
     landlordWhatsApp:  waNum,
-    landlordSince:     String(new Date().getFullYear()),
-    landlordVerified:  false,
-    landlordListings:  1,
     title,
     area,
     lga:               document.getElementById('clLga').value,
@@ -315,21 +410,27 @@ function publishListing() {
     rentPerYear:       rent,
     cautionFee:        caution,
     serviceCharge:     service,
-    totalMoveIn:       rent + caution + service,
-    isVerified:        false,
     isMonthly:         document.getElementById('clMonthly').checked,
     beds:              Number(document.getElementById('clBeds').value) || 0,
     baths:             Number(document.getElementById('clBaths').value) || 1,
     amenities,
     description:       document.getElementById('clDesc').value.trim(),
     images,
+    documents:         docUpload.urls,
     ownershipDocTypes: docTypes,
-    ownershipDocCount: uploadedDocs.length,
-    views:             0,
-    createdAt:         new Date().toISOString().split('T')[0]
   };
 
-  saveListing(listing);
+  const res = await PWApi.request('/api/listings', { method: 'POST', body: JSON.stringify(payload) });
+
+  publishBtn.disabled = false;
+  publishBtn.textContent = originalBtnText;
+
+  if (!res.ok) {
+    showPublishError(res.error === 'network'
+      ? "Couldn't reach the server. Check your connection and try again."
+      : (res.error || 'Something went wrong publishing your listing. Please try again.'));
+    return;
+  }
 
   // Show success
   document.getElementById('clStep5').classList.add('hidden');

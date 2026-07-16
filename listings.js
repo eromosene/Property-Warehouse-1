@@ -1,17 +1,22 @@
 const PER_PAGE = 8;
 let currentPage = 1;
-let filtered = [];
 let pwActiveChat = null;
+
+/* Kicked off once on page load; chat-open prefill awaits this shared promise instead of
+   re-fetching the session on every click (and instead of the old synchronous
+   localStorage.getItem('pw_current_user') read, which no longer holds anything real). */
+const pwSessionPromise = typeof PWAuth !== 'undefined' ? PWAuth.getSession() : Promise.resolve({ user: null });
 
 /* ── Helpers ── */
 function getFilters() {
   const areas = [...document.querySelectorAll('input[name="area"]:checked')].map(i => i.value);
   const type  = document.querySelector('input[name="type"]:checked')?.value || '';
-  const maxRent = Number(document.getElementById('lsMaxRent').value) || Infinity;
+  const maxRentVal = Number(document.getElementById('lsMaxRent').value);
+  const maxRent = maxRentVal > 0 ? maxRentVal : null; // null = "no cap", omitted from the query
   const amenities = [...document.querySelectorAll('input[name="amenity"]:checked')].map(i => i.value);
   const verifiedOnly = document.getElementById('lsVerifiedOnly').checked;
   const monthlyOnly  = document.getElementById('lsMonthlyOnly').checked;
-  const q = document.getElementById('lsSearchInput').value.toLowerCase().trim();
+  const q = document.getElementById('lsSearchInput').value.trim();
   return { areas, type, maxRent, amenities, verifiedOnly, monthlyOnly, q };
 }
 
@@ -20,38 +25,63 @@ function getSort() {
       || document.getElementById('lsSortSelect').value;
 }
 
-function applyFilters() {
+/* Builds the same querystring the backend's GET /api/listings expects — area/type/amenities
+   are comma-separated lists, matching splitCsv() server-side (see listings.controller.js). */
+function buildListingsQuery(page) {
   const { areas, type, maxRent, amenities, verifiedOnly, monthlyOnly, q } = getFilters();
-  const all = getAllListings();
-
-  filtered = all.filter(l => {
-    if (areas.length && !areas.includes(l.area)) return false;
-    if (type && l.type !== type) return false;
-    if (l.rentPerYear > maxRent) return false;
-    if (amenities.length && !amenities.every(a => l.amenities.includes(a))) return false;
-    if (verifiedOnly && !l.isVerified) return false;
-    if (monthlyOnly && !l.isMonthly) return false;
-    if (q && !`${l.title} ${l.area} ${l.type} ${l.description}`.toLowerCase().includes(q)) return false;
-    return true;
-  });
-
+  const params = new URLSearchParams();
+  if (areas.length) params.set('area', areas.join(','));
+  if (type) params.set('type', type);
+  if (maxRent) params.set('maxRent', String(maxRent));
+  if (amenities.length) params.set('amenities', amenities.join(','));
+  if (verifiedOnly) params.set('verifiedOnly', 'true');
+  if (monthlyOnly) params.set('monthlyOnly', 'true');
+  if (q) params.set('q', q);
   const sort = getSort();
-  if (sort === 'price-asc')  filtered.sort((a,b) => a.rentPerYear - b.rentPerYear);
-  if (sort === 'price-desc') filtered.sort((a,b) => b.rentPerYear - a.rentPerYear);
-  if (sort === 'views')      filtered.sort((a,b) => b.views - a.views);
-  if (sort === 'newest')     filtered.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
-
-  currentPage = 1;
-  render();
+  if (sort) params.set('sort', sort);
+  params.set('page', String(page));
+  params.set('limit', String(PER_PAGE));
+  return params.toString();
 }
 
-function render() {
+async function applyFilters() {
+  currentPage = 1;
+  await loadAndRender();
+}
+
+/* Fetches the current filter/sort/page state from the backend and renders it. Used for the
+   initial load, every filter change, and as the "Retry" action on failure. */
+async function loadAndRender() {
+  const grid  = document.getElementById('lsGrid');
+  const empty = document.getElementById('lsEmpty');
+  empty.style.display = 'none';
+  document.getElementById('lsPagination').innerHTML = '';
+  grid.innerHTML = `<div class="ls-status" style="grid-column:1/-1;padding:48px 0;text-align:center;font-weight:700;color:#5d6876;">Loading listings…</div>`;
+
+  const res = await PWApi.request('/api/listings?' + buildListingsQuery(currentPage));
+
+  if (!res.ok) {
+    const msg = res.error === 'network'
+      ? "Couldn't reach the server. Check your connection and try again."
+      : 'Something went wrong loading listings.';
+    grid.innerHTML = `<div class="ls-status" style="grid-column:1/-1;padding:48px 0;text-align:center;font-weight:700;color:#c0392b;">
+      ${msg}
+      <button onclick="loadAndRender()" style="display:block;margin:14px auto 0;padding:8px 18px;border-radius:8px;border:none;background:#a97e4b;color:#fff;font-weight:800;cursor:pointer;font-family:inherit">Retry</button>
+    </div>`;
+    return;
+  }
+
+  render(res.data);
+}
+
+function render(data) {
   const grid  = document.getElementById('lsGrid');
   const empty = document.getElementById('lsEmpty');
   const count = document.getElementById('lsCountText');
   const rcount = document.getElementById('lsResultCount');
 
-  const total = filtered.length;
+  const { listings, total, page, totalPages } = data;
+
   rcount.textContent = `${total} propert${total === 1 ? 'y' : 'ies'} found`;
   count.textContent  = `${total} propert${total === 1 ? 'y' : 'ies'} found`;
 
@@ -65,13 +95,10 @@ function render() {
 
   pwActiveChat = null;
 
-  const start = (currentPage - 1) * PER_PAGE;
-  const page  = filtered.slice(start, start + PER_PAGE);
-
   const WA_SVG = '<svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>';
   const MSG_SVG = '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>';
 
-  grid.innerHTML = page.map(l => {
+  grid.innerHTML = listings.map(l => {
     const waMsg  = encodeURIComponent('Hello, I am interested in your property "' + l.title + '" listed on Property Warehouse.');
     const waHref = 'https://wa.me/' + l.landlordWhatsApp + '?text=' + waMsg;
     const safeLandlord = l.landlordName.replace(/"/g, '&quot;');
@@ -150,11 +177,11 @@ function render() {
     </div>`;
   }).join('');
 
-  renderPagination(total);
+  renderPagination(page, totalPages);
 }
 
 /* ── Chatbox logic ── */
-function pwToggleChat(btn) {
+async function pwToggleChat(btn) {
   const lid = btn.dataset.lid;
   const panel = document.getElementById('pw-chat-' + lid);
   if (!panel) return;
@@ -169,15 +196,13 @@ function pwToggleChat(btn) {
   pwActiveChat = opening ? lid : null;
 
   if (opening) {
-    try {
-      const user = JSON.parse(localStorage.getItem('pw_current_user') || 'null');
-      if (user) {
-        const nameEl  = document.getElementById('pw-name-' + lid);
-        const phoneEl = document.getElementById('pw-phone-' + lid);
-        if (nameEl)  nameEl.value  = ((user.firstName || '') + ' ' + (user.lastName || '')).trim();
-        if (phoneEl) phoneEl.value = user.phone || '';
-      }
-    } catch (e) {}
+    const { user } = await pwSessionPromise;
+    if (user) {
+      const nameEl  = document.getElementById('pw-name-' + lid);
+      const phoneEl = document.getElementById('pw-phone-' + lid);
+      if (nameEl)  nameEl.value  = ((user.firstName || '') + ' ' + (user.lastName || '')).trim();
+      if (phoneEl) phoneEl.value = user.phone || '';
+    }
   }
 }
 
@@ -221,26 +246,25 @@ function pwSubmitInquiry(btn) {
 }
 
 /* ── Pagination ── */
-function renderPagination(total) {
+function renderPagination(page, totalPages) {
   const pag = document.getElementById('lsPagination');
-  const pages = Math.ceil(total / PER_PAGE);
-  if (pages <= 1) { pag.innerHTML = ''; return; }
+  if (totalPages <= 1) { pag.innerHTML = ''; return; }
 
-  let html = `<button class="ls-pg-btn" ${currentPage===1?'disabled':''} onclick="goPage(${currentPage-1})">&#x2190; Prev</button>`;
-  for (let i = 1; i <= pages; i++) {
-    if (pages > 6 && i > 2 && i < pages - 1 && Math.abs(i - currentPage) > 1) {
-      if (i === 3 || i === pages - 2) html += `<span class="ls-pg-ellipsis">...</span>`;
+  let html = `<button class="ls-pg-btn" ${page===1?'disabled':''} onclick="goPage(${page-1})">&#x2190; Prev</button>`;
+  for (let i = 1; i <= totalPages; i++) {
+    if (totalPages > 6 && i > 2 && i < totalPages - 1 && Math.abs(i - page) > 1) {
+      if (i === 3 || i === totalPages - 2) html += `<span class="ls-pg-ellipsis">...</span>`;
       continue;
     }
-    html += `<button class="ls-pg-btn${i===currentPage?' active':''}" onclick="goPage(${i})">${i}</button>`;
+    html += `<button class="ls-pg-btn${i===page?' active':''}" onclick="goPage(${i})">${i}</button>`;
   }
-  html += `<button class="ls-pg-btn" ${currentPage===pages?'disabled':''} onclick="goPage(${currentPage+1})">Next &#x2192;</button>`;
+  html += `<button class="ls-pg-btn" ${page===totalPages?'disabled':''} onclick="goPage(${page+1})">Next &#x2192;</button>`;
   pag.innerHTML = html;
 }
 
-function goPage(n) {
+async function goPage(n) {
   currentPage = n;
-  render();
+  await loadAndRender();
   window.scrollTo({ top: document.querySelector('.ls-body').offsetTop - 80, behavior: 'smooth' });
 }
 
