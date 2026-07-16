@@ -81,8 +81,15 @@ window.addEventListener("DOMContentLoaded", () => {
 
 /* ── Form submissions ── */
 
+/* Disable a form's submit button while a request is in flight, so a slow/failed network
+   call can't be double-submitted. */
+function setFormBusy(form, busy) {
+    const btn = form.querySelector("button[type='submit']");
+    if (btn) btn.disabled = busy;
+}
+
 /* TENANT LOGIN */
-document.getElementById("tenant-login")?.addEventListener("submit", (e) => {
+document.getElementById("tenant-login")?.addEventListener("submit", async (e) => {
     e.preventDefault();
     const form    = e.target;
     const email   = form.querySelector("input[type='text'], input[type='email']")?.value.trim();
@@ -93,19 +100,21 @@ document.getElementById("tenant-login")?.addEventListener("submit", (e) => {
         return;
     }
 
-    const stored = JSON.parse(localStorage.getItem("pw_tenant") || "null");
-    if (!stored || stored.email !== email || stored.password !== password) {
-        showToast("Invalid credentials. Please sign up first.");
+    setFormBusy(form, true);
+    const res = await PWAuth.login({ email, password, role: "tenant" });
+    setFormBusy(form, false);
+
+    if (!res.ok) {
+        showToast(res.error === "network" ? "Couldn't reach the server. Please try again." : res.error);
         return;
     }
 
-    localStorage.setItem("pw_current_user", JSON.stringify({ ...stored, role: "tenant" }));
-    showToast("Welcome back, " + stored.firstName + "! Redirecting…");
+    showToast("Welcome back, " + res.data.user.firstName + "! Redirecting…");
     setTimeout(() => { window.location.href = "dashboard.html"; }, 1200);
 });
 
 /* TENANT SIGN UP */
-document.getElementById("tenant-signup")?.addEventListener("submit", (e) => {
+document.getElementById("tenant-signup")?.addEventListener("submit", async (e) => {
     e.preventDefault();
     const form      = e.target;
     const inputs    = form.querySelectorAll("input");
@@ -123,33 +132,46 @@ document.getElementById("tenant-signup")?.addEventListener("submit", (e) => {
         return;
     }
 
-    const userData = { firstName, lastName, email, phone, password, area, budget, role: "tenant", joinedDate: new Date().toISOString() };
-    localStorage.setItem("pw_tenant", JSON.stringify(userData));
-    localStorage.setItem("pw_current_user", JSON.stringify(userData));
+    setFormBusy(form, true);
+    const res = await PWAuth.signup({ role: "tenant", firstName, lastName, email, phone, password, area, budget });
+    setFormBusy(form, false);
+
+    if (!res.ok) {
+        showToast(res.error === "network" ? "Couldn't reach the server. Please try again." : res.error);
+        return;
+    }
+
     showToast("Account created! Welcome, " + firstName + "! Redirecting…");
     setTimeout(() => { window.location.href = "dashboard.html"; }, 1400);
 });
 
 /* LANDLORD LOGIN */
-document.getElementById("landlord-login")?.addEventListener("submit", (e) => {
+document.getElementById("landlord-login")?.addEventListener("submit", async (e) => {
     e.preventDefault();
     const form    = e.target;
     const email   = form.querySelector("input")?.value.trim();
     const password = form.querySelectorAll("input")[1]?.value;
 
-    const stored = JSON.parse(localStorage.getItem("pw_landlord") || "null");
-    if (!stored || stored.email !== email || stored.password !== password) {
-        showToast("Invalid credentials. Please sign up first.");
+    if (!email || !password) {
+        showToast("Please fill in all fields.");
         return;
     }
 
-    localStorage.setItem("pw_current_user", JSON.stringify({ ...stored, role: "landlord" }));
-    showToast("Welcome back, " + stored.firstName + "!");
+    setFormBusy(form, true);
+    const res = await PWAuth.login({ email, password, role: "landlord" });
+    setFormBusy(form, false);
+
+    if (!res.ok) {
+        showToast(res.error === "network" ? "Couldn't reach the server. Please try again." : res.error);
+        return;
+    }
+
+    showToast("Welcome back, " + res.data.user.firstName + "!");
     setTimeout(() => { window.location.href = "landlord-dashboard.html"; }, 1200);
 });
 
 /* LANDLORD SIGN UP */
-document.getElementById("landlord-signup")?.addEventListener("submit", (e) => {
+document.getElementById("landlord-signup")?.addEventListener("submit", async (e) => {
     e.preventDefault();
     const form      = e.target;
     const inputs    = form.querySelectorAll("input");
@@ -167,9 +189,15 @@ document.getElementById("landlord-signup")?.addEventListener("submit", (e) => {
         return;
     }
 
-    const userData = { firstName, lastName, email, phone, password, propType, lga, role: "landlord", joinedDate: new Date().toISOString() };
-    localStorage.setItem("pw_landlord", JSON.stringify(userData));
-    localStorage.setItem("pw_current_user", JSON.stringify(userData));
+    setFormBusy(form, true);
+    const res = await PWAuth.signup({ role: "landlord", firstName, lastName, email, phone, password, propType, lga });
+    setFormBusy(form, false);
+
+    if (!res.ok) {
+        showToast(res.error === "network" ? "Couldn't reach the server. Please try again." : res.error);
+        return;
+    }
+
     showToast("Landlord account created! Welcome, " + firstName + "!");
     setTimeout(() => { window.location.href = "landlord-dashboard.html"; }, 1400);
 });

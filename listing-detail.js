@@ -1,5 +1,10 @@
 let pwDetListingData = null;
 
+/* Kicked off once on page load; chat-open prefill awaits this shared promise instead of
+   re-fetching the session on every click (and instead of the old synchronous
+   localStorage.getItem('pw_current_user') read, which no longer holds anything real). */
+const pwSessionPromise = typeof PWAuth !== 'undefined' ? PWAuth.getSession() : Promise.resolve({ user: null });
+
 const AMENITY_ICONS = {
   Water: '💧', Parking: '🚗', Security: '🔒',
   Generator: '⚡', AC: '❄️', Lift: '🛗'
@@ -12,24 +17,39 @@ const INCOME_MAP = {
   'above300': 4500000
 };
 
-function init() {
+async function init() {
   const params = new URLSearchParams(location.search);
   const id = params.get('id');
   if (!id) { location.href = 'listings.html'; return; }
 
-  const l = getListingById(id);
-  if (!l) { location.href = 'listings.html'; return; }
+  PWOverlay.showLoading('Loading listing…');
+
+  const listingRes = await PWApi.request('/api/listings/' + encodeURIComponent(id));
+
+  if (!listingRes.ok && listingRes.status === 0) {
+    PWOverlay.showError("Couldn't reach the server. Check your connection and try again.", { retry: init });
+    return;
+  }
+  if (!listingRes.ok) { location.href = 'listings.html'; return; }
+
+  const l = listingRes.data.listing;
+
+  // Best-effort view increment — awaited so the count shown below is accurate, but a failure
+  // here shouldn't block viewing the listing (falls back to the count already on `l`).
+  const viewRes = await PWApi.request('/api/listings/' + encodeURIComponent(id) + '/view', { method: 'POST' });
+  if (viewRes.ok && typeof viewRes.data.views === 'number') l.views = viewRes.data.views;
+
+  const simRes = await PWApi.request('/api/listings/' + encodeURIComponent(id) + '/similar');
+  const similar = simRes.ok ? simRes.data.listings : [];
 
   document.title = `${l.title} — Property Warehouse`;
   document.getElementById('ldetBcTitle').textContent = l.title;
 
-  const similar = getAllListings()
-    .filter(x => x.area === l.area && x.id !== l.id)
-    .slice(0, 2);
-
   document.getElementById('ldetBody').innerHTML = buildHTML(l, similar);
   pwDetListingData = l;
   bindEvents(l);
+
+  PWOverlay.hide();
 }
 
 function buildHTML(l, similar) {
@@ -301,21 +321,19 @@ document.addEventListener('DOMContentLoaded', init);
 /* ── Inline chatbox (detail page) ── */
 let pwDetChatOpen = false;
 
-function pwToggleDetailChat() {
+async function pwToggleDetailChat() {
   const panel = document.getElementById('pwDetChat');
   if (!panel) return;
   pwDetChatOpen = !pwDetChatOpen;
   panel.classList.toggle('pw-open', pwDetChatOpen);
   if (pwDetChatOpen) {
-    try {
-      const user = JSON.parse(localStorage.getItem('pw_current_user') || 'null');
-      if (user) {
-        const nameEl  = document.getElementById('pwDetName');
-        const phoneEl = document.getElementById('pwDetPhone');
-        if (nameEl)  nameEl.value  = ((user.firstName || '') + ' ' + (user.lastName || '')).trim();
-        if (phoneEl) phoneEl.value = user.phone || '';
-      }
-    } catch (e) {}
+    const { user } = await pwSessionPromise;
+    if (user) {
+      const nameEl  = document.getElementById('pwDetName');
+      const phoneEl = document.getElementById('pwDetPhone');
+      if (nameEl)  nameEl.value  = ((user.firstName || '') + ' ' + (user.lastName || '')).trim();
+      if (phoneEl) phoneEl.value = user.phone || '';
+    }
   }
 }
 

@@ -2,11 +2,11 @@
    DASHBOARD JS — Property Warehouse
 ══════════════════════════════════════════════════ */
 
-/* ── Auth guard ── */
-const currentUser = JSON.parse(localStorage.getItem("pw_current_user") || "null");
-if (!currentUser || currentUser.role !== "tenant") {
-    window.location.href = "auth.html";
-}
+/* ── Auth guard ──
+   Resolved asynchronously in boot() at the bottom of this file (was a synchronous
+   localStorage read before the backend existed). Everything below that references
+   currentUser is only ever called after boot() has set it. */
+let currentUser = null;
 
 /* ══════════════════════════════════════════════════
    STATIC DATA
@@ -19,19 +19,18 @@ const IMGS = [
     "dashboard homes sample images assets/B85B7D15-92A0-4AEB-93A9-E1816F2BA58C.png"
 ];
 
-const userArea = currentUser?.area || "Lekki";
-const userFirst = currentUser?.firstName || "User";
-const userLast  = currentUser?.lastName  || "";
-const userFull  = `${userFirst} ${userLast}`.trim();
-const initials  = (userFirst[0] + (userLast[0] || userFirst[1] || "")).toUpperCase();
-
-
-const ACTIVITIES = [
-    { type:"saved",   icon:"heart",    desc:"You saved Luxury 3 Bed Apartment in "+userArea,  time:"2 hours ago"      },
-    { type:"inspect", icon:"calendar", desc:"You scheduled an inspection in Yaba",             time:"Today, 10:30 AM"  },
-    { type:"applied", icon:"file",     desc:"You applied for 2 Bedroom Flat in Ikoyi",        time:"Yesterday, 4:15 PM" },
-    { type:"payment", icon:"credit",   desc:"Payment of ₦1,200,000 recorded",                 time:"May 20, 2025"     }
-];
+/* These used to be computed once at parse time from a synchronous localStorage read; now
+   that currentUser resolves asynchronously, they're derived fresh each time from currentUser
+   instead (see populateUser() / getActivities()). */
+function getActivities() {
+    const userArea = currentUser?.area || "Lekki";
+    return [
+        { type:"saved",   icon:"heart",    desc:"You saved Luxury 3 Bed Apartment in "+userArea,  time:"2 hours ago"      },
+        { type:"inspect", icon:"calendar", desc:"You scheduled an inspection in Yaba",             time:"Today, 10:30 AM"  },
+        { type:"applied", icon:"file",     desc:"You applied for 2 Bedroom Flat in Ikoyi",        time:"Yesterday, 4:15 PM" },
+        { type:"payment", icon:"credit",   desc:"Payment of ₦1,200,000 recorded",                 time:"May 20, 2025"     }
+    ];
+}
 
 const INSPECTIONS = [
     { month:"MAY", day:"24", name:"Lekki 3 Bed Apartment", loc:"Lekki Phase 1", time:"10:00 AM", img:IMGS[0] },
@@ -100,6 +99,11 @@ function toast(msg) {
    POPULATE USER DATA
 ══════════════════════════════════════════════════ */
 function populateUser() {
+    const userFirst = currentUser?.firstName || "User";
+    const userLast  = currentUser?.lastName  || "";
+    const userFull  = `${userFirst} ${userLast}`.trim();
+    const initials  = (userFirst[0] + (userLast[0] || userFirst[1] || "")).toUpperCase();
+
     const greetText = `${greeting()}, ${userFirst}`;
     const areaNote  = currentUser?.area ? ` in ${currentUser.area}` : " in Lagos";
     const subtitle  = `Let's help you find your perfect space${areaNote}.`;
@@ -157,11 +161,11 @@ function populateUser() {
 /* ══════════════════════════════════════════════════
    RENDER SECTIONS
 ══════════════════════════════════════════════════ */
-function renderSaved() {
+async function renderSaved() {
     const track = document.getElementById("savedTrack");
     if (!track) return;
 
-    const homes = getSavedListings();
+    const homes = await getSavedListings();
 
     if (!homes.length) {
         track.innerHTML = `<div style="padding:20px 8px;font-size:13px;font-weight:700;color:#5d6876;">
@@ -231,11 +235,17 @@ function renderSaved() {
     }
 }
 
-function renderRec() {
+async function renderRec() {
     const grid = document.getElementById("recGrid");
     if (!grid) return;
 
-    const all = getAllListings().slice(0, 4);
+    const all = (await getAllListings()).slice(0, 4);
+
+    if (!all.length) {
+        grid.innerHTML = `<div style="padding:20px 8px;font-size:13px;font-weight:700;color:#5d6876;">
+            Couldn't load recommendations right now.</div>`;
+        return;
+    }
 
     grid.innerHTML = all.map(p => `
         <div class="rec-card" data-id="${p.id}" tabindex="0" role="button" aria-label="View ${p.title}">
@@ -309,7 +319,7 @@ function renderMessages() {
 function renderActivity() {
     const list = document.getElementById("activityList");
     if (!list) return;
-    list.innerHTML = ACTIVITIES.map(a => `
+    list.innerHTML = getActivities().map(a => `
         <div class="activity-item">
             <div class="activity-icon ${a.type}">${iconSVG(a.icon)}</div>
             <div class="activity-text">
@@ -443,9 +453,9 @@ document.addEventListener("click", closeDropdown);
 /* ══════════════════════════════════════════════════
    LOGOUT
 ══════════════════════════════════════════════════ */
-document.getElementById("logoutBtn")?.addEventListener("click", e => {
+document.getElementById("logoutBtn")?.addEventListener("click", async e => {
     e.preventDefault();
-    localStorage.removeItem("pw_current_user");
+    await PWAuth.logout();
     window.location.href = "auth.html";
 });
 
@@ -468,13 +478,33 @@ document.querySelectorAll(".db-search input, .db-mobile-search input").forEach(i
 });
 
 /* ══════════════════════════════════════════════════
-   INIT
+   INIT — resolves the session before rendering anything user-specific.
 ══════════════════════════════════════════════════ */
-document.addEventListener("DOMContentLoaded", () => {
+async function boot() {
+    PWOverlay.showLoading("Loading your dashboard…");
+
+    const { user, networkError } = await PWAuth.getSession();
+
+    if (networkError) {
+        PWOverlay.showError("Couldn't reach the server. Check your connection and try again.", {
+            retry: () => window.location.reload(),
+        });
+        return;
+    }
+    if (!user || user.role !== "tenant") {
+        window.location.href = "auth.html";
+        return;
+    }
+
+    currentUser = user;
+    PWOverlay.hide();
+
     populateUser();
     renderSaved();
     renderRec();
     renderMessages();
     renderActivity();
     renderInspections();
-});
+}
+
+document.addEventListener("DOMContentLoaded", boot);

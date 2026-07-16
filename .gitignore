@@ -1,0 +1,30 @@
+# Personal working docs — not meant to be pushed to the shared repo
+CLAUDE.md
+BACKEND-REQUIREMENTS.md
+MIGRATION-NOTES.md
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+!backend/.env.example
+*.pem
+*.key
+
+# Databases (SQLite)
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite3
+
+# Uploaded files (dev/test artifacts)
+backend/uploads/
+
+# Dependencies
+node_modules/
+
+# OS cruft
+.DS_Store
+Thumbs.db

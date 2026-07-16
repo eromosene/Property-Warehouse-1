@@ -1,0 +1,12 @@
+node_modules/
+.env
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+uploads/images/*
+!uploads/images/.gitkeep
+uploads/documents/*
+!uploads/documents/.gitkeep
+*.jar
+server.log
