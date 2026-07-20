@@ -1,15 +1,10 @@
-// Drizzle ORM schema for the Property Warehouse backend (Phase 1: auth + listings + uploads).
-//
-// Dev default is SQLite via better-sqlite3 (zero external setup — no Docker/Postgres install
-// needed to run this locally). BACKEND-REQUIREMENTS.md recommends PostgreSQL for production;
-// switching later means swapping the driver in src/db/client.js (drizzle-orm/node-postgres or
-// drizzle-orm/postgres-js instead of drizzle-orm/better-sqlite3) and re-generating migrations
-// with dialect: 'postgresql' in drizzle.config.js. Scalar arrays (amenities, ownershipDocTypes)
-// are deliberately stored as JSON text columns instead of native array columns so the schema
-// itself doesn't need to change on that switch.
-const { sqliteTable, text, integer } = require('drizzle-orm/sqlite-core');
+// Drizzle ORM schema for the Property Warehouse backend, targeting Supabase-hosted PostgreSQL
+// via drizzle-orm/node-postgres. Scalar arrays (amenities, ownershipDocTypes) are stored as
+// JSON text columns instead of native array columns, matching how the app already reads/writes
+// them (JSON.parse/JSON.stringify in services/controllers) — no behavior change from the switch.
+const { pgTable, text, integer, boolean, timestamp } = require('drizzle-orm/pg-core');
 
-const users = sqliteTable('users', {
+const users = pgTable('users', {
   id: text('id').primaryKey(),
   role: text('role', { enum: ['tenant', 'landlord', 'admin'] }).notNull(),
   firstName: text('first_name').notNull(),
@@ -27,14 +22,14 @@ const users = sqliteTable('users', {
   lga: text('lga'),
 
   // landlord verification badge, drives listing.landlordVerified in the API response
-  isVerified: integer('is_verified', { mode: 'boolean' }).notNull().default(false),
+  isVerified: boolean('is_verified').notNull().default(false),
 
-  joinedDate: integer('joined_date', { mode: 'timestamp' }).notNull(),
-  createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
-  updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull(),
+  joinedDate: timestamp('joined_date', { withTimezone: true, mode: 'date' }).notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).notNull(),
 });
 
-const listings = sqliteTable('listings', {
+const listings = pgTable('listings', {
   id: text('id').primaryKey(),
   landlordId: text('landlord_id')
     .notNull()
@@ -59,8 +54,8 @@ const listings = sqliteTable('listings', {
   // totalMoveIn is NOT a column — it's derived (rentPerYear + cautionFee + serviceCharge) in
   // the API response serializer, never trusted from the client.
 
-  isVerified: integer('is_verified', { mode: 'boolean' }).notNull().default(false),
-  isMonthly: integer('is_monthly', { mode: 'boolean' }).notNull().default(false),
+  isVerified: boolean('is_verified').notNull().default(false),
+  isMonthly: boolean('is_monthly').notNull().default(false),
 
   beds: integer('beds').notNull(),
   baths: integer('baths').notNull(),
@@ -78,28 +73,28 @@ const listings = sqliteTable('listings', {
   // JSON-encoded string[] of document type labels, e.g. '["C of O","Survey Plan"]'
   ownershipDocTypesJson: text('ownership_doc_types_json').notNull().default('[]'),
 
-  createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
-  updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).notNull(),
 });
 
-const listingImages = sqliteTable('listing_images', {
+const listingImages = pgTable('listing_images', {
   id: text('id').primaryKey(),
   listingId: text('listing_id')
     .notNull()
     .references(() => listings.id, { onDelete: 'cascade' }),
   url: text('url').notNull(),
   sortOrder: integer('sort_order').notNull().default(0),
-  createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull(),
 });
 
-const listingDocuments = sqliteTable('listing_documents', {
+const listingDocuments = pgTable('listing_documents', {
   id: text('id').primaryKey(),
   listingId: text('listing_id')
     .notNull()
     .references(() => listings.id, { onDelete: 'cascade' }),
   url: text('url').notNull(),
   docType: text('doc_type'),
-  createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull(),
 });
 
 module.exports = { users, listings, listingImages, listingDocuments };

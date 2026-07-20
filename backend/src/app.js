@@ -1,4 +1,3 @@
-const path = require('path');
 const express = require('express');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
@@ -19,11 +18,6 @@ app.use(
 );
 app.use(express.json());
 app.use(cookieParser());
-
-// Uploaded listing images/documents (dev: local disk — see BACKEND-REQUIREMENTS.md §4 for the
-// production object-storage plan). Served statically for now; documents should move behind an
-// authorized/signed-URL endpoint once this is no longer a local dev prototype.
-app.use('/uploads', express.static(path.resolve(__dirname, '../uploads')));
 
 app.get('/api/health', (req, res) => res.json({ ok: true }));
 

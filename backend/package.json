@@ -12,15 +12,16 @@
     "seed": "node src/db/seed.js"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.110.7",
     "bcryptjs": "^2.4.3",
-    "better-sqlite3": "^12.11.1",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "drizzle-orm": "^0.45.2",
     "express": "^4.19.2",
     "jsonwebtoken": "^9.0.2",
-    "multer": "^2.2.0"
+    "multer": "^2.2.0",
+    "pg": "^8.22.0"
   },
   "devDependencies": {
     "drizzle-kit": "^0.31.10"

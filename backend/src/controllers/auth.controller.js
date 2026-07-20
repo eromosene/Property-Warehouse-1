@@ -26,7 +26,7 @@ async function signup(req, res) {
     return res.status(400).json({ error: 'Password must be at least 6 characters' });
   }
 
-  const existing = db.select().from(users).where(eq(users.email, email)).get();
+  const [existing] = await db.select().from(users).where(eq(users.email, email));
   if (existing) {
     return res.status(409).json({ error: 'An account with this email already exists' });
   }
@@ -49,7 +49,7 @@ async function signup(req, res) {
     createdAt: now,
     updatedAt: now,
   };
-  db.insert(users).values(row).run();
+  await db.insert(users).values(row);
 
   setSessionCookie(res, row);
   res.status(201).json({ user: serializeUser(row) });
@@ -64,7 +64,7 @@ async function login(req, res) {
     return res.status(400).json({ error: 'email and password are required' });
   }
 
-  const user = db.select().from(users).where(eq(users.email, email)).get();
+  const [user] = await db.select().from(users).where(eq(users.email, email));
   if (!user || user.role === 'admin' || !bcrypt.compareSync(password, user.passwordHash)) {
     return res.status(401).json({ error: 'Invalid credentials. Please sign up first.' });
   }
@@ -83,7 +83,7 @@ async function adminLogin(req, res) {
     return res.status(400).json({ error: 'email and password are required' });
   }
 
-  const user = db.select().from(users).where(eq(users.email, email)).get();
+  const [user] = await db.select().from(users).where(eq(users.email, email));
   if (!user || user.role !== 'admin' || !bcrypt.compareSync(password, user.passwordHash)) {
     return res.status(401).json({ error: 'Invalid admin credentials' });
   }
