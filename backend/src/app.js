@@ -10,6 +10,11 @@ const uploadsRoutes = require('./routes/uploads.routes');
 
 const app = express();
 
+// Render terminates TLS at its edge proxy and forwards requests over plain HTTP internally.
+// Trusting the first proxy hop lets Express read X-Forwarded-* correctly (req.secure,
+// req.protocol, req.ip) instead of seeing every request as insecure.
+app.set('trust proxy', 1);
+
 const allowedOrigins = [
   process.env.FRONTEND_ORIGIN || 'https://property-warehouse-frontend.onrender.com',
   'http://localhost:5000',
