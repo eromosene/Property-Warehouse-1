@@ -14,7 +14,7 @@
 require('dotenv').config();
 const bcrypt = require('bcryptjs');
 const { eq } = require('drizzle-orm');
-const { db } = require('./client');
+const { db, pool } = require('./client');
 const { users, listings, listingImages } = require('./schema');
 
 const SEED_LANDLORD_PASSWORD = 'SeedLandlord2026!'; // dev-only login for all 6 seed landlords
@@ -222,7 +222,7 @@ function slugToNames(fullName) {
 }
 
 async function upsertUser({ email, passwordHash, role, firstName, lastName, phone, isVerified, joinedDate }) {
-  const existing = db.select().from(users).where(eq(users.email, email)).get();
+  const [existing] = await db.select().from(users).where(eq(users.email, email));
   if (existing) return existing;
   const now = new Date();
   const row = {
@@ -238,7 +238,7 @@ async function upsertUser({ email, passwordHash, role, firstName, lastName, phon
     createdAt: now,
     updatedAt: now,
   };
-  db.insert(users).values(row).run();
+  await db.insert(users).values(row);
   return row;
 }
 
@@ -253,7 +253,7 @@ async function main() {
     console.error('ADMIN_EMAIL and ADMIN_PASSWORD must be set in .env before seeding — refusing to create a default/guessable admin account.');
     process.exit(1);
   }
-  const adminExisting = db.select().from(users).where(eq(users.email, adminEmail)).get();
+  const [adminExisting] = await db.select().from(users).where(eq(users.email, adminEmail));
   if (!adminExisting) {
     await upsertUser({
       email: adminEmail,
@@ -282,47 +282,43 @@ async function main() {
       joinedDate: new Date(`${seed.landlordSince}-01-01`),
     });
 
-    const existingListing = db.select().from(listings).where(eq(listings.id, seed.id)).get();
+    const [existingListing] = await db.select().from(listings).where(eq(listings.id, seed.id));
     if (existingListing) {
       console.log(`  Listing ${seed.id} already exists, skipping`);
       continue;
     }
 
     const createdAt = new Date(seed.createdAt);
-    db.insert(listings)
-      .values({
-        id: seed.id,
-        landlordId: landlord.id,
-        landlordName: seed.landlordName,
-        landlordPhone: seed.landlordPhone,
-        landlordWhatsApp: seed.landlordWhatsApp,
-        title: seed.title,
-        area: seed.area,
-        lga: seed.lga,
-        address: seed.address,
-        type: seed.type,
-        rentPerYear: seed.rentPerYear,
-        cautionFee: seed.cautionFee,
-        serviceCharge: seed.serviceCharge,
-        isVerified: seed.isVerified,
-        isMonthly: seed.isMonthly,
-        beds: seed.beds,
-        baths: seed.baths,
-        amenitiesJson: JSON.stringify(seed.amenities),
-        description: seed.description,
-        views: seed.views,
-        status: 'active',
-        ownershipDocTypesJson: '[]',
-        createdAt,
-        updatedAt: createdAt,
-      })
-      .run();
-
-    seed.images.forEach((url, i) => {
-      db.insert(listingImages)
-        .values({ id: crypto.randomUUID(), listingId: seed.id, url, sortOrder: i, createdAt })
-        .run();
+    await db.insert(listings).values({
+      id: seed.id,
+      landlordId: landlord.id,
+      landlordName: seed.landlordName,
+      landlordPhone: seed.landlordPhone,
+      landlordWhatsApp: seed.landlordWhatsApp,
+      title: seed.title,
+      area: seed.area,
+      lga: seed.lga,
+      address: seed.address,
+      type: seed.type,
+      rentPerYear: seed.rentPerYear,
+      cautionFee: seed.cautionFee,
+      serviceCharge: seed.serviceCharge,
+      isVerified: seed.isVerified,
+      isMonthly: seed.isMonthly,
+      beds: seed.beds,
+      baths: seed.baths,
+      amenitiesJson: JSON.stringify(seed.amenities),
+      description: seed.description,
+      views: seed.views,
+      status: 'active',
+      ownershipDocTypesJson: '[]',
+      createdAt,
+      updatedAt: createdAt,
     });
+
+    for (const [i, url] of seed.images.entries()) {
+      await db.insert(listingImages).values({ id: crypto.randomUUID(), listingId: seed.id, url, sortOrder: i, createdAt });
+    }
 
     console.log(`  Created listing ${seed.id} (${seed.title}) owned by ${seed.landlordEmail}`);
   }
@@ -332,7 +328,9 @@ async function main() {
   console.log(`Seed landlord login (any of the 6 above): <their email> / ${SEED_LANDLORD_PASSWORD}`);
 }
 
-main().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
+main()
+  .catch((err) => {
+    console.error(err);
+    process.exit(1);
+  })
+  .finally(() => pool.end());

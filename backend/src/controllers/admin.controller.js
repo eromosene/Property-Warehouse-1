@@ -5,45 +5,48 @@ const { serializeListingRow, serializeListingRows } = require('../services/listi
 
 // GET /api/admin/listings — all listings, any status. Mirrors getAllListingsAdmin() in
 // listings-data.js, used by admin.js's Listings section.
-function list(req, res) {
-  const rows = db.select().from(listings).all();
-  res.json({ listings: serializeListingRows(rows) });
+async function list(req, res) {
+  const rows = await db.select().from(listings);
+  res.json({ listings: await serializeListingRows(rows) });
 }
 
-function setStatus(id, status) {
-  const row = db.select().from(listings).where(eq(listings.id, id)).get();
+async function setStatus(id, status) {
+  const [row] = await db.select().from(listings).where(eq(listings.id, id));
   if (!row) return null;
-  db.update(listings).set({ status, updatedAt: new Date() }).where(eq(listings.id, id)).run();
-  return db.select().from(listings).where(eq(listings.id, id)).get();
+  await db.update(listings).set({ status, updatedAt: new Date() }).where(eq(listings.id, id));
+  const [updated] = await db.select().from(listings).where(eq(listings.id, id));
+  return updated;
 }
 
 // PATCH /api/admin/listings/:id/approve — mirrors admin.js's approveListing().
-function approve(req, res) {
-  const updated = setStatus(req.params.id, 'active');
+async function approve(req, res) {
+  const updated = await setStatus(req.params.id, 'active');
   if (!updated) return res.status(404).json({ error: 'Listing not found' });
-  res.json({ listing: serializeListingRow(updated) });
+  res.json({ listing: await serializeListingRow(updated) });
 }
 
 // PATCH /api/admin/listings/:id/reject — mirrors admin.js's rejectListing().
-function reject(req, res) {
-  const updated = setStatus(req.params.id, 'rejected');
+async function reject(req, res) {
+  const updated = await setStatus(req.params.id, 'rejected');
   if (!updated) return res.status(404).json({ error: 'Listing not found' });
-  res.json({ listing: serializeListingRow(updated) });
+  res.json({ listing: await serializeListingRow(updated) });
 }
 
 // POST /api/admin/listings/bulk-approve — mirrors admin.js's bulkApproveListings().
-function bulkApprove(req, res) {
-  const pending = db.select().from(listings).where(eq(listings.status, 'pending')).all();
+async function bulkApprove(req, res) {
+  const pending = await db.select().from(listings).where(eq(listings.status, 'pending'));
   const now = new Date();
-  pending.forEach((l) => db.update(listings).set({ status: 'active', updatedAt: now }).where(eq(listings.id, l.id)).run());
+  for (const l of pending) {
+    await db.update(listings).set({ status: 'active', updatedAt: now }).where(eq(listings.id, l.id));
+  }
   res.json({ updatedCount: pending.length });
 }
 
 const ADMIN_EDITABLE_FIELDS = ['title', 'area', 'type', 'rentPerYear', 'landlordName', 'status'];
 
 // PATCH /api/admin/listings/:id — generic inline edit, mirrors admin.js's openListingEdit()/saveListingEdit().
-function update(req, res) {
-  const row = db.select().from(listings).where(eq(listings.id, req.params.id)).get();
+async function update(req, res) {
+  const [row] = await db.select().from(listings).where(eq(listings.id, req.params.id));
   if (!row) return res.status(404).json({ error: 'Listing not found' });
 
   const updates = {};
@@ -52,16 +55,16 @@ function update(req, res) {
   }
   updates.updatedAt = new Date();
 
-  db.update(listings).set(updates).where(eq(listings.id, row.id)).run();
-  const updated = db.select().from(listings).where(eq(listings.id, row.id)).get();
-  res.json({ listing: serializeListingRow(updated) });
+  await db.update(listings).set(updates).where(eq(listings.id, row.id));
+  const [updated] = await db.select().from(listings).where(eq(listings.id, row.id));
+  res.json({ listing: await serializeListingRow(updated) });
 }
 
 // DELETE /api/admin/listings/:id — mirrors admin.js's deleteListingAdmin().
-function remove(req, res) {
-  const row = db.select().from(listings).where(eq(listings.id, req.params.id)).get();
+async function remove(req, res) {
+  const [row] = await db.select().from(listings).where(eq(listings.id, req.params.id));
   if (!row) return res.status(404).json({ error: 'Listing not found' });
-  db.delete(listings).where(eq(listings.id, row.id)).run();
+  await db.delete(listings).where(eq(listings.id, row.id));
   res.status(204).end();
 }
 

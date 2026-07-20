@@ -19,7 +19,7 @@ function splitCsv(value) {
 
 // GET /api/listings — public browse/search/filter, mirrors listings.js's applyFilters().
 // Query params: area, type, maxRent, amenities, verifiedOnly, monthlyOnly, q, sort, page, limit
-function list(req, res) {
+async function list(req, res) {
   const { area, type, maxRent, amenities, verifiedOnly, monthlyOnly, q, sort, page, limit } = req.query;
 
   const conditions = [eq(listings.status, 'active')];
@@ -41,11 +41,10 @@ function list(req, res) {
     );
   }
 
-  let rows = db
+  let rows = await db
     .select()
     .from(listings)
-    .where(and(...conditions))
-    .all();
+    .where(and(...conditions));
 
   // Amenities require ALL selected amenities to be present — done in JS since amenities are
   // stored as a JSON column, not a queryable column (see schema.js header comment).
@@ -65,7 +64,7 @@ function list(req, res) {
   const pageRows = rows.slice((pageNum - 1) * pageSize, pageNum * pageSize);
 
   res.json({
-    listings: serializeListingRows(pageRows),
+    listings: await serializeListingRows(pageRows),
     total,
     page: pageNum,
     pageSize,
@@ -75,8 +74,8 @@ function list(req, res) {
 
 // GET /api/listings/:id — public detail view. Non-active listings are only visible to their
 // owning landlord or an admin (uses optionalAuth so req.user may be null).
-function getById(req, res) {
-  const row = db.select().from(listings).where(eq(listings.id, req.params.id)).get();
+async function getById(req, res) {
+  const [row] = await db.select().from(listings).where(eq(listings.id, req.params.id));
   if (!row) return res.status(404).json({ error: 'Listing not found' });
 
   const isOwner = req.user && req.user.id === row.landlordId;
@@ -85,32 +84,33 @@ function getById(req, res) {
     return res.status(404).json({ error: 'Listing not found' });
   }
 
-  res.json({ listing: serializeListingRow(row) });
+  res.json({ listing: await serializeListingRow(row) });
 }
 
 // GET /api/listings/:id/similar — "Similar in <area>" section on listing-detail.html
-function similar(req, res) {
-  const row = db.select().from(listings).where(eq(listings.id, req.params.id)).get();
+async function similar(req, res) {
+  const [row] = await db.select().from(listings).where(eq(listings.id, req.params.id));
   if (!row) return res.status(404).json({ error: 'Listing not found' });
 
-  const rows = db
-    .select()
-    .from(listings)
-    .where(and(eq(listings.area, row.area), eq(listings.status, 'active')))
-    .all()
+  const rows = (
+    await db
+      .select()
+      .from(listings)
+      .where(and(eq(listings.area, row.area), eq(listings.status, 'active')))
+  )
     .filter((r) => r.id !== row.id)
     .slice(0, 2);
 
-  res.json({ listings: serializeListingRows(rows) });
+  res.json({ listings: await serializeListingRows(rows) });
 }
 
 // POST /api/listings/:id/view — increments the view counter shown on listing cards/detail.
-function incrementView(req, res) {
-  const row = db.select().from(listings).where(eq(listings.id, req.params.id)).get();
+async function incrementView(req, res) {
+  const [row] = await db.select().from(listings).where(eq(listings.id, req.params.id));
   if (!row) return res.status(404).json({ error: 'Listing not found' });
 
   const views = row.views + 1;
-  db.update(listings).set({ views }).where(eq(listings.id, row.id)).run();
+  await db.update(listings).set({ views }).where(eq(listings.id, row.id));
   res.json({ views });
 }
 
@@ -133,7 +133,7 @@ const REQUIRED_CREATE_FIELDS = [
 
 // POST /api/listings — landlord-only, mirrors create-listing.js's publishListing()/saveListing().
 // New listings always start 'pending', matching saveListing()'s existing default-to-pending behavior.
-function create(req, res) {
+async function create(req, res) {
   const body = req.body;
   for (const field of REQUIRED_CREATE_FIELDS) {
     if (body[field] === undefined || body[field] === null || body[field] === '') {
@@ -168,14 +168,12 @@ function create(req, res) {
     createdAt: now,
     updatedAt: now,
   };
-  db.insert(listings).values(row).run();
+  await db.insert(listings).values(row);
 
   const imageUrls = Array.isArray(body.images) ? body.images : [];
-  imageUrls.forEach((url, i) => {
-    db.insert(listingImages)
-      .values({ id: crypto.randomUUID(), listingId: row.id, url, sortOrder: i, createdAt: now })
-      .run();
-  });
+  for (const [i, url] of imageUrls.entries()) {
+    await db.insert(listingImages).values({ id: crypto.randomUUID(), listingId: row.id, url, sortOrder: i, createdAt: now });
+  }
 
   // Ownership document URLs (from POST /api/uploads/documents) — previously accepted nowhere,
   // so create-listing.js's uploaded ownership docs were silently discarded. docType is left
@@ -183,13 +181,11 @@ function create(req, res) {
   // separately-submitted ownershipDocTypes list already captures which types the landlord says
   // they have.
   const documentUrls = Array.isArray(body.documents) ? body.documents : [];
-  documentUrls.forEach((url) => {
-    db.insert(listingDocuments)
-      .values({ id: crypto.randomUUID(), listingId: row.id, url, docType: null, createdAt: now })
-      .run();
-  });
+  for (const url of documentUrls) {
+    await db.insert(listingDocuments).values({ id: crypto.randomUUID(), listingId: row.id, url, docType: null, createdAt: now });
+  }
 
-  res.status(201).json({ listing: serializeListingRow(row) });
+  res.status(201).json({ listing: await serializeListingRow(row) });
 }
 
 const OWNER_EDITABLE_FIELDS = [
@@ -213,8 +209,8 @@ const OWNER_EDITABLE_FIELDS = [
 // PATCH /api/listings/:id — landlord editing their own listing. Not present in the current
 // frontend (create-listing.js only ever creates), but listed in BACKEND-REQUIREMENTS.md §2 as
 // a needed addition. Editing an already-active listing sends it back to 'pending' for re-review.
-function updateOwn(req, res) {
-  const row = db.select().from(listings).where(eq(listings.id, req.params.id)).get();
+async function updateOwn(req, res) {
+  const [row] = await db.select().from(listings).where(eq(listings.id, req.params.id));
   if (!row) return res.status(404).json({ error: 'Listing not found' });
   if (row.landlordId !== req.user.id) return res.status(403).json({ error: 'Forbidden' });
 
@@ -228,19 +224,19 @@ function updateOwn(req, res) {
   updates.updatedAt = new Date();
   if (row.status === 'active') updates.status = 'pending';
 
-  db.update(listings).set(updates).where(eq(listings.id, row.id)).run();
-  const updated = db.select().from(listings).where(eq(listings.id, row.id)).get();
-  res.json({ listing: serializeListingRow(updated) });
+  await db.update(listings).set(updates).where(eq(listings.id, row.id));
+  const [updated] = await db.select().from(listings).where(eq(listings.id, row.id));
+  res.json({ listing: await serializeListingRow(updated) });
 }
 
 // DELETE /api/listings/:id — landlord deleting their own listing, mirrors deleteListing() in
 // listings-data.js as called from landlord-dashboard.js.
-function deleteOwn(req, res) {
-  const row = db.select().from(listings).where(eq(listings.id, req.params.id)).get();
+async function deleteOwn(req, res) {
+  const [row] = await db.select().from(listings).where(eq(listings.id, req.params.id));
   if (!row) return res.status(404).json({ error: 'Listing not found' });
   if (row.landlordId !== req.user.id) return res.status(403).json({ error: 'Forbidden' });
 
-  db.delete(listings).where(eq(listings.id, row.id)).run();
+  await db.delete(listings).where(eq(listings.id, row.id));
   res.status(204).end();
 }
 

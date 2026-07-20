@@ -1,59 +1,86 @@
-// Local-disk multer storage for Phase 1 (dev). Replaces create-listing.js's client-side
-// canvas-compress-to-base64-in-localStorage approach, which hits the browser's ~5-10MB
-// localStorage quota fast (see BACKEND-REQUIREMENTS.md §4). Swap this file for an S3/R2
-// pre-signed-upload flow in a later phase — the /api/uploads/* route contracts (multipart
-// upload in, { urls: [...] } out) don't need to change for that swap.
-const fs = require('fs');
-const path = require('path');
+// Supabase Storage for uploaded listing images/documents. Replaces create-listing.js's
+// client-side canvas-compress-to-base64-in-localStorage approach (Phase 1), then local-disk
+// multer storage (Stage 1 backend). The /api/uploads/* route contract (multipart upload in,
+// { urls: [...] } out) is unchanged by this swap — only what's inside src/utils/storage.js.
+//
+// Images go to SUPABASE_IMAGES_BUCKET (public) — the returned value is a real, permanent public
+// URL, since listing photos get rendered as <img src> on listings.html/listing-detail.html.
+//
+// Documents go to SUPABASE_DOCUMENTS_BUCKET (private) — ownership documents are
+// verification-only and, per serialize.js, never returned in any API response or rendered
+// anywhere in the app today. So instead of a URL, the returned/stored value is the bare storage
+// object PATH (e.g. "1737000000000-ab12cd34.pdf"). Nothing currently treats it as a fetchable
+// URL; if a "view this document" admin feature is added later, generate a short-lived signed
+// URL from that path on demand (supabase.storage.from(bucket).createSignedUrl(path, expirySeconds))
+// rather than storing a signed URL — a signed URL embedded in the DB permanently would either
+// expire (broken link) or, if given a long expiry, sit around as a long-lived bearer credential.
 const crypto = require('crypto');
+const path = require('path');
 const multer = require('multer');
+const { createClient } = require('@supabase/supabase-js');
 
-const UPLOAD_ROOT = path.isAbsolute(process.env.UPLOAD_DIR || '')
-  ? process.env.UPLOAD_DIR
-  : path.resolve(__dirname, '../../', process.env.UPLOAD_DIR || './uploads');
+for (const name of ['SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY']) {
+  if (!process.env[name]) {
+    throw new Error(`${name} is missing. Set it in your .env file — see .env.example.`);
+  }
+}
 
-const IMAGE_DIR = path.join(UPLOAD_ROOT, 'images');
-const DOCUMENT_DIR = path.join(UPLOAD_ROOT, 'documents');
-fs.mkdirSync(IMAGE_DIR, { recursive: true });
-fs.mkdirSync(DOCUMENT_DIR, { recursive: true });
+const IMAGES_BUCKET = process.env.SUPABASE_IMAGES_BUCKET || 'listings';
+const DOCUMENTS_BUCKET = process.env.SUPABASE_DOCUMENTS_BUCKET || 'listing-documents';
+
+// service_role key bypasses Row Level Security — this client must only ever be used
+// server-side (it is; nothing here is exposed to the frontend).
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
 
 const MAX_BYTES = Number(process.env.MAX_UPLOAD_MB || 10) * 1024 * 1024;
 
-function makeStorage(dir) {
-  return multer.diskStorage({
-    destination: (req, file, cb) => cb(null, dir),
-    filename: (req, file, cb) => {
-      const ext = path.extname(file.originalname).toLowerCase();
-      cb(null, `${Date.now()}-${crypto.randomBytes(8).toString('hex')}${ext}`);
-    },
-  });
+function makeStorage() {
+  // Buffer in memory instead of writing to local disk — the buffer is uploaded straight to
+  // Supabase Storage in the controller, nothing touches this server's filesystem.
+  return multer.memoryStorage();
+}
+
+function randomObjectKey(originalname) {
+  const ext = path.extname(originalname).toLowerCase();
+  return `${Date.now()}-${crypto.randomBytes(8).toString('hex')}${ext}`;
 }
 
 const IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
 const DOCUMENT_TYPES = new Set(['image/jpeg', 'image/png', 'application/pdf']);
 
 const uploadImages = multer({
-  storage: makeStorage(IMAGE_DIR),
+  storage: makeStorage(),
   limits: { fileSize: MAX_BYTES, files: 6 },
   fileFilter: (req, file, cb) => cb(null, IMAGE_TYPES.has(file.mimetype)),
 });
 
 const uploadDocuments = multer({
-  storage: makeStorage(DOCUMENT_DIR),
+  storage: makeStorage(),
   limits: { fileSize: MAX_BYTES, files: 5 },
   fileFilter: (req, file, cb) => cb(null, DOCUMENT_TYPES.has(file.mimetype)),
 });
 
-// Returns an ABSOLUTE URL, not a root-relative path. The uploaded file is served from this
-// backend's origin (e.g. http://localhost:4000), but the URL gets stored on a listing and
-// rendered as <img src> on pages served from a different origin (the static frontend on
-// :5000) — a root-relative "/uploads/..." path would resolve against the FRONTEND's origin in
-// that context and 404. Uses the incoming request's own host, so this stays correct without a
-// separately-configured "public URL" setting that could drift out of sync; if this backend is
-// ever put behind a reverse proxy, Express's `trust proxy` setting needs to be configured so
-// req.protocol/req.get('host') reflect the real public-facing host instead of the proxy's.
-function toPublicUrl(req, kind, filename) {
-  return `${req.protocol}://${req.get('host')}/uploads/${kind}/${filename}`;
+// Uploads one already-validated multer file (from req.files, memory storage) to the given
+// Supabase bucket and returns the storage object path.
+async function uploadFileToBucket(bucket, file) {
+  const key = randomObjectKey(file.originalname);
+  const { error } = await supabase.storage.from(bucket).upload(key, file.buffer, {
+    contentType: file.mimetype,
+    upsert: false,
+  });
+  if (error) throw new Error(`Supabase Storage upload failed (${bucket}/${key}): ${error.message}`);
+  return key;
 }
 
-module.exports = { uploadImages, uploadDocuments, toPublicUrl };
+// Images: public bucket, so the durable value is the public URL.
+async function uploadImageFile(file) {
+  const key = await uploadFileToBucket(IMAGES_BUCKET, file);
+  return supabase.storage.from(IMAGES_BUCKET).getPublicUrl(key).data.publicUrl;
+}
+
+// Documents: private bucket, so the durable value is the object path (see file header comment).
+async function uploadDocumentFile(file) {
+  return uploadFileToBucket(DOCUMENTS_BUCKET, file);
+}
+
+module.exports = { uploadImages, uploadDocuments, uploadImageFile, uploadDocumentFile };

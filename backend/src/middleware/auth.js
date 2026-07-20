@@ -3,17 +3,18 @@ const { db } = require('../db/client');
 const { users } = require('../db/schema');
 const { COOKIE_NAME, verifySession } = require('../utils/jwt');
 
-function loadUserFromRequest(req) {
+async function loadUserFromRequest(req) {
   const token = req.cookies[COOKIE_NAME];
   if (!token) return null;
   const payload = verifySession(token); // throws if invalid/expired
-  return db.select().from(users).where(eq(users.id, payload.sub)).get() || null;
+  const [user] = await db.select().from(users).where(eq(users.id, payload.sub));
+  return user || null;
 }
 
 // Requires a valid session; 401s otherwise. Populates req.user with the full DB row.
-function requireAuth(req, res, next) {
+async function requireAuth(req, res, next) {
   try {
-    const user = loadUserFromRequest(req);
+    const user = await loadUserFromRequest(req);
     if (!user) return res.status(401).json({ error: 'Not authenticated' });
     req.user = user;
     next();
@@ -25,9 +26,9 @@ function requireAuth(req, res, next) {
 // Populates req.user if a valid session cookie is present, but never rejects the request.
 // Used by public endpoints (e.g. GET /api/listings) that behave slightly differently for
 // a logged-in tenant/landlord without requiring login.
-function optionalAuth(req, res, next) {
+async function optionalAuth(req, res, next) {
   try {
-    req.user = loadUserFromRequest(req);
+    req.user = await loadUserFromRequest(req);
   } catch (err) {
     req.user = null;
   }
