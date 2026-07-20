@@ -5,8 +5,14 @@ const { users } = require('../db/schema');
 const { COOKIE_NAME, signSession, sessionCookieOptions } = require('../utils/jwt');
 const { serializeUser } = require('../utils/serialize');
 
+// Sets the session cookie (still used for local dev, where frontend/backend share a site) and
+// returns the raw token so callers can also put it in the JSON body for Bearer-header auth —
+// needed because the live frontend/backend are on different domains and SameSite cookies alone
+// aren't reliable there.
 function setSessionCookie(res, user) {
-  res.cookie(COOKIE_NAME, signSession(user), sessionCookieOptions());
+  const token = signSession(user);
+  res.cookie(COOKIE_NAME, token, sessionCookieOptions());
+  return token;
 }
 
 // POST /api/auth/signup
@@ -51,8 +57,8 @@ async function signup(req, res) {
   };
   await db.insert(users).values(row);
 
-  setSessionCookie(res, row);
-  res.status(201).json({ user: serializeUser(row) });
+  const token = setSessionCookie(res, row);
+  res.status(201).json({ user: serializeUser(row), token });
 }
 
 // POST /api/auth/login
@@ -72,8 +78,8 @@ async function login(req, res) {
     return res.status(401).json({ error: 'Invalid credentials. Please sign up first.' });
   }
 
-  setSessionCookie(res, user);
-  res.json({ user: serializeUser(user) });
+  const token = setSessionCookie(res, user);
+  res.json({ user: serializeUser(user), token });
 }
 
 // POST /api/auth/admin/login — separate from tenant/landlord login on purpose.
@@ -88,8 +94,8 @@ async function adminLogin(req, res) {
     return res.status(401).json({ error: 'Invalid admin credentials' });
   }
 
-  setSessionCookie(res, user);
-  res.json({ user: serializeUser(user) });
+  const token = setSessionCookie(res, user);
+  res.json({ user: serializeUser(user), token });
 }
 
 // POST /api/auth/logout

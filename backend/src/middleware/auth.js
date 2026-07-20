@@ -3,8 +3,17 @@ const { db } = require('../db/client');
 const { users } = require('../db/schema');
 const { COOKIE_NAME, verifySession } = require('../utils/jwt');
 
+// Cookie first (local dev, same-site), falling back to Authorization: Bearer <token>
+// (cross-domain production, where the frontend and backend are on different sites).
+function extractToken(req) {
+  if (req.cookies[COOKIE_NAME]) return req.cookies[COOKIE_NAME];
+  const authHeader = req.headers.authorization || '';
+  if (authHeader.startsWith('Bearer ')) return authHeader.slice('Bearer '.length);
+  return null;
+}
+
 async function loadUserFromRequest(req) {
-  const token = req.cookies[COOKIE_NAME];
+  const token = extractToken(req);
   if (!token) return null;
   const payload = verifySession(token); // throws if invalid/expired
   const [user] = await db.select().from(users).where(eq(users.id, payload.sub));

@@ -6,17 +6,27 @@
    (PWAuth), and a generic loading/error overlay (PWOverlay).
 ══════════════════════════════════════════════════ */
 
+const PW_TOKEN_KEY = "pw_token";
+
 const PWApi = (() => {
   // Generic fetch wrapper: always sends cookies, always parses JSON, and — importantly —
   // distinguishes "the backend is unreachable" (status: 0) from a real HTTP error status, so
   // callers never mistake a network blip for a 401/404/etc.
+  //
+  // Also attaches a Bearer token from localStorage when present. The session cookie alone
+  // isn't reliable in production, where the frontend and backend are on different domains
+  // (property-warehouse-frontend.onrender.com / property-warehouse-1.onrender.com) — the
+  // Bearer header works across domains where the cookie may not.
   async function request(path, options = {}) {
     let res;
+    const token = localStorage.getItem(PW_TOKEN_KEY);
+    const headers = { "Content-Type": "application/json", ...options.headers };
+    if (token) headers.Authorization = `Bearer ${token}`;
     try {
       res = await fetch(API_BASE + path, {
         credentials: "include",
-        headers: { "Content-Type": "application/json" },
         ...options,
+        headers,
       });
     } catch (networkErr) {
       return { ok: false, status: 0, error: "network", data: null };
@@ -38,27 +48,35 @@ const PWAuth = (() => {
   // (e.g. prefilling a chat form). undefined = never checked this page load; null = logged out.
   let cachedUser;
 
+  function storeToken(res) {
+    if (res.ok && res.data?.token) localStorage.setItem(PW_TOKEN_KEY, res.data.token);
+  }
+
   async function signup(payload) {
     const res = await PWApi.request("/api/auth/signup", { method: "POST", body: JSON.stringify(payload) });
     if (res.ok) cachedUser = res.data.user;
+    storeToken(res);
     return res;
   }
 
   async function login(payload) {
     const res = await PWApi.request("/api/auth/login", { method: "POST", body: JSON.stringify(payload) });
     if (res.ok) cachedUser = res.data.user;
+    storeToken(res);
     return res;
   }
 
   async function adminLogin(payload) {
     const res = await PWApi.request("/api/auth/admin/login", { method: "POST", body: JSON.stringify(payload) });
     if (res.ok) cachedUser = res.data.user;
+    storeToken(res);
     return res;
   }
 
   async function logout() {
     const res = await PWApi.request("/api/auth/logout", { method: "POST" });
     cachedUser = null;
+    localStorage.removeItem(PW_TOKEN_KEY);
     return res;
   }
 
