@@ -37,10 +37,16 @@ function verifySession(token) {
 }
 
 function sessionCookieOptions() {
+  // Frontend and backend are deployed on different onrender.com subdomains, which browsers
+  // treat as cross-site. SameSite=Lax cookies are never sent on cross-site fetch requests
+  // (only on top-level navigations), so the session cookie must be SameSite=None in
+  // production — which in turn requires Secure. Locally both run on http://localhost, where
+  // None+Secure would just get silently dropped over plain HTTP, so we fall back to Lax there.
+  const isProduction = process.env.NODE_ENV === 'production';
   return {
     httpOnly: true,
-    sameSite: 'lax',
-    secure: process.env.NODE_ENV === 'production',
+    sameSite: isProduction ? 'none' : 'lax',
+    secure: isProduction,
     maxAge: parseDurationMs(process.env.JWT_EXPIRES_IN || '7d'),
   };
 }
