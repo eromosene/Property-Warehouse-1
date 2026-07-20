@@ -10,9 +10,19 @@ const uploadsRoutes = require('./routes/uploads.routes');
 
 const app = express();
 
+// TODO: lock this down to the exact deployed frontend origin once it's known,
+// instead of allowing any *.onrender.com subdomain.
+const onrenderOriginPattern = /^https:\/\/([a-z0-9-]+\.)*onrender\.com$/;
+
 app.use(
   cors({
-    origin: process.env.FRONTEND_ORIGIN || 'http://localhost:5000',
+    origin: (origin, callback) => {
+      const allowedOrigin = process.env.FRONTEND_ORIGIN || 'http://localhost:5000';
+      if (!origin || origin === allowedOrigin || onrenderOriginPattern.test(origin)) {
+        return callback(null, true);
+      }
+      return callback(new Error('Not allowed by CORS'));
+    },
     credentials: true,
   })
 );
