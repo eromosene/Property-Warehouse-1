@@ -157,9 +157,12 @@ async function removeThumb(idx) {
   try {
     const token = localStorage.getItem(PW_TOKEN_KEY);
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
-    await fetch(`${API_BASE}/api/uploads/images/${item.key}`, { method: 'DELETE', credentials: 'include', headers });
+    const res = await fetch(`${API_BASE}/api/uploads/images/${item.key}`, { method: 'DELETE', credentials: 'include', headers });
+    if (!res.ok) throw new Error('delete failed');
   } catch (err) {
-    /* best-effort cleanup — the listing publish payload no longer references this file either way */
+    // The photo is already gone from the form either way — it won't be published — but the file
+    // may still be sitting in storage, so make that visible instead of failing silently.
+    alert("Removed from the form, but couldn't confirm it was deleted from the server.");
   }
 }
 
@@ -263,9 +266,12 @@ async function removeDoc(idx) {
   try {
     const token = localStorage.getItem(PW_TOKEN_KEY);
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
-    await fetch(`${API_BASE}/api/uploads/documents/${doc.key}`, { method: 'DELETE', credentials: 'include', headers });
+    const res = await fetch(`${API_BASE}/api/uploads/documents/${doc.key}`, { method: 'DELETE', credentials: 'include', headers });
+    if (!res.ok) throw new Error('delete failed');
   } catch (err) {
-    /* best-effort cleanup — the listing publish payload no longer references this file either way */
+    // The document is already gone from the form either way — it won't be published — but the
+    // file may still be sitting in storage, so make that visible instead of failing silently.
+    alert("Removed from the form, but couldn't confirm it was deleted from the server.");
   }
 }
 
