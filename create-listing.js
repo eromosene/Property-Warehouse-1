@@ -259,16 +259,33 @@ function renderDocList() {
 // Storage if it finished uploading (nothing to delete yet if it's still mid-upload or errored).
 async function removeDoc(idx) {
   const doc = uploadedDocs[idx];
-  if (!doc || doc.status === 'uploading') return;
+  console.log('removeDoc called', idx, doc); // TEMP DEBUG — remove once live delete bug is found
+  if (!doc || doc.status === 'uploading') {
+    console.log('removeDoc: bailing early (no doc, or still uploading)', doc); // TEMP DEBUG
+    return;
+  }
   uploadedDocs.splice(idx, 1);
   renderDocList();
-  if (!doc.key) return;
+  console.log('removeDoc: doc.key =', doc.key); // TEMP DEBUG
+  if (!doc.key) {
+    console.log('removeDoc: no key — nothing was uploaded, skipping DELETE request'); // TEMP DEBUG
+    return;
+  }
   try {
     const token = localStorage.getItem(PW_TOKEN_KEY);
+    console.log('removeDoc: pw_token present in localStorage?', !!token); // TEMP DEBUG
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
-    const res = await fetch(`${API_BASE}/api/uploads/documents/${doc.key}`, { method: 'DELETE', credentials: 'include', headers });
-    if (!res.ok) throw new Error('delete failed');
+    const url = `${API_BASE}/api/uploads/documents/${doc.key}`;
+    console.log('removeDoc: sending DELETE', url); // TEMP DEBUG
+    const res = await fetch(url, { method: 'DELETE', credentials: 'include', headers });
+    console.log('removeDoc: response status', res.status, 'ok?', res.ok); // TEMP DEBUG
+    if (!res.ok) {
+      const body = await res.text().catch(() => '<unreadable body>');
+      console.log('removeDoc: error response body', body); // TEMP DEBUG
+      throw new Error('delete failed');
+    }
   } catch (err) {
+    console.log('removeDoc: caught error', err); // TEMP DEBUG
     // The document is already gone from the form either way — it won't be published — but the
     // file may still be sitting in storage, so make that visible instead of failing silently.
     alert("Removed from the form, but couldn't confirm it was deleted from the server.");
