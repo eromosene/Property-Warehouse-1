@@ -84,11 +84,34 @@ function handleFiles(files) {
     if (file.size > 5 * 1024 * 1024) { alert(`"${file.name}" exceeds the 5 MB limit.`); return; }
     const reader = new FileReader();
     reader.onload = e => compressImage(e.target.result, compressed => {
-      uploadedImages.push(compressed);
+      // Uploads to Supabase as soon as it's picked (not batched at Publish) so the remove
+      // button on each thumb has a real storage key to delete — see removeThumb().
+      const item = { previewSrc: compressed, key: null, url: null, status: 'uploading' };
+      uploadedImages.push(item);
       renderThumbs();
+      uploadOneImage(item);
     });
     reader.readAsDataURL(file);
   });
+}
+
+async function uploadOneImage(item) {
+  try {
+    const blob = await dataUrlToBlob(item.previewSrc);
+    const formData = new FormData();
+    formData.append('images', blob, 'photo.jpg');
+    const token = localStorage.getItem(PW_TOKEN_KEY);
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    const res = await fetch(API_BASE + '/api/uploads/images', { method: 'POST', credentials: 'include', headers, body: formData });
+    if (!res.ok) throw new Error('upload failed');
+    const data = await res.json();
+    item.key = data.files[0].key;
+    item.url = data.files[0].url;
+    item.status = 'done';
+  } catch (err) {
+    item.status = 'error';
+  }
+  renderThumbs();
 }
 
 function compressImage(dataUrl, callback) {
@@ -113,17 +136,31 @@ function renderThumbs() {
   const count = document.getElementById('clPhotoCount');
   if (count) count.textContent = `${uploadedImages.length} / 6`;
   if (!strip) return;
-  strip.innerHTML = uploadedImages.map((src, i) => `
+  strip.innerHTML = uploadedImages.map((item, i) => `
     <div class="cl-thumb">
-      <img src="${src}" alt="Photo ${i + 1}" />
+      <img src="${item.previewSrc}" alt="Photo ${i + 1}" />
       ${i === 0 ? '<span class="cl-thumb-badge">Cover</span>' : ''}
-      <button class="cl-thumb-remove" type="button" onclick="removeThumb(${i})" title="Remove">&#215;</button>
+      ${item.status === 'uploading' ? '<div class="cl-thumb-spinner"></div>' : ''}
+      ${item.status === 'error' ? '<div class="cl-thumb-error" title="Upload failed">!</div>' : ''}
+      <button class="cl-thumb-remove" type="button" onclick="removeThumb(${i})" title="Remove" ${item.status === 'uploading' ? 'disabled' : ''}>&#215;</button>
     </div>`).join('');
 }
 
-function removeThumb(idx) {
+// Removes the thumb from the UI immediately, then best-effort deletes the file from Supabase
+// Storage if it finished uploading (nothing to delete yet if it's still mid-upload or errored).
+async function removeThumb(idx) {
+  const item = uploadedImages[idx];
+  if (!item || item.status === 'uploading') return;
   uploadedImages.splice(idx, 1);
   renderThumbs();
+  if (!item.key) return;
+  try {
+    const token = localStorage.getItem(PW_TOKEN_KEY);
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    await fetch(`${API_BASE}/api/uploads/images/${item.key}`, { method: 'DELETE', credentials: 'include', headers });
+  } catch (err) {
+    /* best-effort cleanup — the listing publish payload no longer references this file either way */
+  }
 }
 
 /* ── Document Upload ── */
@@ -160,11 +197,33 @@ function handleDocFiles(files) {
     }
     const reader = new FileReader();
     reader.onload = e => {
-      uploadedDocs.push({ name: file.name, type: file.type, data: e.target.result });
+      // Uploads to Supabase as soon as it's picked (not batched at Publish) so the remove
+      // button on each row has a real storage key to delete — see removeDoc().
+      const item = { name: file.name, type: file.type, data: e.target.result, key: null, status: 'uploading' };
+      uploadedDocs.push(item);
       renderDocList();
+      uploadOneDoc(item);
     };
     reader.readAsDataURL(file);
   });
+}
+
+async function uploadOneDoc(item) {
+  try {
+    const blob = await dataUrlToBlob(item.data);
+    const formData = new FormData();
+    formData.append('documents', blob, item.name);
+    const token = localStorage.getItem(PW_TOKEN_KEY);
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    const res = await fetch(API_BASE + '/api/uploads/documents', { method: 'POST', credentials: 'include', headers, body: formData });
+    if (!res.ok) throw new Error('upload failed');
+    const data = await res.json();
+    item.key = data.files[0].key;
+    item.status = 'done';
+  } catch (err) {
+    item.status = 'error';
+  }
+  renderDocList();
 }
 
 function renderDocList() {
@@ -180,18 +239,34 @@ function renderDocList() {
     const icon  = isPdf
       ? `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#e53e3e" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>`
       : `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#a97e4b" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>`;
+    const status = doc.status === 'uploading' ? '<span class="cl-doc-status">Uploading…</span>'
+      : doc.status === 'error' ? '<span class="cl-doc-status cl-doc-status--error">Failed</span>'
+      : '';
     return `
     <div class="cl-doc-item">
       <div class="cl-doc-icon">${icon}</div>
       <div class="cl-doc-name">${doc.name}</div>
-      <button class="cl-thumb-remove" type="button" onclick="removeDoc(${i})" title="Remove">&#215;</button>
+      ${status}
+      <button class="cl-thumb-remove" type="button" onclick="removeDoc(${i})" title="Remove" ${doc.status === 'uploading' ? 'disabled' : ''}>&#215;</button>
     </div>`;
   }).join('');
 }
 
-function removeDoc(idx) {
+// Removes the row from the UI immediately, then best-effort deletes the file from Supabase
+// Storage if it finished uploading (nothing to delete yet if it's still mid-upload or errored).
+async function removeDoc(idx) {
+  const doc = uploadedDocs[idx];
+  if (!doc || doc.status === 'uploading') return;
   uploadedDocs.splice(idx, 1);
   renderDocList();
+  if (!doc.key) return;
+  try {
+    const token = localStorage.getItem(PW_TOKEN_KEY);
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    await fetch(`${API_BASE}/api/uploads/documents/${doc.key}`, { method: 'DELETE', credentials: 'include', headers });
+  } catch (err) {
+    /* best-effort cleanup — the listing publish payload no longer references this file either way */
+  }
 }
 
 /* ── Step Navigation ── */
@@ -289,46 +364,16 @@ function updatePricePreview() {
    multipart boundary itself), so these call fetch() directly instead of going through
    PWApi.request (which defaults to Content-Type: application/json). The client-side
    compression in compressImage() is kept as-is — only the final "embed as base64" step is
-   replaced with a real upload. */
+   replaced with a real upload.
+
+   Photos and documents upload to Supabase as soon as they're picked (uploadOneImage/uploadOneDoc,
+   near handleFiles/handleDocFiles above) rather than in one batch at Publish — that's what gives
+   each thumb/row a real storage key so its remove button can actually delete the file instead of
+   just clearing a local preview. Publish then just reads the already-uploaded key/url off each
+   item (see publishListing() below). */
 async function dataUrlToBlob(dataUrl) {
   const res = await fetch(dataUrl);
   return res.blob();
-}
-
-async function uploadImageFiles() {
-  if (!uploadedImages.length) return { ok: true, urls: [] };
-  const formData = new FormData();
-  for (let i = 0; i < uploadedImages.length; i++) {
-    formData.append('images', await dataUrlToBlob(uploadedImages[i]), `photo-${i + 1}.jpg`);
-  }
-  try {
-    const token = localStorage.getItem(PW_TOKEN_KEY);
-    const headers = token ? { Authorization: `Bearer ${token}` } : {};
-    const res = await fetch(API_BASE + '/api/uploads/images', { method: 'POST', credentials: 'include', headers, body: formData });
-    if (!res.ok) return { ok: false, networkError: false };
-    const data = await res.json();
-    return { ok: true, urls: data.urls };
-  } catch (err) {
-    return { ok: false, networkError: true };
-  }
-}
-
-async function uploadDocumentFiles() {
-  if (!uploadedDocs.length) return { ok: true, urls: [] };
-  const formData = new FormData();
-  for (const doc of uploadedDocs) {
-    formData.append('documents', await dataUrlToBlob(doc.data), doc.name);
-  }
-  try {
-    const token = localStorage.getItem(PW_TOKEN_KEY);
-    const headers = token ? { Authorization: `Bearer ${token}` } : {};
-    const res = await fetch(API_BASE + '/api/uploads/documents', { method: 'POST', credentials: 'include', headers, body: formData });
-    if (!res.ok) return { ok: false, networkError: false };
-    const data = await res.json();
-    return { ok: true, urls: data.urls };
-  } catch (err) {
-    return { ok: false, networkError: true };
-  }
 }
 
 function showPublishError(msg) {
@@ -364,30 +409,28 @@ async function publishListing() {
   const urlImages = [...document.querySelectorAll('.cl-img-url')]
     .map(i => i.value.trim()).filter(u => u.length > 0);
 
-  // Upload any device-selected photos, then any ownership documents. Each is a separate
-  // multipart request to its own endpoint; a failure at either step stops here and leaves all
-  // form data/local previews intact so the user can just retry Publish.
-  const imageUpload = await uploadImageFiles();
-  if (!imageUpload.ok) {
-    showPublishError(imageUpload.networkError
-      ? "Couldn't reach the server to upload photos. Check your connection and try again."
-      : 'Something went wrong uploading your photos. Please try again.');
+  // Photos/documents already uploaded to Supabase as they were picked (see uploadOneImage/
+  // uploadOneDoc) — just confirm nothing is still mid-upload or failed before publishing.
+  if (uploadedImages.some(i => i.status === 'uploading') || uploadedDocs.some(d => d.status === 'uploading')) {
+    showPublishError('Please wait for all photo/document uploads to finish before publishing.');
+    publishBtn.disabled = false;
+    publishBtn.textContent = originalBtnText;
+    return;
+  }
+  if (uploadedImages.some(i => i.status === 'error')) {
+    showPublishError('One of your photos failed to upload. Remove it and try again.');
+    publishBtn.disabled = false;
+    publishBtn.textContent = originalBtnText;
+    return;
+  }
+  if (uploadedDocs.some(d => d.status === 'error')) {
+    showPublishError('One of your documents failed to upload. Remove it and try again.');
     publishBtn.disabled = false;
     publishBtn.textContent = originalBtnText;
     return;
   }
 
-  const docUpload = await uploadDocumentFiles();
-  if (!docUpload.ok) {
-    showPublishError(docUpload.networkError
-      ? "Couldn't reach the server to upload documents. Check your connection and try again."
-      : 'Something went wrong uploading your documents. Please try again.');
-    publishBtn.disabled = false;
-    publishBtn.textContent = originalBtnText;
-    return;
-  }
-
-  const images = [...imageUpload.urls, ...urlImages];
+  const images = [...uploadedImages.map(i => i.url), ...urlImages];
   if (!images.length) {
     images.push('https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&q=80');
   }
@@ -420,7 +463,7 @@ async function publishListing() {
     amenities,
     description:       document.getElementById('clDesc').value.trim(),
     images,
-    documents:         docUpload.urls,
+    documents:         uploadedDocs.map(d => d.key),
     ownershipDocTypes: docTypes,
   };
 

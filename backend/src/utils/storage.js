@@ -40,9 +40,12 @@ function makeStorage() {
   return multer.memoryStorage();
 }
 
-function randomObjectKey(originalname) {
+// Keys are namespaced "<landlordId>-<timestamp>-<random><ext>" so a DELETE request can be
+// authorized by prefix match alone (see uploads.controller.js) without a DB lookup — nothing
+// about an in-progress, not-yet-published listing is persisted anywhere else.
+function randomObjectKey(originalname, userId) {
   const ext = path.extname(originalname).toLowerCase();
-  return `${Date.now()}-${crypto.randomBytes(8).toString('hex')}${ext}`;
+  return `${userId}-${Date.now()}-${crypto.randomBytes(8).toString('hex')}${ext}`;
 }
 
 const IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
@@ -61,9 +64,9 @@ const uploadDocuments = multer({
 });
 
 // Uploads one already-validated multer file (from req.files, memory storage) to the given
-// Supabase bucket and returns the storage object path.
-async function uploadFileToBucket(bucket, file) {
-  const key = randomObjectKey(file.originalname);
+// Supabase bucket and returns the storage object key.
+async function uploadFileToBucket(bucket, file, userId) {
+  const key = randomObjectKey(file.originalname, userId);
   const { error } = await supabase.storage.from(bucket).upload(key, file.buffer, {
     contentType: file.mimetype,
     upsert: false,
@@ -72,15 +75,39 @@ async function uploadFileToBucket(bucket, file) {
   return key;
 }
 
-// Images: public bucket, so the durable value is the public URL.
-async function uploadImageFile(file) {
-  const key = await uploadFileToBucket(IMAGES_BUCKET, file);
-  return supabase.storage.from(IMAGES_BUCKET).getPublicUrl(key).data.publicUrl;
+// Images: public bucket. Returns both the key (needed for delete) and the public URL (needed
+// for rendering + the listing payload).
+async function uploadImageFile(file, userId) {
+  const key = await uploadFileToBucket(IMAGES_BUCKET, file, userId);
+  const url = supabase.storage.from(IMAGES_BUCKET).getPublicUrl(key).data.publicUrl;
+  return { key, url };
 }
 
-// Documents: private bucket, so the durable value is the object path (see file header comment).
-async function uploadDocumentFile(file) {
-  return uploadFileToBucket(DOCUMENTS_BUCKET, file);
+// Documents: private bucket, so the durable value is the object path/key (see file header
+// comment) — there is no separate "url" for documents.
+async function uploadDocumentFile(file, userId) {
+  const key = await uploadFileToBucket(DOCUMENTS_BUCKET, file, userId);
+  return { key };
 }
 
-module.exports = { uploadImages, uploadDocuments, uploadImageFile, uploadDocumentFile };
+async function deleteFileFromBucket(bucket, key) {
+  const { error } = await supabase.storage.from(bucket).remove([key]);
+  if (error) throw new Error(`Supabase Storage delete failed (${bucket}/${key}): ${error.message}`);
+}
+
+function deleteImageFile(key) {
+  return deleteFileFromBucket(IMAGES_BUCKET, key);
+}
+
+function deleteDocumentFile(key) {
+  return deleteFileFromBucket(DOCUMENTS_BUCKET, key);
+}
+
+module.exports = {
+  uploadImages,
+  uploadDocuments,
+  uploadImageFile,
+  uploadDocumentFile,
+  deleteImageFile,
+  deleteDocumentFile,
+};

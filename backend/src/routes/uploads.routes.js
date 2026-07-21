@@ -8,5 +8,7 @@ router.use(requireAuth, requireRole('landlord'));
 
 router.post('/images', imageUpload.array('images', 6), asyncHandler(ctrl.uploadImages));
 router.post('/documents', documentUpload.array('documents', 5), asyncHandler(ctrl.uploadDocuments));
+router.delete('/images/:filename', asyncHandler(ctrl.deleteImage));
+router.delete('/documents/:filename', asyncHandler(ctrl.deleteDocument));
 
 module.exports = router;
