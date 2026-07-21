@@ -302,7 +302,9 @@ async function uploadImageFiles() {
     formData.append('images', await dataUrlToBlob(uploadedImages[i]), `photo-${i + 1}.jpg`);
   }
   try {
-    const res = await fetch(API_BASE + '/api/uploads/images', { method: 'POST', credentials: 'include', body: formData });
+    const token = localStorage.getItem(PW_TOKEN_KEY);
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    const res = await fetch(API_BASE + '/api/uploads/images', { method: 'POST', credentials: 'include', headers, body: formData });
     if (!res.ok) return { ok: false, networkError: false };
     const data = await res.json();
     return { ok: true, urls: data.urls };
@@ -318,7 +320,9 @@ async function uploadDocumentFiles() {
     formData.append('documents', await dataUrlToBlob(doc.data), doc.name);
   }
   try {
-    const res = await fetch(API_BASE + '/api/uploads/documents', { method: 'POST', credentials: 'include', body: formData });
+    const token = localStorage.getItem(PW_TOKEN_KEY);
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    const res = await fetch(API_BASE + '/api/uploads/documents', { method: 'POST', credentials: 'include', headers, body: formData });
     if (!res.ok) return { ok: false, networkError: false };
     const data = await res.json();
     return { ok: true, urls: data.urls };
