@@ -221,6 +221,7 @@ async function uploadOneDoc(item) {
     const res = await fetch(API_BASE + '/api/uploads/documents', { method: 'POST', credentials: 'include', headers, body: formData });
     if (!res.ok) throw new Error('upload failed');
     const data = await res.json();
+    console.log('uploadOneDoc: response', data);
     item.key = data.files[0].key;
     item.status = 'done';
   } catch (err) {
@@ -250,42 +251,27 @@ function renderDocList() {
       <div class="cl-doc-icon">${icon}</div>
       <div class="cl-doc-name">${doc.name}</div>
       ${status}
-      <button class="cl-thumb-remove" type="button" onclick="removeDoc(${i})" title="Remove" ${doc.status === 'uploading' ? 'disabled' : ''}>&#215;</button>
+      <button class="cl-thumb-remove" type="button" onclick="removeDoc(${i})" title="Remove">&#215;</button>
     </div>`;
   }).join('');
 }
 
 // Removes the row from the UI immediately, then best-effort deletes the file from Supabase
 // Storage if it finished uploading (nothing to delete yet if it's still mid-upload or errored).
+// Always clickable — even mid-upload — so the button never silently swallows a click; if the
+// item hasn't finished uploading yet there's simply no key to delete server-side.
 async function removeDoc(idx) {
   const doc = uploadedDocs[idx];
-  console.log('removeDoc called', idx, doc); // TEMP DEBUG — remove once live delete bug is found
-  if (!doc || doc.status === 'uploading') {
-    console.log('removeDoc: bailing early (no doc, or still uploading)', doc); // TEMP DEBUG
-    return;
-  }
+  if (!doc) return;
   uploadedDocs.splice(idx, 1);
   renderDocList();
-  console.log('removeDoc: doc.key =', doc.key); // TEMP DEBUG
-  if (!doc.key) {
-    console.log('removeDoc: no key — nothing was uploaded, skipping DELETE request'); // TEMP DEBUG
-    return;
-  }
+  if (!doc.key) return;
   try {
     const token = localStorage.getItem(PW_TOKEN_KEY);
-    console.log('removeDoc: pw_token present in localStorage?', !!token); // TEMP DEBUG
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
-    const url = `${API_BASE}/api/uploads/documents/${doc.key}`;
-    console.log('removeDoc: sending DELETE', url); // TEMP DEBUG
-    const res = await fetch(url, { method: 'DELETE', credentials: 'include', headers });
-    console.log('removeDoc: response status', res.status, 'ok?', res.ok); // TEMP DEBUG
-    if (!res.ok) {
-      const body = await res.text().catch(() => '<unreadable body>');
-      console.log('removeDoc: error response body', body); // TEMP DEBUG
-      throw new Error('delete failed');
-    }
+    const res = await fetch(`${API_BASE}/api/uploads/documents/${doc.key}`, { method: 'DELETE', credentials: 'include', headers });
+    if (!res.ok) throw new Error('delete failed');
   } catch (err) {
-    console.log('removeDoc: caught error', err); // TEMP DEBUG
     // The document is already gone from the form either way — it won't be published — but the
     // file may still be sitting in storage, so make that visible instead of failing silently.
     alert("Removed from the form, but couldn't confirm it was deleted from the server.");
