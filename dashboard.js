@@ -194,10 +194,16 @@ async function renderSaved() {
         </div>`).join("");
 
     track.querySelectorAll(".saved-heart").forEach(btn => {
-        btn.addEventListener("click", e => {
+        btn.addEventListener("click", async e => {
             e.stopPropagation();
             const id = btn.dataset.id;
-            toggleFavourite(id);
+            btn.disabled = true;
+            const res = await unsaveFavourite(id);
+            if (!res.ok) {
+                btn.disabled = false;
+                toast(res.error === "network" ? "Couldn't reach the server. Please try again." : "Couldn't remove listing. Please try again.");
+                return;
+            }
             const card = btn.closest(".saved-card");
             if (card) {
                 card.style.transition = "opacity .3s";

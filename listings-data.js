@@ -230,28 +230,33 @@ function formatNaira(amount) {
   return '\u20a6' + Number(amount).toLocaleString('en-NG');
 }
 
-/* ── Tenant Favourites ── */
-function getFavourites() {
-  return JSON.parse(localStorage.getItem('pw_favourites') || '[]');
+/* ── Tenant Favourites ──
+   Backed by the Phase 2 API (GET/POST/DELETE /api/favourites) instead of localStorage.
+   Requires a logged-in tenant session — callers (listings.js, listing-detail.js, dashboard.js)
+   are responsible for checking that via PWAuth first; these just return whatever the API says
+   (an unauthenticated/non-tenant call naturally 401s/403s, surfaced as res.ok === false). */
+
+// One full round trip, used once per page load to seed initial heart-button states — mirrors
+// pwSessionPromise's "fetch once, reuse everywhere" pattern rather than a call per card.
+async function getFavouriteIds() {
+  const res = await PWApi.request('/api/favourites');
+  return res.ok ? new Set(res.data.listings.map(l => l.id)) : new Set();
 }
-function isFavourite(listingId) {
-  return getFavourites().includes(listingId);
+
+function saveFavourite(listingId) {
+  return PWApi.request('/api/favourites/' + encodeURIComponent(listingId), { method: 'POST' });
 }
-function toggleFavourite(listingId) {
-  const favs = getFavourites();
-  const idx  = favs.indexOf(listingId);
-  if (idx > -1) favs.splice(idx, 1);
-  else favs.unshift(listingId);
-  localStorage.setItem('pw_favourites', JSON.stringify(favs));
-  return idx === -1;
+
+function unsaveFavourite(listingId) {
+  return PWApi.request('/api/favourites/' + encodeURIComponent(listingId), { method: 'DELETE' });
 }
+
+// GET /api/favourites already returns full listing objects (see favourites.controller.js), so
+// this is a direct pass-through — no separate getAllListings() + filter needed like the old
+// localStorage version required.
 async function getSavedListings() {
-  // Favourite IDs themselves are still localStorage-only (Phase 2+), but looking up the actual
-  // listing objects now has to go through the async, API-backed getAllListings() above.
-  const favs = getFavourites();
-  if (!favs.length) return [];
-  const all = await getAllListings();
-  return all.filter(l => favs.includes(l.id));
+  const res = await PWApi.request('/api/favourites');
+  return res.ok ? res.data.listings : [];
 }
 
 /* ── Inquiries ── */

@@ -42,12 +42,17 @@ async function init() {
   const simRes = await PWApi.request('/api/listings/' + encodeURIComponent(id) + '/similar');
   const similar = simRes.ok ? simRes.data.listings : [];
 
+  // Seed the Save button's initial state — only tenants have favourites, so this is skipped
+  // (and the button just starts unsaved) for logged-out visitors and landlords.
+  const { user } = await pwSessionPromise;
+  const favIds = user && user.role === 'tenant' ? await getFavouriteIds() : new Set();
+
   document.title = `${l.title} — Property Warehouse`;
   document.getElementById('ldetBcTitle').textContent = l.title;
 
   document.getElementById('ldetBody').innerHTML = buildHTML(l, similar);
   pwDetListingData = l;
-  bindEvents(l);
+  bindEvents(l, favIds.has(l.id));
 
   PWOverlay.hide();
 }
@@ -297,20 +302,38 @@ function trackInquiry(id, title, area, rent, landlordName, landlordWhatsApp) {
   } catch(e) {}
 }
 
-function bindEvents(l) {
+function bindEvents(l, initiallySaved) {
   document.getElementById('ldetMenuBtn').addEventListener('click', () =>
     document.getElementById('ldetDrawer').classList.toggle('open'));
 
   const saveBtn = document.getElementById('ldetSaveBtn');
   if (saveBtn) {
+    let saved = initiallySaved;
     const updateSaveBtn = () => {
-      const saved = isFavourite(l.id);
       saveBtn.classList.toggle('saved', saved);
       document.getElementById('ldetSaveLbl').textContent = saved ? 'Saved' : 'Save Property';
     };
     updateSaveBtn();
-    saveBtn.addEventListener('click', () => {
-      toggleFavourite(l.id);
+    saveBtn.addEventListener('click', async () => {
+      // Disabled synchronously, before the first await, so a second rapid click can't start a
+      // concurrent handler invocation racing this one on the shared `saved` variable — a
+      // disabled button doesn't dispatch click events at all, native or synthetic.
+      saveBtn.disabled = true;
+
+      const { user } = await pwSessionPromise;
+      if (!user || user.role !== 'tenant') {
+        saveBtn.disabled = false;
+        alert('Please log in as a tenant to save listings.');
+        location.href = 'auth.html';
+        return;
+      }
+      const res = saved ? await unsaveFavourite(l.id) : await saveFavourite(l.id);
+      saveBtn.disabled = false;
+      if (!res.ok) {
+        alert(res.error === 'network' ? "Couldn't reach the server. Please try again." : 'Something went wrong. Please try again.');
+        return;
+      }
+      saved = !saved;
       updateSaveBtn();
     });
   }
