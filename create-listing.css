@@ -305,6 +305,9 @@
 }
 .cl-doc-status { flex-shrink: 0; font-size: 11px; font-weight: 700; color: #9a9490; }
 .cl-doc-status--error { color: #c0392b; }
+/* .cl-thumb-remove is normally absolutely-positioned inside a position:relative .cl-thumb —
+   .cl-doc-item has no such ancestor, so lay it out as a normal flex item here instead. */
+.cl-doc-item .cl-thumb-remove { position: static; flex-shrink: 0; }
 
 /* ═══ PRIVACY NOTE ═══ */
 .cl-privacy-note {
