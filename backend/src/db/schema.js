@@ -2,7 +2,7 @@
 // via drizzle-orm/node-postgres. Scalar arrays (amenities, ownershipDocTypes) are stored as
 // JSON text columns instead of native array columns, matching how the app already reads/writes
 // them (JSON.parse/JSON.stringify in services/controllers) — no behavior change from the switch.
-const { pgTable, text, integer, boolean, timestamp } = require('drizzle-orm/pg-core');
+const { pgTable, text, integer, boolean, timestamp, unique } = require('drizzle-orm/pg-core');
 
 const users = pgTable('users', {
   id: text('id').primaryKey(),
@@ -97,4 +97,21 @@ const listingDocuments = pgTable('listing_documents', {
   createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull(),
 });
 
-module.exports = { users, listings, listingImages, listingDocuments };
+const favourites = pgTable(
+  'favourites',
+  {
+    id: text('id').primaryKey(),
+    tenantId: text('tenant_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    listingId: text('listing_id')
+      .notNull()
+      .references(() => listings.id, { onDelete: 'cascade' }),
+    createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull(),
+  },
+  (table) => ({
+    tenantListingUnique: unique('favourites_tenant_id_listing_id_unique').on(table.tenantId, table.listingId),
+  })
+);
+
+module.exports = { users, listings, listingImages, listingDocuments, favourites };
