@@ -10,6 +10,8 @@ const users = pgTable('users', {
   firstName: text('first_name').notNull(),
   lastName: text('last_name').notNull(),
   email: text('email').notNull().unique(),
+  // Stored normalized to international format (+234XXXXXXXXXX) — see normalizePhone() in
+  // auth.controller.js. Used for both WhatsApp links and phone-based login.
   phone: text('phone'),
   passwordHash: text('password_hash').notNull(),
 

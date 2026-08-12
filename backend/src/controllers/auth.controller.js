@@ -5,6 +5,25 @@ const { users } = require('../db/schema');
 const { COOKIE_NAME, signSession, sessionCookieOptions } = require('../utils/jwt');
 const { serializeUser } = require('../utils/serialize');
 
+function normalizePhone(raw) {
+  if (!raw) return null;
+  // Strip everything except digits and a leading +
+  let cleaned = raw.replace(/[^\d+]/g, '');
+  // Convert local Nigerian format (0801...) to international (+234801...)
+  if (cleaned.startsWith('0')) {
+    cleaned = '+234' + cleaned.slice(1);
+  }
+  // Add + if it starts with 234 but missing the +
+  if (cleaned.startsWith('234') && !cleaned.startsWith('+234')) {
+    cleaned = '+' + cleaned;
+  }
+  return cleaned;
+}
+
+function isEmail(value) {
+  return /\S+@\S+\.\S+/.test(value);
+}
+
 // Sets the session cookie (still used for local dev, where frontend/backend share a site) and
 // returns the raw token so callers can also put it in the JSON body for Bearer-header auth —
 // needed because the live frontend/backend are on different domains and SameSite cookies alone
@@ -44,7 +63,7 @@ async function signup(req, res) {
     firstName,
     lastName,
     email,
-    phone: phone || null,
+    phone: normalizePhone(phone),
     passwordHash: bcrypt.hashSync(password, 10),
     area: role === 'tenant' ? area || null : null,
     budget: role === 'tenant' ? budget || null : null,
@@ -62,15 +81,24 @@ async function signup(req, res) {
 }
 
 // POST /api/auth/login
-// body: { email, password, role? }  — role is an optional hint matching which tab
-// (tenant/landlord) the frontend form was submitted from.
+// body: { email, password, role? }  — the email field may contain an email address or phone
+// number; role is an optional hint matching which tab the frontend form was submitted from.
 async function login(req, res) {
   const { email, password, role } = req.body;
-  if (!email || !password) {
-    return res.status(400).json({ error: 'email and password are required' });
+  const identifier = email;
+
+  if (!identifier || !password) {
+    return res.status(400).json({ error: 'Email/phone number and password are required' });
   }
 
-  const [user] = await db.select().from(users).where(eq(users.email, email));
+  let user;
+  if (isEmail(identifier)) {
+    [user] = await db.select().from(users).where(eq(users.email, identifier));
+  } else {
+    const normalized = normalizePhone(identifier);
+    [user] = await db.select().from(users).where(eq(users.phone, normalized));
+  }
+
   if (!user || user.role === 'admin' || !bcrypt.compareSync(password, user.passwordHash)) {
     return res.status(401).json({ error: 'Invalid credentials. Please sign up first.' });
   }
