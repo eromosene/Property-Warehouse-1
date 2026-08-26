@@ -19,31 +19,37 @@ const IMGS = [
     "dashboard homes sample images assets/B85B7D15-92A0-4AEB-93A9-E1816F2BA58C.png"
 ];
 
-/* These used to be computed once at parse time from a synchronous localStorage read; now
-   that currentUser resolves asynchronously, they're derived fresh each time from currentUser
-   instead (see populateUser() / getActivities()). */
+/* Recent Activity used to be four invented entries — "You saved Luxury 3 Bed Apartment in
+   <area>", "You scheduled an inspection in Yaba", "You applied for 2 Bedroom Flat in Ikoyi" and
+   "Payment of ₦1,200,000 recorded" — presented to every tenant as their own history, including
+   someone who had just signed up. Only inquiries are actually recorded (getInquiries() in
+   listings-data.js), so activity is derived from those and shows an empty state otherwise.
+   Inspections, applications and payments have no backend at all (see backend/src/app.js). */
 function getActivities() {
-    const userArea = currentUser?.area || "Lekki";
-    return [
-        { type:"saved",   icon:"heart",    desc:"You saved Luxury 3 Bed Apartment in "+userArea,  time:"2 hours ago"      },
-        { type:"inspect", icon:"calendar", desc:"You scheduled an inspection in Yaba",             time:"Today, 10:30 AM"  },
-        { type:"applied", icon:"file",     desc:"You applied for 2 Bedroom Flat in Ikoyi",        time:"Yesterday, 4:15 PM" },
-        { type:"payment", icon:"credit",   desc:"Payment of ₦1,200,000 recorded",                 time:"May 20, 2025"     }
-    ];
+    return getInquiries().slice(0, 6).map(inq => ({
+        type: "applied",
+        icon: "file",
+        desc: `You inquired about ${inq.listingTitle || "a property"}${inq.area ? " in " + inq.area : ""}`,
+        time: timeAgo(inq.sentAt),
+    }));
 }
 
-const INSPECTIONS = [
-    { month:"MAY", day:"24", name:"Lekki 3 Bed Apartment", loc:"Lekki Phase 1", time:"10:00 AM", img:IMGS[0] },
-    { month:"MAY", day:"25", name:"2 Bedroom Flat",         loc:"Yaba, Mainland",time:"1:00 PM",  img:IMGS[2] },
-    { month:"MAY", day:"26", name:"4 Bed Duplex",           loc:"Ajah, Lagos",   time:"11:00 AM", img:IMGS[3] }
-];
+function emptyWidget(message) {
+    return `<div style="padding:16px 0;font-size:13px;font-weight:600;color:#5d6876;line-height:1.5">${message}</div>`;
+}
 
+/* maxRent is derived from the budget range the tenant chose at signup, so it's real.
+   The `pct` and `spent` fields that used to live here were not: `pct` drove a gauge captioned
+   "of monthly income" (income we never collect) and `spent` drove a Payment Tracker reading
+   "₦1,200,000 spent / ₦800,000 left" for tenants who had never paid anything through the
+   platform. Both were invented per budget band and have been removed along with the widgets
+   they fed. */
 const BUDGET_MAP = {
-    "Under ₦500,000/yr":          { maxRent:"₦500,000",   pct:22, spent:250000,  budget:500000  },
-    "₦500,000 – ₦1,000,000/yr":  { maxRent:"₦1,000,000", pct:25, spent:600000,  budget:1000000 },
-    "₦1,000,000 – ₦2,000,000/yr":{ maxRent:"₦1,500,000", pct:27, spent:900000,  budget:1500000 },
-    "₦2,000,000 – ₦3,500,000/yr":{ maxRent:"₦2,000,000", pct:28, spent:1200000, budget:2000000 },
-    "Above ₦3,500,000/yr":        { maxRent:"₦3,500,000", pct:30, spent:2000000, budget:3500000 }
+    "Under ₦500,000/yr":          { maxRent:"₦500,000"   },
+    "₦500,000 – ₦1,000,000/yr":  { maxRent:"₦1,000,000" },
+    "₦1,000,000 – ₦2,000,000/yr":{ maxRent:"₦1,500,000" },
+    "₦2,000,000 – ₦3,500,000/yr":{ maxRent:"₦2,000,000" },
+    "Above ₦3,500,000/yr":        { maxRent:"₦3,500,000" }
 };
 
 /* ══════════════════════════════════════════════════
@@ -57,7 +63,6 @@ function greeting() {
     return "Good night";
 }
 
-function fmt(n) { return "₦" + n.toLocaleString(); }
 
 function iconSVG(type) {
     const map = {
@@ -131,31 +136,6 @@ function populateUser() {
 
     const mr = document.getElementById("maxRent");
     if (mr) mr.innerHTML = `${b.maxRent} <small>/yr</small>`;
-
-    const gp = document.getElementById("gaugePct");
-    if (gp) gp.textContent = `${b.pct}%`;
-
-    const fill = document.getElementById("gaugeFill");
-    if (fill) {
-        const circ   = 2 * Math.PI * 50;
-        const filled = (b.pct / 100) * circ;
-        fill.setAttribute("stroke-dasharray", `${filled.toFixed(1)} ${(circ - filled).toFixed(1)}`);
-    }
-
-    const left = b.budget - b.spent;
-    const pct  = Math.round((b.spent / b.budget) * 100);
-
-    const rbl = document.getElementById("rentBudgetLabel");
-    if (rbl) rbl.innerHTML = `${b.maxRent} <small>/mo</small>`;
-
-    const pbf = document.getElementById("payBarFill");
-    if (pbf) setTimeout(() => { pbf.style.width = pct + "%"; }, 300);
-
-    const sl = document.getElementById("spentLabel");
-    if (sl) sl.textContent = `${fmt(b.spent)} spent`;
-
-    const ll = document.getElementById("leftLabel");
-    if (ll) ll.textContent = `${fmt(left)} left`;
 }
 
 /* ══════════════════════════════════════════════════
@@ -325,7 +305,12 @@ function renderMessages() {
 function renderActivity() {
     const list = document.getElementById("activityList");
     if (!list) return;
-    list.innerHTML = getActivities().map(a => `
+    const acts = getActivities();
+    if (!acts.length) {
+        list.innerHTML = emptyWidget("No activity yet. Saving a home or contacting a landlord will show up here.");
+        return;
+    }
+    list.innerHTML = acts.map(a => `
         <div class="activity-item">
             <div class="activity-icon ${a.type}">${iconSVG(a.icon)}</div>
             <div class="activity-text">
@@ -338,19 +323,7 @@ function renderActivity() {
 function renderInspections() {
     const list = document.getElementById("inspectionList");
     if (!list) return;
-    list.innerHTML = INSPECTIONS.map(i => `
-        <div class="inspection-item">
-            <img class="insp-img" src="${i.img}" alt="${i.name}" loading="lazy">
-            <div class="insp-date-block">
-                <div class="insp-month">${i.month}</div>
-                <div class="insp-day">${i.day}</div>
-            </div>
-            <div class="insp-info">
-                <div class="insp-name">${i.name}</div>
-                <div class="insp-loc">${i.loc}</div>
-            </div>
-            <div class="insp-time">${i.time}</div>
-        </div>`).join("");
+    list.innerHTML = emptyWidget("No inspections scheduled yet.");
 }
 
 /* ══════════════════════════════════════════════════

@@ -30,7 +30,6 @@
         <a href="#" class="db-nav-item" data-section="messages">
             <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
             <span>Messages</span>
-            <span class="db-badge">6</span>
         </a>
         <a href="#" class="db-nav-item" data-section="applications">
             <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
@@ -97,13 +96,13 @@
 
             <button class="db-notif-btn" type="button" aria-label="Notifications">
                 <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-                <span class="db-notif-dot" id="notifDot">6</span>
+                <span class="db-notif-dot" id="notifDot" hidden></span>
             </button>
 
             <div class="db-user-chip" id="dbUserChip">
-                <div class="db-avatar" id="dbAvatar">DA</div>
+                <div class="db-avatar" id="dbAvatar"></div>
                 <div class="db-user-info">
-                    <strong id="dbUserName">Daniel Adewale</strong>
+                    <strong id="dbUserName">&nbsp;</strong>
                     <span>Tenant</span>
                 </div>
                 <svg class="db-chevron" viewBox="0 0 24 24" width="14" height="14"><polyline points="6 9 12 15 18 9"/></svg>
@@ -222,95 +221,20 @@
                         </button>
                     </div>
                     <div class="afford-body">
-                        <div class="afford-gauge-wrap">
-                            <svg class="afford-gauge" viewBox="0 0 120 120">
-                                <defs>
-                                    <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                                        <stop offset="0%" stop-color="#15935f"/>
-                                        <stop offset="100%" stop-color="#f5a623"/>
-                                    </linearGradient>
-                                </defs>
-                                <circle class="gauge-track" cx="60" cy="60" r="50"/>
-                                <circle class="gauge-fill" cx="60" cy="60" r="50" id="gaugeFill"/>
-                                <text class="gauge-pct" x="60" y="57" text-anchor="middle" id="gaugePct">28%</text>
-                                <text class="gauge-sub" x="60" y="72" text-anchor="middle">of monthly income</text>
-                            </svg>
-                        </div>
                         <div class="afford-info">
-                            <div class="afford-fit">
-                                <span class="fit-badge">Good Fit! ✓</span>
-                                <p>This rent is within your affordability range.</p>
-                            </div>
                             <div class="afford-max">
                                 <span>Recommended max rent</span>
-                                <strong id="maxRent">₦2,000,000 <small>/yr</small></strong>
+                                <strong id="maxRent">—</strong>
                             </div>
+                            <p class="afford-note">Based on the budget range on your profile.</p>
                             <button class="db-adjust-btn" type="button">Adjust Budget</button>
                         </div>
                     </div>
                 </section>
 
-                <section class="db-widget db-widget--payment">
-                    <div class="db-section-head">
-                        <h3>Payment Tracker</h3>
-                        <a href="#" class="db-view-all">View all <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></a>
-                    </div>
-                    <div class="payment-row">
-                        <span>Rent Budget</span>
-                        <strong id="rentBudgetLabel">₦2,000,000 <small>/mo</small></strong>
-                    </div>
-                    <div class="payment-bar-wrap">
-                        <div class="payment-bar">
-                            <div class="payment-bar-fill" id="payBarFill" style="width:0%"></div>
-                        </div>
-                        <div class="payment-bar-labels">
-                            <span id="spentLabel">₦1,200,000 spent</span>
-                            <span id="leftLabel">₦800,000 left</span>
-                        </div>
-                    </div>
-                    <div class="payment-due">
-                        <div>
-                            <span class="pay-due-label">Next Payment Due</span>
-                            <strong id="nextPayDate">June 1, 2025</strong>
-                        </div>
-                        <button class="db-reminder-btn" type="button">
-                            <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-                            Set Up Reminders
-                        </button>
-                    </div>
-                </section>
 
             </div><!-- /db-widget-pair -->
 
-            <!-- APPLICATION PROGRESS -->
-            <section class="db-widget db-widget--approg">
-                <div class="db-section-head">
-                    <h3>Application Progress</h3>
-                    <a href="#" class="db-view-all">View all <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></a>
-                </div>
-                <p class="app-count"><strong id="appCount">2</strong> <span>Active Applications</span></p>
-                <div class="pipeline-track">
-                    <div class="pipeline-line"><div class="pipeline-line-fill"></div></div>
-                    <div class="pipeline-steps">
-                        <div class="pipeline-step done">
-                            <div class="step-dot"><span>1</span></div>
-                            <span class="step-label">Submitted</span>
-                        </div>
-                        <div class="pipeline-step active">
-                            <div class="step-dot"><span>2</span></div>
-                            <span class="step-label">Review</span>
-                        </div>
-                        <div class="pipeline-step">
-                            <div class="step-dot"><span>3</span></div>
-                            <span class="step-label">Offer</span>
-                        </div>
-                        <div class="pipeline-step">
-                            <div class="step-dot"><span>4</span></div>
-                            <span class="step-label">Move-in</span>
-                        </div>
-                    </div>
-                </div>
-            </section>
 
         </aside><!-- /db-right -->
 

@@ -19,35 +19,24 @@ const IMGS = [
     "dashboard homes sample images assets/B85B7D15-92A0-4AEB-93A9-E1816F2BA58C.png"
 ];
 
-/* Unsplash tenant avatars */
-const PEOPLE = [
-    "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=80&h=80&fit=crop&crop=face",
-    "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&crop=face",
-    "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=80&h=80&fit=crop&crop=face",
-    "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop&crop=face",
-    "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&crop=face"
-];
-
 let LISTINGS = [];
 
-const MESSAGES = [
-    { name:"Amaka Nwosu",    text:"Hi, is this Lekki apartment still available? I'm interested in scheduling an inspection.",  time:"2m ago",    unread:true,  img:PEOPLE[0] },
-    { name:"Tunde Adebayo",  text:"I'd like to know more about the 4 bed duplex in Ajah, is it still available?",             time:"15m ago",   unread:true,  img:PEOPLE[1] },
-    { name:"Kemi Balogun",   text:"Thanks for the info. I'm ready to proceed with the payment.",                               time:"1h ago",    unread:false, img:PEOPLE[2] },
-    { name:"David Okonkwo",  text:"Can I see more pictures of the property in Gbagada?",                                       time:"2h ago",    unread:false, img:PEOPLE[3] }
-];
+/* Messages, inspections and payments have no backend yet — there are no API endpoints behind
+   any of them (see backend/src/app.js: only /api/auth, /api/listings, /api/landlord,
+   /api/admin, /api/uploads and /api/favourites are mounted). They used to render hardcoded
+   sample tenants, viewings and "₦2,400,000 paid" rows, which every real landlord saw on their
+   own dashboard as if it were their data. Until each has a real source they render an honest
+   empty state instead. */
+function emptyWidget(message) {
+    return `<div style="padding:20px 4px;font-size:13px;font-weight:600;color:#5d6876;line-height:1.5">${message}</div>`;
+}
 
-const INSPECTIONS = [
-    { month:"MAY", day:"24", name:"Lekki 3 Bed Apartment",  loc:"Lekki Phase 1",  time:"10:00 AM", img:PEOPLE[4] },
-    { month:"MAY", day:"25", name:"2 Bedroom Flat",          loc:"Yaba, Mainland", time:"1:00 PM",  img:PEOPLE[0] },
-    { month:"MAY", day:"26", name:"4 Bed Duplex",            loc:"Ajah, Lagos",    time:"11:00 AM", img:PEOPLE[1] }
-];
-
-const PAYMENTS = [
-    { name:"Luxury 3 Bed Duplex – Lekki",  type:"Annual Rent Payment", amount:"₦2,400,000", status:"paid" },
-    { name:"2 Bed Apartment – Yaba",        type:"Annual Rent Payment", amount:"₦1,200,000", status:"paid" },
-    { name:"4 Bed Terrace – Ajah",          type:"Annual Rent Payment", amount:"₦2,000,000", status:"paid" }
-];
+/* Listing titles/areas are landlord-supplied, so they're escaped before going into innerHTML. */
+function escHtml(s) {
+    return String(s ?? "").replace(/[&<>"']/g, c =>
+        ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+const escAttr = escHtml;
 
 /* ══════════════════════════════════════════════════
    HELPERS
@@ -82,19 +71,85 @@ function statusLabel(s) {
    POPULATE USER
 ══════════════════════════════════════════════════ */
 function populateUser() {
-    const userFirst = currentUser?.firstName || "Adeyemi";
-    const userLast  = currentUser?.lastName  || "Johnson";
+    /* No "Adeyemi Johnson" fallback: populateUser() only runs after boot() has a real session,
+       so a placeholder name here could only ever be shown to a real landlord as if it were
+       their own. Fall back to a neutral greeting instead. */
+    const userFirst = currentUser?.firstName || "";
+    const userLast  = currentUser?.lastName  || "";
     const userFull  = `${userFirst} ${userLast}`.trim();
-    const greet = `${greeting()}, ${userFirst}`;
+    const greet = userFirst ? `${greeting()}, ${userFirst}` : greeting();
 
     const gEl = document.getElementById("ldGreeting");
-    if (gEl) gEl.innerHTML = `${greet} <span>👋</span>`;
+    if (gEl) gEl.innerHTML = `${escHtml(greet)} <span>👋</span>`;
 
     const gmEl = document.getElementById("ldGreetingMobile");
-    if (gmEl) gmEl.innerHTML = `${greet} <span>👋</span>`;
+    if (gmEl) gmEl.innerHTML = `${escHtml(greet)} <span>👋</span>`;
 
     const un = document.getElementById("ldUserName");
     if (un) un.textContent = userFull;
+
+    const av = document.getElementById("ldAvatar");
+    if (av) av.textContent = ((userFirst[0] || "") + (userLast[0] || "")) || "—";
+
+    /* Header chip used to claim "Verified Landlord" for everyone, unconditionally. */
+    const vl = document.getElementById("ldVerifiedLabel");
+    if (vl) vl.hidden = !currentUser?.isVerified;
+}
+
+/* ══════════════════════════════════════════════════
+   STAT CARDS
+   Derived from the landlord's own listings (GET /api/landlord/listings), the only real data
+   source available for this landlord. The cards previously showed fixed numbers baked into the
+   HTML — "12" active listings, "248" monthly inquiries, "91%" occupancy and "₦14,800,000"
+   revenue — which never changed and were shown to every landlord including brand-new ones.
+   Inquiries, occupancy and revenue have no backend to derive them from, so those cards were
+   replaced with listing counts that can actually be computed.
+══════════════════════════════════════════════════ */
+function renderStats() {
+    const active  = LISTINGS.filter(l => l.status === "active").length;
+    const pending = LISTINGS.filter(l => l.status === "pending").length;
+
+    const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+    set("ldActiveListings",  active);
+    set("ldPendingListings", pending);
+    set("ldTotalListings",   LISTINGS.length);
+
+    /* Verification is a real per-user flag (users.isVerified). The card used to be always
+       visible and always claimed the profile was verified — and told every landlord they were
+       "trusted by thousands of tenants". Now it only appears once the account actually is. */
+    const card = document.getElementById("ldVerifiedCard");
+    if (card) card.hidden = !currentUser?.isVerified;
+
+    renderMostViewed();
+}
+
+/* listings.views is a real counter — listings.controller.js increments it on each listing-detail
+   view — so this one widget can show genuine numbers. The neighbouring "Highest Inquiry Area"
+   and "Best Performing Listing" panels were removed rather than rewired: both reported figures
+   (inquiry counts per area, occupancy rate) that nothing in the system actually records. */
+function renderMostViewed() {
+    const el = document.getElementById("ldMostViewed");
+    if (!el) return;
+
+    const top = LISTINGS.filter(l => (l.views || 0) > 0)
+                        .sort((a, b) => (b.views || 0) - (a.views || 0))[0];
+
+    if (!top) {
+        el.innerHTML = emptyWidget("No views yet. Once tenants start opening your listings, your most viewed one appears here.");
+        return;
+    }
+
+    const img = (top.images && top.images[0]) || "";
+    el.innerHTML = `
+        ${img ? `<img src="${escAttr(img)}" alt="${escAttr(top.title || "Most viewed property")}" loading="lazy">` : ""}
+        <div class="ld-top-prop-info">
+            <div class="ld-top-prop-name">${escHtml(top.title || "Untitled")}</div>
+            <div class="ld-top-prop-loc">${escHtml(top.area || "—")}</div>
+            <div class="ld-top-prop-views">
+                <svg viewBox="0 0 24 24" width="12" height="12"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                ${Number(top.views).toLocaleString()} view${top.views === 1 ? "" : "s"}
+            </div>
+        </div>`;
 }
 
 /* ══════════════════════════════════════════════════
@@ -129,6 +184,7 @@ async function renderListings() {
         return;
     }
     LISTINGS = res.data.listings;
+    renderStats();
 
     if (!LISTINGS.length) {
         showListingsMessage(`
@@ -222,22 +278,7 @@ async function renderListings() {
 function renderMessages() {
     const list = document.getElementById("ldMsgList");
     if (!list) return;
-    list.innerHTML = MESSAGES.map(m => `
-        <div class="ld-msg-item">
-            <div class="ld-msg-avatar"><img src="${m.img}" alt="${m.name}" loading="lazy"></div>
-            <div class="ld-msg-body">
-                <div class="ld-msg-name-row">
-                    <span class="ld-msg-name">${m.name}</span>
-                    <span class="ld-msg-time">${m.time}</span>
-                </div>
-                <div class="ld-msg-text">${m.text}</div>
-            </div>
-            ${m.unread ? `<div class="ld-msg-unread"></div>` : ""}
-        </div>`).join("");
-
-    list.querySelectorAll(".ld-msg-item").forEach((item, i) => {
-        item.addEventListener("click", () => toast(`Opening message from ${MESSAGES[i].name}…`));
-    });
+    list.innerHTML = emptyWidget("No messages yet. Tenants who contact you about a listing will appear here.");
 }
 
 /* ══════════════════════════════════════════════════
@@ -246,19 +287,7 @@ function renderMessages() {
 function renderInspections() {
     const list = document.getElementById("ldInspList");
     if (!list) return;
-    list.innerHTML = INSPECTIONS.map(i => `
-        <div class="ld-insp-item">
-            <div class="ld-insp-avatar"><img src="${i.img}" alt="${i.name}" loading="lazy"></div>
-            <div class="ld-insp-date">
-                <div class="ld-insp-month">${i.month}</div>
-                <div class="ld-insp-day">${i.day}</div>
-            </div>
-            <div class="ld-insp-info">
-                <div class="ld-insp-name">${i.name}</div>
-                <div class="ld-insp-loc">${i.loc}</div>
-            </div>
-            <div class="ld-insp-time">${i.time}</div>
-        </div>`).join("");
+    list.innerHTML = emptyWidget("No inspections scheduled. Viewings you arrange with tenants will show up here.");
 }
 
 /* ══════════════════════════════════════════════════
@@ -267,20 +296,7 @@ function renderInspections() {
 function renderPayments() {
     const list = document.getElementById("ldPayList");
     if (!list) return;
-    list.innerHTML = PAYMENTS.map(p => `
-        <div class="ld-pay-item">
-            <div class="ld-pay-icon">
-                <svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-            </div>
-            <div class="ld-pay-info">
-                <div class="ld-pay-name">${p.name}</div>
-                <div class="ld-pay-type">${p.type}</div>
-            </div>
-            <div class="ld-pay-right">
-                <span class="ld-pay-amount">${p.amount}</span>
-                <span class="ld-pay-status ${p.status}">${p.status.charAt(0).toUpperCase()+p.status.slice(1)}</span>
-            </div>
-        </div>`).join("");
+    list.innerHTML = emptyWidget("No payments recorded yet.");
 }
 
 /* ══════════════════════════════════════════════════
