@@ -277,7 +277,11 @@ async function main() {
       role: 'landlord',
       firstName,
       lastName,
-      phone: seed.landlordPhone,
+      // users.phone must match what normalizePhone() in auth.controller.js produces
+      // (+234XXXXXXXXXX) or phone-based login can't find these accounts — it looks the user up
+      // by exact match on the normalized input. The listings table below deliberately keeps the
+      // bare 234XXXXXXXXXX form: wa.me links (listing-detail.js) break with a leading +.
+      phone: `+${seed.landlordPhone}`,
       isVerified: seed.landlordVerified,
       joinedDate: new Date(`${seed.landlordSince}-01-01`),
     });
