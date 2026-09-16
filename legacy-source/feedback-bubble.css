@@ -1,0 +1,554 @@
+/* ═══════════════════════════════════════════════
+   FEEDBACK BUBBLE — Property Warehouse
+   All classes prefixed pw-
+═══════════════════════════════════════════════ */
+
+.pw-bubble-btn {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #0a1628;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 28px rgba(10,22,40,.4);
+  z-index: 9999;
+  transition: transform .2s ease, background .2s ease;
+  outline: none;
+}
+
+.pw-bubble-btn:hover {
+  background: #c9a84c;
+  transform: scale(1.08);
+}
+
+.pw-bubble-btn.pw-pulse {
+  animation: pw-pulse-ring 2s ease-out 3;
+}
+
+@keyframes pw-pulse-ring {
+  0%   { box-shadow: 0 0 0 0 rgba(201,168,76,.75); }
+  70%  { box-shadow: 0 0 0 18px rgba(201,168,76,0); }
+  100% { box-shadow: 0 0 0 0 rgba(201,168,76,0); }
+}
+
+.pw-bubble-tooltip {
+  position: absolute;
+  right: 66px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: #0a1628;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: 'Manrope', sans-serif;
+  white-space: nowrap;
+  padding: 6px 12px;
+  border-radius: 8px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .15s;
+}
+
+.pw-bubble-btn:hover .pw-bubble-tooltip {
+  opacity: 1;
+}
+
+/* ── Panel ── */
+.pw-feedback-panel {
+  position: fixed;
+  bottom: 92px;
+  right: 24px;
+  width: 320px;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 24px 64px rgba(10,22,40,.2), 0 4px 16px rgba(10,22,40,.1);
+  z-index: 9998;
+  font-family: 'Manrope', sans-serif;
+  transform: translateY(14px) scale(.97);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform .25s cubic-bezier(.16,1,.3,1), opacity .2s ease;
+}
+
+.pw-feedback-panel.pw-open {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.pw-fb-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid #f0eeeb;
+}
+
+.pw-fb-header h3 {
+  font-size: 17px;
+  font-weight: 800;
+  color: #0a1628;
+  margin: 0;
+  font-family: 'Cormorant Garamond', serif;
+  letter-spacing: .3px;
+}
+
+.pw-fb-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 22px;
+  color: #9a9490;
+  line-height: 1;
+  padding: 2px 6px;
+  border-radius: 6px;
+  transition: background .15s, color .15s;
+}
+
+.pw-fb-close:hover {
+  background: #f4f2ef;
+  color: #0a1628;
+}
+
+.pw-fb-body {
+  padding: 16px 20px 20px;
+}
+
+.pw-fb-types {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.pw-fb-pill {
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1.5px solid #dedad5;
+  background: transparent;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: 'Manrope', sans-serif;
+  color: #5d6876;
+  cursor: pointer;
+  transition: all .2s;
+}
+
+.pw-fb-pill.pw-active {
+  background: #0a1628;
+  color: #c9a84c;
+  border-color: #0a1628;
+}
+
+.pw-fb-field {
+  margin-bottom: 12px;
+}
+
+.pw-fb-field input,
+.pw-fb-field textarea {
+  width: 100%;
+  padding: 10px 13px;
+  border: 1.5px solid #dedad5;
+  border-radius: 10px;
+  font-family: 'Manrope', sans-serif;
+  font-size: 13px;
+  color: #0a1628;
+  outline: none;
+  transition: border-color .2s;
+  resize: vertical;
+  box-sizing: border-box;
+}
+
+.pw-fb-field input::placeholder,
+.pw-fb-field textarea::placeholder {
+  color: #b5b0aa;
+}
+
+.pw-fb-field input:focus,
+.pw-fb-field textarea:focus {
+  border-color: #c9a84c;
+}
+
+.pw-fb-submit {
+  width: 100%;
+  padding: 12px;
+  background: #0a1628;
+  color: #fff;
+  border: none;
+  border-radius: 11px;
+  font-family: 'Manrope', sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  margin-bottom: 14px;
+  transition: opacity .2s;
+  letter-spacing: .2px;
+}
+
+.pw-fb-submit:hover { opacity: .85; }
+
+.pw-fb-divider {
+  border: none;
+  border-top: 1px solid #f0eeeb;
+  margin-bottom: 12px;
+}
+
+.pw-fb-wa-link {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #25D366;
+  text-decoration: none;
+  font-family: 'Manrope', sans-serif;
+  transition: opacity .2s;
+  line-height: 1.45;
+}
+
+.pw-fb-wa-link:hover { opacity: .78; }
+
+.pw-fb-wa-link svg {
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.pw-fb-success-msg {
+  text-align: center;
+  padding: 18px 16px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #15935f;
+  display: none;
+  font-family: 'Manrope', sans-serif;
+}
+
+/* ── Listing Card Action Buttons ── */
+.pw-card-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.pw-wa-btn-sm {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 13px;
+  background: #25D366;
+  color: #fff;
+  border-radius: 10px;
+  font-family: 'Manrope', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: opacity .2s;
+  flex: 1;
+  justify-content: center;
+  min-width: 0;
+}
+
+.pw-wa-btn-sm:hover { opacity: .85; }
+
+.pw-inquiry-btn-sm {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 13px;
+  background: #0a1628;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-family: 'Manrope', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity .2s;
+  flex: 1;
+  justify-content: center;
+  min-width: 0;
+}
+
+.pw-inquiry-btn-sm:hover { opacity: .85; }
+
+/* ── Inline Chat Panel (listings grid + detail) ── */
+.pw-chat-panel {
+  background: #f9f8f6;
+  border-top: 1px solid #ede9e3;
+  border-radius: 0 0 14px 14px;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height .3s ease, padding .3s ease;
+  padding: 0 16px;
+}
+
+.pw-chat-panel.pw-open {
+  max-height: 420px;
+  padding: 16px;
+}
+
+.pw-chat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.pw-chat-header span {
+  font-size: 13px;
+  font-weight: 800;
+  color: #0a1628;
+  font-family: 'Manrope', sans-serif;
+}
+
+.pw-chat-close {
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: #9a9490;
+  cursor: pointer;
+  line-height: 1;
+  padding: 2px 6px;
+  border-radius: 6px;
+  transition: background .15s;
+}
+
+.pw-chat-close:hover {
+  background: #edeae5;
+  color: #0a1628;
+}
+
+.pw-chat-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.pw-chat-fields input,
+.pw-chat-fields textarea {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1.5px solid #dedad5;
+  border-radius: 9px;
+  font-family: 'Manrope', sans-serif;
+  font-size: 13px;
+  color: #0a1628;
+  outline: none;
+  transition: border-color .2s;
+  resize: vertical;
+  box-sizing: border-box;
+  background: #fff;
+}
+
+.pw-chat-fields input::placeholder,
+.pw-chat-fields textarea::placeholder {
+  color: #b5b0aa;
+}
+
+.pw-chat-fields input:focus,
+.pw-chat-fields textarea:focus {
+  border-color: #c9a84c;
+}
+
+.pw-chat-send {
+  width: 100%;
+  padding: 11px;
+  background: #0a1628;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-family: 'Manrope', sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: opacity .2s;
+  margin-bottom: 6px;
+}
+
+.pw-chat-send:hover { opacity: .85; }
+
+.pw-chat-success {
+  font-family: 'Manrope', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: #15935f;
+  text-align: center;
+  min-height: 20px;
+}
+
+/* Detail page action row */
+.pw-detail-actions {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 0;
+  flex-wrap: wrap;
+}
+
+.pw-detail-actions .pw-wa-btn-sm,
+.pw-detail-actions .pw-inquiry-btn-sm {
+  flex: 1;
+  font-size: 13px;
+  padding: 11px 14px;
+  border-radius: 12px;
+}
+
+.pw-det-chat {
+  border-radius: 12px;
+  border: 1px solid #ede9e3;
+  margin-top: 10px;
+}
+
+/* ── Landlord Inquiries Section ── */
+.pw-inq-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.pw-inq-empty p {
+  font-size: 14px;
+  font-weight: 600;
+  color: #8e897f;
+  font-family: 'Manrope', sans-serif;
+  margin: 0;
+}
+
+.pw-inq-card {
+  background: #fff;
+  border: 1px solid #ede9e3;
+  border-radius: 14px;
+  padding: 16px 18px;
+  margin-bottom: 12px;
+  position: relative;
+  transition: border-color .2s, box-shadow .2s;
+}
+
+.pw-inq-card:hover {
+  border-color: #c9a84c;
+  box-shadow: 0 4px 16px rgba(10,22,40,.08);
+}
+
+.pw-inq-card--new {
+  border-color: #c9a84c;
+  background: #fffdf5;
+}
+
+.pw-inq-new-badge {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  background: #c9a84c;
+  color: #0a1628;
+  font-size: 10px;
+  font-weight: 800;
+  font-family: 'Manrope', sans-serif;
+  padding: 3px 9px;
+  border-radius: 20px;
+  letter-spacing: .3px;
+  text-transform: uppercase;
+}
+
+.pw-inq-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  gap: 10px;
+}
+
+.pw-inq-sender {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.pw-inq-sender strong {
+  font-size: 14px;
+  font-weight: 800;
+  color: #0a1628;
+  font-family: 'Manrope', sans-serif;
+}
+
+.pw-inq-phone {
+  font-size: 12px;
+  font-weight: 600;
+  color: #c9a84c;
+  font-family: 'Manrope', sans-serif;
+  text-decoration: none;
+}
+
+.pw-inq-phone:hover { text-decoration: underline; }
+
+.pw-inq-time {
+  font-size: 11px;
+  font-weight: 600;
+  color: #b5b0aa;
+  font-family: 'Manrope', sans-serif;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.pw-inq-listing {
+  font-size: 12px;
+  font-weight: 700;
+  color: #5d6876;
+  font-family: 'Manrope', sans-serif;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: .3px;
+}
+
+.pw-inq-msg {
+  font-size: 13px;
+  font-weight: 500;
+  color: #3a4452;
+  font-family: 'Manrope', sans-serif;
+  margin: 0 0 12px;
+  line-height: 1.5;
+}
+
+.pw-inq-wa-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 16px;
+  background: #25D366;
+  color: #fff;
+  border-radius: 10px;
+  font-family: 'Manrope', sans-serif;
+  font-size: 12px;
+  font-weight: 800;
+  text-decoration: none;
+  transition: opacity .2s;
+}
+
+.pw-inq-wa-btn:hover { opacity: .85; }
+
+/* ── Responsive ── */
+@media (max-width: 480px) {
+  .pw-feedback-panel {
+    right: 12px;
+    left: 12px;
+    width: auto;
+    bottom: 82px;
+  }
+  .pw-bubble-btn {
+    right: 16px;
+    bottom: 20px;
+  }
+  .pw-card-actions {
+    flex-direction: column;
+  }
+}

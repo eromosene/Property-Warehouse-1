@@ -1,0 +1,168 @@
+I need to fix login on Property Warehouse so users can sign in using 
+EITHER their email address OR their phone number, along with their 
+password. Right now the login form's placeholder already says "Email 
+address or phone number" and the input is already type="text" — but 
+the backend only ever checks the email field, so phone number login 
+silently fails with "Invalid credentials."
+
+Do NOT change the signup flow's required fields or the UI layout. 
+This is a backend logic fix plus a small normalization fix.
+
+=== ROOT CAUSE ===
+
+In backend/src/controllers/auth.controller.js, the login() function does:
+
+  const [user] = await db.select().from(users).where(eq(users.email, email));
+
+This ONLY matches against the email column. If a user types their 
+phone number into that field, this query returns nothing and login 
+fails, even with the correct password.
+
+Additionally, phone numbers are stored in schema.js as a plain, 
+unformatted text column with no normalization — so even once we fix 
+the query, "08012345678" typed at login won't match "+2348012345678" 
+stored at signup (or vice versa) unless we normalize both to the 
+same format.
+
+=== FIX PART 1 — Normalize phone numbers on signup ===
+
+In backend/src/controllers/auth.controller.js, add a helper function 
+near the top of the file:
+
+function normalizePhone(raw) {
+  if (!raw) return null;
+  // Strip everything except digits and a leading +
+  let cleaned = raw.replace(/[^\d+]/g, '');
+  // Convert local Nigerian format (0801...) to international (+234801...)
+  if (cleaned.startsWith('0')) {
+    cleaned = '+234' + cleaned.slice(1);
+  }
+  // Add + if it starts with 234 but missing the +
+  if (cleaned.startsWith('234') && !cleaned.startsWith('+234')) {
+    cleaned = '+' + cleaned;
+  }
+  return cleaned;
+}
+
+In the signup() function, replace this line:
+
+  phone: phone || null,
+
+with:
+
+  phone: normalizePhone(phone),
+
+=== FIX PART 2 — Detect email vs phone at login, query the right column ===
+
+In backend/src/controllers/auth.controller.js, add this helper function 
+near normalizePhone():
+
+function isEmail(value) {
+  return /\S+@\S+\.\S+/.test(value);
+}
+
+Then replace the entire login() function with this version:
+
+async function login(req, res) {
+  const { email, password, role } = req.body;
+  // Note: the request body field is still called "email" for backward 
+  // compatibility with the frontend payload shape — but it now may 
+  // contain either an email address or a phone number.
+  const identifier = email;
+
+  if (!identifier || !password) {
+    return res.status(400).json({ error: 'Email/phone number and password are required' });
+  }
+
+  let user;
+  if (isEmail(identifier)) {
+    [user] = await db.select().from(users).where(eq(users.email, identifier));
+  } else {
+    const normalized = normalizePhone(identifier);
+    [user] = await db.select().from(users).where(eq(users.phone, normalized));
+  }
+
+  if (!user || user.role === 'admin' || !bcrypt.compareSync(password, user.passwordHash)) {
+    return res.status(401).json({ error: 'Invalid credentials. Please sign up first.' });
+  }
+  if (role && user.role !== role) {
+    return res.status(401).json({ error: 'Invalid credentials. Please sign up first.' });
+  }
+
+  const token = setSessionCookie(res, user);
+  res.json({ user: serializeUser(user), token });
+}
+
+=== FIX PART 3 — Handle existing users with unnormalized phone numbers ===
+
+Since some landlords/tenants may have already signed up before this 
+fix, with their phone numbers stored in whatever raw format they 
+typed (e.g. "0801 234 5678" with spaces, or "234-801-234-5678"), a 
+straight equality match on the phone column will miss them.
+
+Write a one-time migration script called normalize-existing-phones.js 
+in the backend/src/db/ folder that:
+
+1. Selects every user row where phone is not null
+2. Runs each phone value through the same normalizePhone() logic 
+   (duplicate the function in this script since it's a standalone 
+   script, not importing from the controller)
+3. Updates that user's phone column with the normalized value
+4. Logs how many rows were updated and skips any that are already 
+   in the correct +234 format
+
+Run this script once after deploying the fix, to backfill existing 
+accounts so their stored phone numbers match what normalizePhone() 
+will produce at login time going forward.
+
+=== FIX PART 4 — Frontend: send the identifier under the right field name ===
+
+Check auth-client.js and auth.js (the file handling the login form 
+submit for both #tenant-login and #landlord-login forms). 
+
+Confirm the login form's input value (whatever the user typed — 
+email OR phone) is being sent to the backend as the "email" field 
+in the login payload (matching what auth.controller.js expects, per 
+Fix Part 2 above). Do NOT rename this field across the whole codebase 
+— just confirm the existing payload shape { email, password, role } 
+still works, since the backend now accepts either an email or a 
+phone number inside that same "email" key.
+
+If auth.js has any client-side validation that checks the input 
+looks like an email before allowing form submission (e.g. a regex 
+test blocking submission unless it contains "@"), remove that check 
+entirely — the field should accept either format and let the backend 
+decide which one it is.
+
+=== FIX PART 5 — Update the schema comment for clarity ===
+
+In backend/src/db/schema.js, update the comment above the phone 
+column to note it's now stored in normalized +234 international 
+format:
+
+  // Stored normalized to international format (+234XXXXXXXXXX) — 
+  // see normalizePhone() in auth.controller.js. Used for both 
+  // WhatsApp links and phone-based login.
+  phone: text('phone'),
+
+=== TESTING CHECKLIST ===
+
+After implementing, verify:
+1. A tenant can sign up with phone "08012345678"
+2. That same tenant can log in typing "08012345678" — should work
+3. That same tenant can log in typing "+2348012345678" — should also work
+4. That same tenant can log in typing their email — should still work
+5. A landlord can do the same (steps 1-4) on the landlord login tab
+6. Logging in with a WRONG phone number still correctly shows 
+   "Invalid credentials"
+7. Logging in with a phone number that has no matching account 
+   still correctly shows "Invalid credentials" rather than a 
+   server error
+8. The existing admin login flow (adminLogin function) still works 
+   unchanged — it should NOT be touched by any of this
+
+Do not modify anything in the signup form UI, the admin login flow, 
+or any other unrelated authentication logic. This fix is scoped 
+strictly to: normalizePhone(), isEmail(), the login() function body, 
+the one-time migration script, and removing any email-only 
+client-side validation blocking phone number submission.

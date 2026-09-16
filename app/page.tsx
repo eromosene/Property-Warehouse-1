@@ -1,9 +1,10 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { FormEvent, useRef, useState } from "react";
 
-const navLinks = ["Listings", "Heat Map", "Landlords", "How It Works", "About Us"];
+const navLinks = [["Listings", "/listings"], ["Heat Map", "/heat-map"], ["Landlords", "#landlords"], ["How It Works", "/how-it-works"], ["About Us", "#about-us"]];
 
 const selectGroups = [
   { label: "AREA", name: "area", options: ["Select Area", "Lekki", "Ikoyi", "Yaba", "Ikeja"] },
@@ -111,37 +112,37 @@ export default function Home() {
           aria-label="Primary navigation"
           className={`${menuOpen ? "flex" : "hidden"} fixed inset-x-6 top-22 z-40 flex-col rounded-xl bg-white p-2.5 shadow-[0_20px_54px_rgba(9,24,42,0.13)] lg:static lg:flex lg:gap-8 lg:flex-1 lg:flex-row lg:items-center lg:justify-center lg:bg-transparent lg:p-0 lg:shadow-none`}
         >
-          {navLinks.map((link) => (
-            <a
-              key={link}
+          {navLinks.map(([label, href]) => (
+            <Link
+              key={label}
               className="w-full px-3.5 py-3.25 text-sm font-bold text-[#101b2a] lg:w-auto lg:p-0 lg:text-[13px]"
-              href={`#${link.toLowerCase().replaceAll(" ", "-")}`}
+              href={href}
               onClick={closeMenu}
             >
-              {link}
-            </a>
+              {label}
+            </Link>
           ))}
           <div
             className={`flex lg:hidden flex-col gap-2.5 rounded-xl p-2.5 shadow-[0_20px_54px_rgba(9,24,42,0.13)] lg:shadow-none`}
           >
-            <a className="inline-flex min-h-10.5 items-center justify-center rounded-lg border border-[#09182a1c] text-[13px] font-bold lg:min-h-0 lg:border-0" href="#login" onClick={closeMenu}>
+            <Link className="inline-flex min-h-10.5 items-center justify-center rounded-lg border border-[#09182a1c] text-[13px] font-bold lg:min-h-0 lg:border-0" href="/auth" onClick={closeMenu}>
               Log in
-            </a>
-            <a className="inline-flex min-h-10.5 items-center justify-center rounded-[7px] bg-[#09182a] px-4.25 text-xs font-bold text-white shadow-[0_14px_30px_rgba(9,24,42,0.16)] lg:min-h-9.25" href="#list-property" onClick={closeMenu}>
+            </Link>
+            <Link className="inline-flex min-h-10.5 items-center justify-center rounded-[7px] bg-[#09182a] px-4.25 text-xs font-bold text-white shadow-[0_14px_30px_rgba(9,24,42,0.16)] lg:min-h-9.25" href="/auth#landlord" onClick={closeMenu}>
               + List Property
-            </a>
+            </Link>
           </div>
         </nav>
 
         <div
           className={`hidden flex-col gap-2.5 rounded-xl p-2.5 shadow-[0_20px_54px_rgba(9,24,42,0.13)] xl:static lg:flex lg:flex-row lg:items-center lg:gap-5.5 lg:bg-transparent lg:p-0 lg:shadow-none`}
         >
-          <a className="inline-flex min-h-10.5 items-center justify-center rounded-lg border border-[#09182a1c] text-[13px] font-bold lg:min-h-0 lg:border-0" href="#login" onClick={closeMenu}>
+          <Link className="inline-flex min-h-10.5 items-center justify-center rounded-lg border border-[#09182a1c] text-[13px] font-bold lg:min-h-0 lg:border-0" href="/auth" onClick={closeMenu}>
             Log in
-          </a>
-          <a className="inline-flex min-h-10.5 items-center justify-center rounded-[7px] bg-[#09182a] px-4.25 text-xs font-bold text-white shadow-[0_14px_30px_rgba(9,24,42,0.16)] lg:min-h-9.25" href="#list-property" onClick={closeMenu}>
+          </Link>
+          <Link className="inline-flex min-h-10.5 items-center justify-center rounded-[7px] bg-[#09182a] px-4.25 text-xs font-bold text-white shadow-[0_14px_30px_rgba(9,24,42,0.16)] lg:min-h-9.25" href="/auth#landlord" onClick={closeMenu}>
             + List Property
-          </a>
+          </Link>
         </div>
 
         <button className="ml-auto block h-8.5 w-10.25 lg:hidden" type="button" aria-label="Open menu" aria-expanded={menuOpen} onClick={() => setMenuOpen((open) => !open)}>
@@ -178,16 +179,16 @@ export default function Home() {
           </p>
 
           <div className="mt-5 flex flex-col items-stretch gap-3 md:flex-row md:items-center lg:gap-4">
-            <a className="inline-flex min-w-40 flex-1 items-center justify-center gap-2 whitespace-nowrap rounded-[7px] bg-[#09182a] p-3 text-[11px] font-extrabold text-white shadow-[0_18px_34px_rgba(9,24,42,0.18)] md:gap-3 md:text-xs lg:flex-none lg:px-5" href="#listings">
+            <Link className="inline-flex min-w-40 flex-1 items-center justify-center gap-2 whitespace-nowrap rounded-[7px] bg-[#09182a] p-3 text-[11px] font-extrabold text-white shadow-[0_18px_34px_rgba(9,24,42,0.18)] md:gap-3 md:text-xs lg:flex-none lg:px-5" href="/listings">
               <span>Browse Listings</span>
               <Icon className="size-4 text-[#a97e4b]"><path d="M5 12h13m-5-5 5 5-5 5" /></Icon>
-            </a>
-            <a className="inline-flex min-w-36 flex-1 items-center justify-center gap-2 whitespace-nowrap rounded-[7px] border border-zinc-200/70 bg-white/80 p-3 text-[11px] font-extrabold text-[#09182a] shadow-[0_12px_28px_rgba(9,24,42,0.06)] md:gap-3 md:text-xs lg:flex-none" href="#how-it-works">
+            </Link>
+            <Link className="inline-flex min-w-36 flex-1 items-center justify-center gap-2 whitespace-nowrap rounded-[7px] border border-zinc-200/70 bg-white/80 p-3 text-[11px] font-extrabold text-[#09182a] shadow-[0_12px_28px_rgba(9,24,42,0.06)] md:gap-3 md:text-xs lg:flex-none" href="/how-it-works">
               <span className="flex size-5 rounded-full border-[1.5px] border-current">
                 <Icon className="h-2.75 w-2.75 translate-x-px"><path d="m10 8 6 4-6 4V8Z" /></Icon>
               </span>
               <span>How It Works</span>
-            </a>
+            </Link>
           </div>
         </div>
 

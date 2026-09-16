@@ -1,0 +1,203 @@
+/* ── Mobile menu ── */
+const menuButton = document.querySelector(".menu-button");
+menuButton?.addEventListener("click", () => {
+    const isOpen = document.body.classList.toggle("menu-open");
+    menuButton.setAttribute("aria-expanded", String(isOpen));
+});
+
+document.querySelectorAll(".site-nav a, .header-actions a").forEach((link) => {
+    link.addEventListener("click", () => {
+        document.body.classList.remove("menu-open");
+        menuButton?.setAttribute("aria-expanded", "false");
+    });
+});
+
+/* ── Boot: enforce hidden state regardless of CSS cache ── */
+document.querySelectorAll(".auth-form").forEach((f) => {
+    if (f.classList.contains("hidden")) f.style.display = "none";
+});
+
+/* ── Tab switching ── */
+function showForm(formEl) {
+    formEl.classList.remove("hidden");
+    formEl.style.display = "";
+}
+function hideForm(formEl) {
+    formEl.classList.add("hidden");
+    formEl.style.display = "none";
+}
+
+document.querySelectorAll(".tab-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+        const targetFormId = btn.dataset.tab;
+        const panelId      = btn.dataset.panel;
+        const panel        = document.getElementById(panelId);
+
+        panel.querySelectorAll(".tab-btn").forEach(b => {
+            b.classList.remove("active");
+            b.setAttribute("aria-selected", "false");
+        });
+        btn.classList.add("active");
+        btn.setAttribute("aria-selected", "true");
+
+        panel.querySelectorAll(".auth-form").forEach(hideForm);
+        const targetForm = document.getElementById(targetFormId);
+        if (targetForm) showForm(targetForm);
+    });
+});
+
+/* ── Password visibility toggle ── */
+document.querySelectorAll(".pw-toggle").forEach((btn) => {
+    btn.addEventListener("click", () => {
+        const input = btn.closest(".field-group, .password-field").querySelector("input[type='password'], input[type='text']");
+        if (!input) return;
+        const isPassword = input.type === "password";
+        input.type = isPassword ? "text" : "password";
+        btn.setAttribute("aria-label", isPassword ? "Hide password" : "Show password");
+        btn.querySelector("svg").style.opacity = isPassword ? "0.5" : "1";
+    });
+});
+
+/* ── Toast helper ── */
+function showToast(msg) {
+    let toast = document.querySelector(".auth-toast");
+    if (!toast) {
+        toast = document.createElement("div");
+        toast.className = "auth-toast";
+        document.body.appendChild(toast);
+    }
+    toast.textContent = msg;
+    toast.classList.add("show");
+    setTimeout(() => toast.classList.remove("show"), 3200);
+}
+
+/* ── Scroll to landlord panel if hash is #landlord ── */
+window.addEventListener("DOMContentLoaded", () => {
+    if (location.hash === "#landlord") {
+        const el = document.getElementById("landlord");
+        if (el) setTimeout(() => el.scrollIntoView({ behavior: "smooth", block: "start" }), 300);
+    }
+});
+
+/* ── Form submissions ── */
+
+/* Disable a form's submit button while a request is in flight, so a slow/failed network
+   call can't be double-submitted. */
+function setFormBusy(form, busy) {
+    const btn = form.querySelector("button[type='submit']");
+    if (btn) btn.disabled = busy;
+}
+
+/* TENANT LOGIN */
+document.getElementById("tenant-login")?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const form    = e.target;
+    const email   = form.querySelector("input[type='text'], input[type='email']")?.value.trim();
+    const password = form.querySelector("input[type='password'], input[type='text'][autocomplete='current-password']")?.value;
+
+    if (!email || !password) {
+        showToast("Please fill in all fields.");
+        return;
+    }
+
+    setFormBusy(form, true);
+    const res = await PWAuth.login({ email, password, role: "tenant" });
+    setFormBusy(form, false);
+
+    if (!res.ok) {
+        showToast(res.error === "network" ? "Couldn't reach the server. Please try again." : res.error);
+        return;
+    }
+
+    showToast("Welcome back, " + res.data.user.firstName + "! Redirecting…");
+    setTimeout(() => { window.location.href = "dashboard.html"; }, 1200);
+});
+
+/* TENANT SIGN UP */
+document.getElementById("tenant-signup")?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const form      = e.target;
+    const inputs    = form.querySelectorAll("input");
+    const selects   = form.querySelectorAll("select");
+    const firstName = inputs[0]?.value.trim();
+    const lastName  = inputs[1]?.value.trim();
+    const email     = inputs[2]?.value.trim();
+    const phone     = inputs[3]?.value.trim();
+    const password  = inputs[4]?.value;
+    const area      = selects[0]?.value;
+    const budget    = selects[1]?.value;
+
+    if (!firstName || !lastName || !email || !password) {
+        showToast("Please fill in all required fields.");
+        return;
+    }
+
+    setFormBusy(form, true);
+    const res = await PWAuth.signup({ role: "tenant", firstName, lastName, email, phone, password, area, budget });
+    setFormBusy(form, false);
+
+    if (!res.ok) {
+        showToast(res.error === "network" ? "Couldn't reach the server. Please try again." : res.error);
+        return;
+    }
+
+    showToast("Account created! Welcome, " + firstName + "! Redirecting…");
+    setTimeout(() => { window.location.href = "dashboard.html"; }, 1400);
+});
+
+/* LANDLORD LOGIN */
+document.getElementById("landlord-login")?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const form    = e.target;
+    const email   = form.querySelector("input")?.value.trim();
+    const password = form.querySelectorAll("input")[1]?.value;
+
+    if (!email || !password) {
+        showToast("Please fill in all fields.");
+        return;
+    }
+
+    setFormBusy(form, true);
+    const res = await PWAuth.login({ email, password, role: "landlord" });
+    setFormBusy(form, false);
+
+    if (!res.ok) {
+        showToast(res.error === "network" ? "Couldn't reach the server. Please try again." : res.error);
+        return;
+    }
+
+    showToast("Welcome back, " + res.data.user.firstName + "!");
+    setTimeout(() => { window.location.href = "landlord-dashboard.html"; }, 1200);
+});
+
+/* LANDLORD SIGN UP */
+document.getElementById("landlord-signup")?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const form      = e.target;
+    const inputs    = form.querySelectorAll("input");
+    const selects   = form.querySelectorAll("select");
+    const firstName = inputs[0]?.value.trim();
+    const lastName  = inputs[1]?.value.trim();
+    const email     = inputs[2]?.value.trim();
+    const phone     = inputs[3]?.value.trim();
+    const password  = inputs[4]?.value;
+    const propType  = selects[0]?.value;
+    const lga       = selects[1]?.value;
+
+    if (!firstName || !lastName || !email || !password) {
+        showToast("Please fill in all required fields.");
+        return;
+    }
+
+    setFormBusy(form, true);
+    const res = await PWAuth.signup({ role: "landlord", firstName, lastName, email, phone, password, propType, lga });
+    setFormBusy(form, false);
+
+    if (!res.ok) {
+        showToast(res.error === "network" ? "Couldn't reach the server. Please try again." : res.error);
+        return;
+    }
+
+    showToast("Landlord account created! Welcome, " + firstName + "!");
+    setTimeout(() => { window.location.href = "landlord-dashboard.html"; }, 1400);
+});

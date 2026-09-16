@@ -1,0 +1,15 @@
+"use client";
+
+import { FormEvent, useEffect, useState } from "react";
+import Link from "next/link";
+import { api, Listing, naira } from "../lib/api";
+
+export default function AdminPage() {
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [listings, setListings] = useState<Listing[]>([]);
+  const [message, setMessage] = useState("");
+  const login = (event: FormEvent<HTMLFormElement>) => { event.preventDefault(); const values = new FormData(event.currentTarget); setMessage("Signing in..."); api<{ token?: string }>("/api/auth/admin/login", { method: "POST", body: JSON.stringify({ email: values.get("email"), password: values.get("password") }) }).then((result) => { if (result.token) localStorage.setItem("pw_token", result.token); setLoggedIn(true); setMessage(""); }).catch((reason: Error) => setMessage(reason.message)); };
+  useEffect(() => { if (!loggedIn) return; api<{ listings: Listing[] }>("/api/admin/listings").then((data) => setListings(data.listings)).catch((reason: Error) => setMessage(reason.message)); }, [loggedIn]);
+  if (!loggedIn) return <main className="grid min-h-screen place-items-center bg-[#10263d] px-5 font-manrope"><form onSubmit={login} className="grid w-full max-w-md gap-4 rounded-2xl bg-white p-8"><Link href="/" className="font-bold text-[#a97e4b]">Property Warehouse</Link><h1 className="font-playfair text-4xl font-bold">Admin portal</h1><input name="email" type="email" placeholder="Admin email" required className="h-11 rounded-lg border border-[#09182a20] px-3" /><input name="password" type="password" placeholder="Password" required className="h-11 rounded-lg border border-[#09182a20] px-3" /><button className="h-11 rounded-lg bg-[#09182a] font-bold text-white" type="submit">Sign in</button>{message && <p className="text-sm font-bold text-red-700">{message}</p>}</form></main>;
+  return <main className="min-h-screen bg-[#f0f2f5] px-5 py-8 font-manrope text-[#09182a] md:px-12"><header className="mx-auto flex max-w-6xl items-center justify-between"><h1 className="font-playfair text-4xl font-bold">Admin overview</h1><Link href="/" className="text-sm font-bold text-[#a97e4b]">View site</Link></header><section className="mx-auto mt-10 max-w-6xl overflow-hidden rounded-xl bg-white"><div className="border-b border-[#09182a12] px-6 py-5"><h2 className="font-extrabold">Listings moderation</h2></div><div className="divide-y divide-[#09182a12]">{listings.map((listing) => <div key={listing.id} className="flex flex-wrap items-center justify-between gap-4 px-6 py-5"><div><b>{listing.title}</b><p className="mt-1 text-xs text-[#5d6876]">{listing.area} · {naira(listing.rentPerYear)}/yr</p></div><span className="rounded-full bg-[#fff4df] px-3 py-1 text-xs font-bold">{listing.isVerified ? "Verified" : "Needs review"}</span></div>)}{!listings.length && <p className="p-8 text-sm text-[#5d6876]">No listings returned.</p>}</div></section></main>;
+}
