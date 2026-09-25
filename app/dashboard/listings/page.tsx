@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { api, Listing, naira } from "../../lib/api";
 
+const CREATE_LISTING_HREF = "/dashboard/listings/create";
+
 export default function LandlordListingsPage() {
     const [listings, setListings] = useState<Listing[]>([]);
     const [message, setMessage] = useState("Loading your listings...");
@@ -44,7 +46,7 @@ export default function LandlordListingsPage() {
     };
 
     return (
-        <div className="p-6 pb-10 max-[860px]:p-[14px] max-[860px]:pb-[78px]">
+        <div className="mx-auto max-w-7xl p-3.5 pb-19.5 lg:p-6 lg:pb-10">
             <div className="mb-5 flex items-end justify-between gap-4">
                 <div>
                     <p className="text-[11px] font-extrabold uppercase tracking-[.12em] text-[#a97e4b]">
@@ -57,7 +59,7 @@ export default function LandlordListingsPage() {
                 </div>
 
                 <Link
-                    href="/create-listing"
+                    href={CREATE_LISTING_HREF}
                     className="flex h-[34px] items-center gap-[6px] rounded-lg bg-[#09182a] px-[14px] text-[12px] font-bold text-white"
                 >
                     + Add New Property
@@ -77,7 +79,7 @@ export default function LandlordListingsPage() {
                     </p>
 
                     <Link
-                        href="/create-listing"
+                        href={CREATE_LISTING_HREF}
                         className="mt-4 inline-flex rounded-xl bg-[#a97e4b] px-6 py-3 text-[14px] font-extrabold text-white"
                     >
                         + Add Your First Property

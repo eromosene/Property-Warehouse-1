@@ -42,7 +42,7 @@ const MESSAGES = [
 
 export default function MessagesPage() {
     return (
-        <div className="p-6 pb-10 max-[860px]:p-[14px] max-[860px]:pb-[78px]">
+        <div className="mx-auto max-w-7xl p-6 pb-10 max-[860px]:p-[14px] max-[860px]:pb-[78px]">
             <div className="mb-5">
                 <p className="text-[11px] font-extrabold uppercase tracking-[.12em] text-[#a97e4b]">
                     Communication
@@ -53,7 +53,7 @@ export default function MessagesPage() {
                 </h1>
             </div>
 
-            <section className="max-w-[760px] rounded-[14px] border border-[rgba(9,24,42,.09)] bg-white p-[18px]">
+            <section className="max-w-7xl rounded-[14px] border border-[rgba(9,24,42,.09)] bg-white p-[18px]">
                 <div className="mb-[14px] border-b border-[rgba(9,24,42,.09)] pb-3">
                     <h2 className="text-[14.5px] font-extrabold">Recent Messages</h2>
                 </div>

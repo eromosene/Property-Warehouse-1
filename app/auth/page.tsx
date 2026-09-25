@@ -147,7 +147,7 @@ function AuthPanel({ role }: { role: Role }) {
         ),
       });
       if (result.token) localStorage.setItem("pw_token", result.token);
-      router.push(role === "landlord" ? "/landlord-dashboard" : "/dashboard");
+      router.push("/dashboard");
     } catch (error) {
       setMessage(
         error instanceof Error

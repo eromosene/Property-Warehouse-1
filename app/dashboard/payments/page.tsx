@@ -21,7 +21,7 @@ const PAYMENTS = [
 
 export default function PaymentsPage() {
     return (
-        <div className="p-6 pb-10 max-[860px]:p-[14px] max-[860px]:pb-[78px]">
+        <div className="mx-auto max-w-7xl p-3.5 pb-19.5 lg:p-6 lg:pb-10">
             <div className="mb-5">
                 <p className="text-[11px] font-extrabold uppercase tracking-[.12em] text-[#a97e4b]">
                     Finance
@@ -32,7 +32,7 @@ export default function PaymentsPage() {
                 </h1>
             </div>
 
-            <section className="max-w-[820px] rounded-[14px] border border-[rgba(9,24,42,.09)] bg-white p-[18px]">
+            <section className="max-w-7xl rounded-[14px] border border-[rgba(9,24,42,.09)] bg-white p-[18px]">
                 <h2 className="mb-[14px] text-[14.5px] font-extrabold">
                     Recent Payments
                 </h2>

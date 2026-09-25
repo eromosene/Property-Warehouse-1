@@ -1,6 +1,6 @@
 export default function ReviewsPage() {
     return (
-        <div className="p-6 pb-10 max-[860px]:p-[14px] max-[860px]:pb-[78px]">
+        <div className="mx-auto max-w-7xl p-3.5 pb-19.5 lg:p-6 lg:pb-10">
             <p className="text-[11px] font-extrabold uppercase tracking-[.12em] text-[#a97e4b]">
                 Landlord dashboard
             </p>
