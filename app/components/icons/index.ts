@@ -36,3 +36,8 @@ export { StarIcon } from "./StarIcon";
 export { UsersIcon } from "./UsersIcon";
 export { VerifiedIcon } from "./VerifiedIcon";
 export { ChevronIcon } from "./ChevronIcon";
+export { ArrowLeftIcon } from "./ArrowLeftIcon";
+export { BathIcon } from "./BathIcon";
+export { BedIcon } from "./BedIcon";
+export { FilterIcon } from "./FilterIcon";
+export { WhatsAppIcon } from "./WhatsAppIcon";

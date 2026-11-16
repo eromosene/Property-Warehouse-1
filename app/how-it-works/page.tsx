@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
+import SiteHeader from "../components/site-header";
 
 type ToggleTarget = "tenant" | "landlord";
 
@@ -292,36 +293,11 @@ const ArrowUpRightIcon = () => (
 );
 
 export default function HowItWorksPage() {
-  const [drawerOpen, setDrawerOpen] = useState(false);
   const [activeToggle, setActiveToggle] = useState<ToggleTarget>("tenant");
-  const [scrolled, setScrolled] = useState(false);
   const [openFaqLeft, setOpenFaqLeft] = useState<number | null>(null);
   const [openFaqRight, setOpenFaqRight] = useState<number | null>(null);
 
-  const drawerRef = useRef<HTMLDivElement>(null);
-  const menuBtnRef = useRef<HTMLButtonElement>(null);
   const journeySectionRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 10);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
-  useEffect(() => {
-    const onClick = (e: MouseEvent) => {
-      if (
-        drawerRef.current &&
-        menuBtnRef.current &&
-        !drawerRef.current.contains(e.target as Node) &&
-        !menuBtnRef.current.contains(e.target as Node)
-      ) {
-        setDrawerOpen(false);
-      }
-    };
-    document.addEventListener("click", onClick);
-    return () => document.removeEventListener("click", onClick);
-  }, []);
 
   const handleToggle = (target: ToggleTarget) => {
     setActiveToggle(target);
@@ -330,91 +306,7 @@ export default function HowItWorksPage() {
 
   return (
     <div className="min-h-screen bg-[#f0eeeb] font-manrope text-[#09182a]">
-      {/* ═══ HEADER ═══ */}
-      <header
-        className="fixed inset-x-0 top-0 z-[100] flex h-[68px] items-center gap-8 border-b border-black/[0.07] bg-white/[0.96] px-10 backdrop-blur-[12px] transition-shadow max-[860px]:gap-0 max-[860px]:px-5"
-        style={{ boxShadow: scrolled ? "0 2px 20px rgba(0,0,0,.10)" : "" }}
-      >
-        <Link href="/" className="inline-flex shrink-0 items-center gap-2.5 text-[#09182a]" aria-label="Property Warehouse home">
-          <span className="inline-block shrink-0 font-cormorant text-[34px] font-bold leading-[0.82] tracking-[-0.09em] text-[#a97e4b]">
-            P <span className="ml-[-3px] inline-block translate-y-[11px]">W</span>
-          </span>
-          <span className="grid gap-px text-[13px] font-extrabold leading-none tracking-[-0.04em] text-[#09182a]">
-            <span>PROPERTY</span>
-            <span>WAREHOUSE</span>
-          </span>
-        </Link>
-
-        <nav
-          className="flex flex-1 justify-center gap-8 max-[860px]:hidden"
-          aria-label="Primary navigation"
-        >
-          <Link href="/#listings" className="border-b-2 border-transparent pb-1 text-sm font-semibold text-[#09182a] transition hover:text-[#a97e4b]">
-            Listings
-          </Link>
-          <Link href="/heatmap" className="border-b-2 border-transparent pb-1 text-sm font-semibold text-[#09182a] transition hover:text-[#a97e4b]">
-            Heat Map
-          </Link>
-          <Link href="/#landlords" className="border-b-2 border-transparent pb-1 text-sm font-semibold text-[#09182a] transition hover:text-[#a97e4b]">
-            Landlords
-          </Link>
-          <Link href="/how-it-works" className="border-b-2 border-[#09182a] pb-1 text-sm font-semibold text-[#09182a] transition hover:text-[#a97e4b]">
-            How It Works
-          </Link>
-          <Link href="/#about-us" className="border-b-2 border-transparent pb-1 text-sm font-semibold text-[#09182a] transition hover:text-[#a97e4b]">
-            About Us
-          </Link>
-        </nav>
-
-        <div className="flex shrink-0 items-center gap-4 max-[860px]:hidden">
-          <Link href="/auth" className="text-sm font-semibold text-[#09182a]">
-            Log in
-          </Link>
-          <Link
-            href="/auth#landlord"
-            className="whitespace-nowrap rounded-[10px] bg-[#09182a] px-[18px] py-2.5 text-sm font-bold text-white transition hover:opacity-85"
-          >
-            + List Property
-          </Link>
-        </div>
-
-        <button
-          ref={menuBtnRef}
-          type="button"
-          aria-label="Open menu"
-          onClick={() => setDrawerOpen((open) => !open)}
-          className="ml-auto hidden flex-col gap-[5px] p-1.5 max-[860px]:flex"
-        >
-          <span className="block h-0.5 w-[22px] rounded-sm bg-[#09182a]" />
-          <span className="block h-0.5 w-[22px] rounded-sm bg-[#09182a]" />
-          <span className="block h-0.5 w-[22px] rounded-sm bg-[#09182a]" />
-        </button>
-      </header>
-
-      {/* Mobile drawer */}
-      <div
-        ref={drawerRef}
-        className={`fixed inset-0 top-[68px] z-[99] ${drawerOpen ? "flex" : "hidden"} flex-col border-t border-[#eee] bg-white p-6`}
-      >
-        <Link href="/#listings" className="block border-b border-[#f0eeeb] py-4 text-base font-semibold text-[#09182a]">
-          Listings
-        </Link>
-        <Link href="/heatmap" className="block border-b border-[#f0eeeb] py-4 text-base font-semibold text-[#09182a]">
-          Heat Map
-        </Link>
-        <Link href="/#landlords" className="block border-b border-[#f0eeeb] py-4 text-base font-semibold text-[#09182a]">
-          Landlords
-        </Link>
-        <Link href="/how-it-works" className="block border-b border-[#f0eeeb] py-4 text-base font-semibold text-[#a97e4b]">
-          How It Works
-        </Link>
-        <Link href="/#about-us" className="block border-b border-[#f0eeeb] py-4 text-base font-semibold text-[#09182a]">
-          About Us
-        </Link>
-        <Link href="/auth" className="block border-b border-[#f0eeeb] py-4 text-base font-semibold text-[#09182a]">
-          Log in / Sign up
-        </Link>
-      </div>
+      <SiteHeader position="fixed" />
 
       {/* ═══ HERO ═══ */}
       <section className="relative flex min-h-[480px] items-center overflow-hidden px-[60px] pb-20 pt-[120px] max-[860px]:min-h-[420px] max-[860px]:px-6 max-[860px]:pb-[60px] max-[860px]:pt-[100px]">

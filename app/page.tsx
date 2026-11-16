@@ -2,9 +2,10 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { FormEvent, useRef, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
+import { getSharedSession, type SessionUser } from "./lib/auth";
 
-const navLinks = [["Listings", "/listings"], ["Heat Map", "/heat-map"], ["Landlords", "#landlords"], ["How It Works", "/how-it-works"], ["About Us", "#about-us"]];
+const navLinks = [["Listings", "/listings"], ["Heat Map", "/heatmap"], ["Landlords", "#landlords"], ["How It Works", "/how-it-works"], ["About Us", "#about-us"]];
 
 const selectGroups = [
   { label: "AREA", name: "area", options: ["Select Area", "Lekki", "Ikoyi", "Yaba", "Ikeja"] },
@@ -81,6 +82,26 @@ export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
   const trackRef = useRef<HTMLDivElement>(null);
 
+  /* Is someone already logged in? Until we know, assume logged out so the
+     Log in button shows its normal label. */
+  const [user, setUser] = useState<SessionUser | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    getSharedSession().then(({ user: sessionUser }) => {
+      if (active) setUser(sessionUser);
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  /* Logged in → the Log in button becomes a shortcut to the dashboard;
+     logged out → it opens the auth page as usual. */
+  const loginHref = user ? "/dashboard" : "/auth";
+  const loginLabel = user ? "Dashboard" : "Log in";
+  const listPropertyHref = user ? "/dashboard/listings/create" : "/auth#landlord";
+
   const closeMenu = () => setMenuOpen(false);
 
   const handleSearch = (event: FormEvent<HTMLFormElement>) => {
@@ -125,10 +146,10 @@ export default function Home() {
           <div
             className={`flex lg:hidden flex-col gap-2.5 rounded-xl p-2.5 shadow-[0_20px_54px_rgba(9,24,42,0.13)] lg:shadow-none`}
           >
-            <Link className="inline-flex min-h-10.5 items-center justify-center rounded-lg border border-[#09182a1c] text-[13px] font-bold lg:min-h-0 lg:border-0" href="/auth" onClick={closeMenu}>
-              Log in
+            <Link className="inline-flex min-h-10.5 items-center justify-center rounded-lg border border-[#09182a1c] text-[13px] font-bold lg:min-h-0 lg:border-0" href={loginHref} onClick={closeMenu}>
+              {loginLabel}
             </Link>
-            <Link className="inline-flex min-h-10.5 items-center justify-center rounded-[7px] bg-[#09182a] px-4.25 text-xs font-bold text-white shadow-[0_14px_30px_rgba(9,24,42,0.16)] lg:min-h-9.25" href="/auth#landlord" onClick={closeMenu}>
+            <Link className="inline-flex min-h-10.5 items-center justify-center rounded-[7px] bg-[#09182a] px-4.25 text-xs font-bold text-white shadow-[0_14px_30px_rgba(9,24,42,0.16)] lg:min-h-9.25" href={listPropertyHref} onClick={closeMenu}>
               + List Property
             </Link>
           </div>
@@ -137,10 +158,10 @@ export default function Home() {
         <div
           className={`hidden flex-col gap-2.5 rounded-xl p-2.5 shadow-[0_20px_54px_rgba(9,24,42,0.13)] xl:static lg:flex lg:flex-row lg:items-center lg:gap-5.5 lg:bg-transparent lg:p-0 lg:shadow-none`}
         >
-          <Link className="inline-flex min-h-10.5 items-center justify-center rounded-lg border border-[#09182a1c] text-[13px] font-bold lg:min-h-0 lg:border-0" href="/auth" onClick={closeMenu}>
-            Log in
+          <Link className="inline-flex min-h-10.5 items-center justify-center rounded-lg border border-[#09182a1c] text-[13px] font-bold lg:min-h-0 lg:border-0" href={loginHref} onClick={closeMenu}>
+            {loginLabel}
           </Link>
-          <Link className="inline-flex min-h-10.5 items-center justify-center rounded-[7px] bg-[#09182a] px-4.25 text-xs font-bold text-white shadow-[0_14px_30px_rgba(9,24,42,0.16)] lg:min-h-9.25" href="/auth#landlord" onClick={closeMenu}>
+          <Link className="inline-flex min-h-10.5 items-center justify-center rounded-[7px] bg-[#09182a] px-4.25 text-xs font-bold text-white shadow-[0_14px_30px_rgba(9,24,42,0.16)] lg:min-h-9.25" href={listPropertyHref} onClick={closeMenu}>
             + List Property
           </Link>
         </div>

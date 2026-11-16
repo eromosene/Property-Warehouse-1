@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, ReactNode, useState } from "react";
+import { FormEvent, ReactNode, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { api } from "../lib/api";
+import { getSharedSession, login, signup } from "../lib/auth";
 import {
   Icon,
   PersonIcon,
@@ -44,6 +44,36 @@ const propertyTypes = [
 ];
 
 export default function AuthPage() {
+  const router = useRouter();
+  const [checkingSession, setCheckingSession] = useState(true);
+
+  /* No point showing login/signup to someone who is already logged in —
+     ask the backend who we are first, and send existing sessions to the
+     dashboard. Until the answer arrives we show a holding screen so the
+     form never flashes for a logged-in visitor. */
+  useEffect(() => {
+    let active = true;
+    getSharedSession().then(({ user }) => {
+      if (!active) return;
+      if (user) {
+        router.replace("/dashboard");
+        return;
+      }
+      setCheckingSession(false);
+    });
+    return () => {
+      active = false;
+    };
+  }, [router]);
+
+  if (checkingSession) {
+    return (
+      <div className="grid min-h-screen place-items-center bg-[#f0ede8] font-manrope text-[#5d6876]">
+        <p className="text-sm font-bold">Logging out…</p>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#f0ede8]">
       {/* ── MAIN ── */}
@@ -80,10 +110,9 @@ export default function AuthPage() {
             <span className="mx-auto block h-[3px] w-12 rounded-full bg-[#a97e4b]" />
           </div>
 
-          {/* Two panels */}
-          <div className="grid grid-cols-1 items-start gap-4 min-[901px]:grid-cols-2 min-[901px]:gap-5">
-            <AuthPanel role="tenant" />
-            <AuthPanel role="landlord" />
+          {/* One panel — the role tabs at the top switch between tenant and landlord */}
+          <div className="mx-auto w-full max-w-[480px]">
+            <AuthPanel />
           </div>
 
           {/* Trust badges */}
@@ -97,7 +126,8 @@ export default function AuthPage() {
   );
 }
 
-function AuthPanel({ role }: { role: Role }) {
+function AuthPanel() {
+  const [role, setRole] = useState<Role>("tenant");
   const [mode, setMode] = useState<Mode>("login");
   const [showPassword, setShowPassword] = useState(false);
   const [message, setMessage] = useState("");
@@ -113,40 +143,37 @@ function AuthPanel({ role }: { role: Role }) {
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const values = new FormData(event.currentTarget);
+    const value = (key: string) => {
+      const raw = values.get(key);
+      return raw === null ? undefined : String(raw);
+    };
     setBusy(true);
     setMessage(
       mode === "login" ? "Signing you in..." : "Creating your account...",
     );
     try {
-      const result = await api<{
-        token?: string;
-        user: { role: Role; firstName?: string };
-      }>(`/api/auth/${mode === "login" ? "login" : "signup"}`, {
-        method: "POST",
-        body: JSON.stringify(
-          mode === "login"
-            ? {
-              email: values.get("email"),
-              password: values.get("password"),
-              role,
-            }
+      if (mode === "login") {
+        await login({
+          email: value("email") ?? "",
+          password: value("password") ?? "",
+          role,
+        });
+      } else {
+        await signup({
+          role,
+          firstName: value("firstName") ?? "",
+          lastName: value("lastName") ?? "",
+          email: value("email") ?? "",
+          phone: value("phone") ?? "",
+          password: value("password") ?? "",
+          ...(tenant
+            ? { area: value("area"), budget: value("budget") }
             : {
-              role,
-              firstName: values.get("firstName"),
-              lastName: values.get("lastName"),
-              email: values.get("email"),
-              phone: values.get("phone"),
-              password: values.get("password"),
-              ...(tenant
-                ? { area: values.get("area"), budget: values.get("budget") }
-                : {
-                  propType: values.get("propType"),
-                  lga: values.get("lga"),
-                }),
-            },
-        ),
-      });
-      if (result.token) localStorage.setItem("pw_token", result.token);
+              propType: value("propType"),
+              lga: value("lga"),
+            }),
+        });
+      }
       router.push("/dashboard");
     } catch (error) {
       setMessage(
@@ -169,16 +196,39 @@ function AuthPanel({ role }: { role: Role }) {
         } as React.CSSProperties
       }
     >
+      {/* Role switcher — same underline treatment as the Log In / Sign Up tabs
+          below, but each side lights up in its own colour (green = tenant,
+          gold = landlord) so you always know which form you're looking at. */}
       <div
-        className="mb-[14px] flex items-center gap-2 text-[11px] font-extrabold tracking-[0.12em]"
-        style={{ color: accent }}
+        className="mb-[14px] flex border-b-2 border-[#09182a14]"
+        role="tablist"
+        aria-label="Account type"
       >
-        {tenant ? (
-          <PersonIcon />
-        ) : (
-          <HomeIcon />
-        )}
-        <span>I&apos;M A {role.toUpperCase()}</span>
+        {(["tenant", "landlord"] as Role[]).map((item) => {
+          const itemAccent = item === "tenant" ? "#15935f" : "#a97e4b";
+          const selected = role === item;
+          return (
+            <button
+              key={item}
+              type="button"
+              role="tab"
+              aria-selected={selected}
+              onClick={() => {
+                setRole(item);
+                setMessage("");
+              }}
+              className="flex flex-1 items-center justify-center gap-2 border-b-2 py-2.5 text-[11px] font-extrabold tracking-[0.12em] transition"
+              style={{
+                color: selected ? itemAccent : "#5d6876",
+                borderColor: selected ? itemAccent : "transparent",
+                marginBottom: -2,
+              }}
+            >
+              {item === "tenant" ? <PersonIcon /> : <HomeIcon />}
+              <span>I&apos;M A {item.toUpperCase()}</span>
+            </button>
+          );
+        })}
       </div>
       <h2 className="mb-1.5 font-playfair text-[clamp(20px,2.2vw,26px)] font-bold leading-[1.2] tracking-[-0.03em] text-[#09182a]">
         Login or Sign up as a{" "}

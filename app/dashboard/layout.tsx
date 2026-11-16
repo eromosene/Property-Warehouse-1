@@ -27,12 +27,9 @@ import {
     UsersIcon,
     VerifiedIcon,
 } from "../components/icons";
+import { getSharedSession, logout, type SessionUser } from "../lib/auth";
 
-/* Temporary role flag — no auth API yet to determine this from a real
-   session. Flip this manually to "landlord" or "tenant" while testing
-   both views. Replace with real session data once the auth API exists. */
 type Role = "landlord" | "tenant";
-const role: Role = "tenant";
 
 export default function DashboardLayout({
     children,
@@ -43,6 +40,29 @@ export default function DashboardLayout({
     const router = useRouter();
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+    const [user, setUser] = useState<SessionUser | null>(null);
+    const [checked, setChecked] = useState(false);
+
+    const role: Role = user?.role === "tenant" ? "tenant" : "landlord";
+    const initials = user
+        ? `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`.toUpperCase() || "PW"
+        : "PW";
+
+    useEffect(() => {
+        let active = true;
+        getSharedSession().then(({ user: sessionUser }) => {
+            if (!active) return;
+            if (!sessionUser) {
+                router.push("/auth");
+                return;
+            }
+            setUser(sessionUser);
+            setChecked(true);
+        });
+        return () => {
+            active = false;
+        };
+    }, [router]);
 
     const isActive = (path: string) => {
         if (path === "/dashboard") {
@@ -56,14 +76,7 @@ export default function DashboardLayout({
     };
 
     const handleLogout = async () => {
-        try {
-            const { api } = await import("../lib/api");
-            await api("/api/auth/logout", {
-                method: "POST",
-            });
-        } catch {
-            // Keep the original navigation behavior even if logout request fails.
-        }
+        await logout();
         router.push("/auth");
     };
 
@@ -82,6 +95,14 @@ export default function DashboardLayout({
             document.removeEventListener("click", handleOutsideClick);
         };
     }, [userDropdownOpen]);
+
+    if (!checked) {
+        return (
+            <div className="grid min-h-screen place-items-center bg-[#f0f2f5] font-['Manrope'] text-[#5d6876]">
+                <p className="text-sm font-semibold">Loading your dashboard…</p>
+            </div>
+        );
+    }
 
     const notifCount = role === "landlord" ? 3 : 6;
 
@@ -352,7 +373,20 @@ export default function DashboardLayout({
                         </p>
                     </div>
 
-                    {/* HEADER RIGHT */}
+                    {/* TENANT → BROWSE LISTINGS */}
+                    {role === "tenant" && (
+                        <Link
+                            href="/listings"
+                            aria-label="Browse listings"
+                            className="group relative flex shrink-0 items-center gap-[7px] overflow-hidden rounded-full border border-[#15935f]/30 bg-[#15935f]/[0.07] py-[7px] pl-[13px] pr-[12px] text-[12.5px] font-extrabold tracking-[-.01em] text-[#0f7a52] transition-colors duration-200 hover:border-[#15935f] hover:bg-[#15935f] hover:text-white max-[600px]:gap-0 max-[600px]:p-[11px]"
+                        >
+                            <span className="pointer-events-none absolute inset-0 -left-full w-full bg-[linear-gradient(100deg,transparent_0%,rgba(255,255,255,.45)_50%,transparent_100%)] transition-[left] duration-[600ms] ease-out group-hover:left-full" />
+                            <SearchIcon className="h-[15px] w-[15px] shrink-0 text-current" />
+                            <span className="max-[600px]:hidden">Browse Listings</span>
+                            <ArrowIcon className="h-[12px] w-[12px] shrink-0 transition-transform duration-200 group-hover:translate-x-[3px] max-[600px]:hidden" />
+                        </Link>
+                    )}
+
                     <div className="flex shrink-0 items-center gap-[10px] max-[860px]:gap-[6px]">
                         {/* DESKTOP SEARCH */}
                         <div className="flex h-9 items-center gap-2 rounded-[9px] border border-[rgba(9,24,42,.09)] bg-[#f6f7f9] px-[13px] max-[860px]:hidden">
@@ -413,12 +447,12 @@ export default function DashboardLayout({
                                 </div>
                             ) : (
                                 <div className="grid h-[30px] w-[30px] shrink-0 place-items-center rounded-full bg-[linear-gradient(135deg,#15935f_0%,#0d6e48_100%)] text-[11px] font-extrabold tracking-[.04em] text-white max-[600px]:h-[42px] max-[600px]:w-[42px] max-[600px]:text-[14px]">
-                                    DA
+                                    {initials}
                                 </div>
                             )}
                             <div className="grid leading-[1.2] max-[860px]:hidden">
                                 <strong className="text-[12px] font-extrabold text-[#09182a]">
-                                    {role === "landlord" ? "Adeyemi Johnson" : "Daniel Adewale"}
+                                    {user ? `${user.firstName} ${user.lastName}`.trim() : ""}
                                 </strong>
                                 {role === "landlord" ? (
                                     <span className="flex items-center gap-[3px] text-[10px] font-semibold text-[#15935f]">

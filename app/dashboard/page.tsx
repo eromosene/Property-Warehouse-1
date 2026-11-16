@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRef } from "react";
 import { api, Listing, naira } from "../lib/api";
+import { getCachedUser, getSharedSession, type SessionUser } from "../lib/auth";
 import { UpcomingInspections } from "../components/upcoming-inspections";
 import {
   ArrowIcon,
@@ -108,11 +109,22 @@ const PAYMENTS = [
   },
 ];
 
-const role: "tenant" | "landlord" = "landlord"; // Change this to "landlord" to test the landlord dashboard
-
 export default function DashboardPage() {
-  if (role === "tenant") {
-    return <TenantDashboard />;
+  const [user, setUser] = useState<SessionUser | null>(() => getCachedUser());
+
+  useEffect(() => {
+    if (user) return;
+    let active = true;
+    getSharedSession().then(({ user: sessionUser }) => {
+      if (active) setUser(sessionUser);
+    });
+    return () => {
+      active = false;
+    };
+  }, [user]);
+
+  if (user?.role === "tenant") {
+    return <TenantDashboard firstName={user.firstName} />;
   }
 
   return <LandlordDashboardPage />;
@@ -718,7 +730,7 @@ const TENANT_ACTIVITY = [
   { text: "Payment of ₦1,200,000 recorded", time: "May 20, 2025" },
 ];
 
-function TenantDashboard() {
+function TenantDashboard({ firstName }: { firstName?: string }) {
   const [savedHomes] = useState(TENANT_SAVED_HOMES);
   const [budget, setBudget] = useState("₦1,000,000 – ₦2,000,000 / yr");
 
@@ -736,7 +748,7 @@ function TenantDashboard() {
     <div className="flex flex-row items-start gap-[18px] px-6 pb-10 pt-[22px] max-[860px]:flex-col max-[860px]:gap-3 max-[860px]:px-[14px] max-[600px]:gap-[14px] max-[600px]:px-[14px]">
       <div className="hidden w-full max-[860px]:block">
         <div className="mb-3">
-          <h2 className="text-[18px] font-extrabold tracking-[-.03em] max-[600px]:text-[22px]">{greeting}, Daniel <span>👋</span></h2>
+          <h2 className="text-[18px] font-extrabold tracking-[-.03em] max-[600px]:text-[22px]">{greeting}{firstName ? `, ${firstName}` : ""} <span>👋</span></h2>
           <p className="mt-[2px] text-[12px] font-medium text-[#5d6876] max-[600px]:mt-1 max-[600px]:text-[14px]">Let&apos;s help you find your perfect space in Lagos.</p>
         </div>
         <div className="flex h-[42px] items-center gap-[9px] rounded-[10px] border border-[rgba(9,24,42,.09)] bg-white px-[14px] shadow-[0_2px_10px_rgba(9,24,42,.05)] max-[600px]:h-[52px] max-[600px]:rounded-[16px] max-[600px]:px-4">

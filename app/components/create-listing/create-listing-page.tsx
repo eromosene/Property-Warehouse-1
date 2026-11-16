@@ -8,7 +8,7 @@ import {
   type SetStateAction,
 } from "react";
 import { useRouter } from "next/navigation";
-import { api } from "../../lib/api";
+import { api, authHeader } from "../../lib/api";
 import ProgressBar from "./progress-bar";
 import StepFive from "./step-five";
 import StepFour from "./step-four";
@@ -279,6 +279,8 @@ export default function CreateListingPage() {
       const response = await fetch("/api/uploads/images", {
         method: "POST",
         body: data,
+        credentials: "include",
+        headers: authHeader(),
       });
 
       if (!response.ok) {
@@ -337,6 +339,8 @@ export default function CreateListingPage() {
     try {
       await fetch(`/api/uploads/images/${encodeURIComponent(image.key)}`, {
         method: "DELETE",
+        credentials: "include",
+        headers: authHeader(),
       });
     } catch {
       // The optimistic remove already updated the UI.
@@ -398,6 +402,8 @@ export default function CreateListingPage() {
       const response = await fetch("/api/uploads/documents", {
         method: "POST",
         body: data,
+        credentials: "include",
+        headers: authHeader(),
       });
 
       if (!response.ok) {
@@ -456,6 +462,8 @@ export default function CreateListingPage() {
     try {
       await fetch(`/api/uploads/documents/${encodeURIComponent(document.key)}`, {
         method: "DELETE",
+        credentials: "include",
+        headers: authHeader(),
       });
     } catch {
       // The optimistic remove already updated the UI.

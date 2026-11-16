@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import SiteHeader from "../components/site-header";
 
 /* ═══ DATA (verbatim from heatmap.js / heatmap.html) ═══ */
 
@@ -122,7 +123,6 @@ function loadStylesheetOnce(href: string) {
 }
 
 export default function HeatMapPage() {
-  const [drawerOpen, setDrawerOpen] = useState(false);
   const [viewBy, setViewBy] = useState<"demand" | "rent" | "listings">("demand");
   const [activeFilter, setActiveFilter] = useState<"all" | AreaCategory>("all");
   const [refreshing, setRefreshing] = useState(false);
@@ -278,85 +278,7 @@ export default function HeatMapPage() {
 
   return (
     <div className="min-h-screen bg-[#f0eeeb] font-manrope text-[#09182a]">
-      {/* ═══ HEADER ═══ */}
-      <header className="sticky top-0 z-[100] flex h-[72px] items-center gap-8 border-b border-black/[0.07] bg-white px-10 max-[768px]:gap-0 max-[768px]:px-5">
-        <Link href="/" className="flex shrink-0 items-center gap-2.5 text-[#09182a]" aria-label="Property Warehouse home">
-          <span className="inline-block shrink-0 font-cormorant text-[34px] font-bold leading-[0.82] tracking-[-0.09em] text-[#a97e4b]">
-            P <span className="ml-[-3px] inline-block translate-y-[11px]">W</span>
-          </span>
-          <span className="grid gap-px text-[13px] font-extrabold leading-none tracking-[-0.04em] text-[#09182a]">
-            <span>PROPERTY</span>
-            <span>WAREHOUSE</span>
-          </span>
-        </Link>
-
-        <nav className="flex flex-1 justify-center gap-7 max-[768px]:hidden" aria-label="Primary navigation">
-          <Link href="/#listings" className="border-b-2 border-transparent pb-1 text-sm font-semibold text-[#09182a] transition hover:text-[#a97e4b]">
-            Listings
-          </Link>
-          <Link href="/heatmap" className="border-b-2 border-[#09182a] pb-1 text-sm font-semibold text-[#09182a] transition hover:text-[#a97e4b]">
-            Heat Map
-          </Link>
-          <Link href="/#landlords" className="border-b-2 border-transparent pb-1 text-sm font-semibold text-[#09182a] transition hover:text-[#a97e4b]">
-            Landlords
-          </Link>
-          <Link href="/how-it-works" className="border-b-2 border-transparent pb-1 text-sm font-semibold text-[#09182a] transition hover:text-[#a97e4b]">
-            How It Works
-          </Link>
-          <Link href="/#about-us" className="border-b-2 border-transparent pb-1 text-sm font-semibold text-[#09182a] transition hover:text-[#a97e4b]">
-            About Us
-          </Link>
-        </nav>
-
-        <div className="flex shrink-0 items-center gap-4 max-[768px]:hidden">
-          <button aria-label="Saved" className="flex items-center rounded-lg p-1.5 text-[#09182a] transition hover:bg-[#f0eeeb]">
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-            </svg>
-          </button>
-          <Link href="/auth" className="text-sm font-semibold text-[#09182a]">
-            Log in
-          </Link>
-          <Link href="/auth#landlord" className="whitespace-nowrap rounded-[10px] bg-[#09182a] px-[18px] py-2.5 text-sm font-bold text-white transition hover:opacity-85">
-            + List Property
-          </Link>
-        </div>
-
-        <button
-          type="button"
-          aria-label="Open menu"
-          onClick={() => setDrawerOpen((open) => !open)}
-          className="ml-auto hidden flex-col gap-[5px] p-1.5 max-[768px]:flex"
-        >
-          <span className="block h-0.5 w-[22px] rounded-sm bg-[#09182a]" />
-          <span className="block h-0.5 w-[22px] rounded-sm bg-[#09182a]" />
-          <span className="block h-0.5 w-[22px] rounded-sm bg-[#09182a]" />
-        </button>
-      </header>
-
-      {/* Mobile drawer */}
-      <div
-        className={`fixed inset-0 top-[72px] z-[99] ${drawerOpen ? "flex" : "hidden"} flex-col border-t border-[#eee] bg-white p-6`}
-      >
-        <Link href="/#listings" className="block border-b border-[#f0eeeb] py-4 text-base font-semibold text-[#09182a]">
-          Listings
-        </Link>
-        <Link href="/heatmap" className="block border-b border-[#f0eeeb] py-4 text-base font-semibold text-[#a97e4b]">
-          Heat Map
-        </Link>
-        <Link href="/#landlords" className="block border-b border-[#f0eeeb] py-4 text-base font-semibold text-[#09182a]">
-          Landlords
-        </Link>
-        <Link href="/how-it-works" className="block border-b border-[#f0eeeb] py-4 text-base font-semibold text-[#09182a]">
-          How It Works
-        </Link>
-        <Link href="/#about-us" className="block border-b border-[#f0eeeb] py-4 text-base font-semibold text-[#09182a]">
-          About Us
-        </Link>
-        <Link href="/auth" className="block border-b border-[#f0eeeb] py-4 text-base font-semibold text-[#09182a]">
-          Log in / Sign up
-        </Link>
-      </div>
+      <SiteHeader />
 
       {/* ═══ HERO ═══ */}
       <section className="flex flex-wrap items-start justify-between gap-5 px-10 pb-5 pt-9 max-[768px]:flex-col max-[768px]:px-5 max-[768px]:pb-4 max-[768px]:pt-6">
