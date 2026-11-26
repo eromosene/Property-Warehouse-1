@@ -7,7 +7,7 @@ export default function ListingCard({ listing }: { listing: Listing }) {
   return (
     <article className="overflow-hidden rounded-xl border border-[#09182a18] bg-white shadow-[0_10px_30px_rgba(9,24,42,0.06)]">
       <Link href={`/listing/${listing.id}`} className="relative block aspect-[1.45] bg-[#eee]">
-        <Image src={image} alt={listing.title} fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover" />
+        <Image src={image} alt={listing.title} fill unoptimized sizes="(max-width: 768px) 100vw, 33vw" className="object-cover" />
         <div className="absolute left-3 top-3 flex gap-2">{listing.isVerified && <span className="rounded-full bg-[#15935f] px-2.5 py-1 text-[10px] font-bold text-white">Verified</span>}{listing.isMonthly && <span className="rounded-full bg-[#fff] px-2.5 py-1 text-[10px] font-bold text-[#09182a]">Monthly</span>}</div>
       </Link>
       <div className="p-4">

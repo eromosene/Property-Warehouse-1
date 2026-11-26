@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { api, Listing, naira } from "../../lib/api";
 import { getFavouriteIds, saveFavourite, unsaveFavourite } from "../../lib/favourites";
 import { getSharedSession, type SessionUser } from "../../lib/auth";
 import SiteHeader from "../../components/site-header";
+import { teamWhatsAppHref } from "../../lib/contact";
 import {
     ArrowLeftIcon,
     BathIcon,
@@ -14,7 +15,6 @@ import {
     EyeIcon,
     HeartIcon,
     LocationIcon,
-    MessageIcon,
     WhatsAppIcon,
 } from "../../components/icons";
 
@@ -40,131 +40,6 @@ type DetailListing = Listing & {
   landlordVerified?: boolean;
 };
 
-/* ── Shared helpers (was listings-data.js) ── */
-function getInquiries() {
-  return JSON.parse(localStorage.getItem("pw_inquiries") || "[]");
-}
-
-function addInquiry(inquiry: Record<string, unknown>) {
-  const list = getInquiries();
-  list.unshift({ ...inquiry, sentAt: new Date().toISOString() });
-  if (list.length > 50) list.length = 50;
-  localStorage.setItem("pw_inquiries", JSON.stringify(list));
-}
-
-/* ── Inline chatbox (was listing-detail.js pwToggleDetailChat/pwSubmitDetailInquiry) ── */
-function DetailChat({
-  listing,
-  user,
-  isOpen,
-  onToggle,
-}: {
-  listing: DetailListing;
-  user: SessionUser | null;
-  isOpen: boolean;
-  onToggle: () => void;
-}) {
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [message, setMessage] = useState("");
-  const [success, setSuccess] = useState("");
-
-  /* Prefill the name/phone from the session every time the panel opens — mirrors the legacy
-     pwToggleDetailChat(), which awaited the shared session promise on open. Done during render
-     (rather than in an effect) because it is a straight adjustment of state to a prop change. */
-  const [wasOpen, setWasOpen] = useState(isOpen);
-  if (isOpen !== wasOpen) {
-    setWasOpen(isOpen);
-    if (isOpen && user) {
-      setName(`${user.firstName || ""} ${user.lastName || ""}`.trim());
-      setPhone(user.phone || "");
-    }
-  }
-
-  const submit = () => {
-    if (!name.trim() || !phone.trim() || !message.trim()) {
-      alert("Please fill in your name, phone number, and a message.");
-      return;
-    }
-
-    addInquiry({
-      listingId: listing.id,
-      listingTitle: listing.title,
-      landlordName: listing.landlordName,
-      area: listing.area,
-      senderName: name.trim(),
-      senderPhone: phone.trim(),
-      message: message.trim(),
-    });
-
-    setSuccess("✅ Message sent! The landlord will contact you shortly.");
-
-    setTimeout(function () {
-      onToggle();
-      setSuccess("");
-      setName("");
-      setPhone("");
-      setMessage("");
-    }, 3000);
-  };
-
-  return (
-    <div
-      className={`mt-2.5 max-h-0 overflow-hidden rounded-[12px] border border-[#ede9e3] border-t-[1px] bg-[#f9f8f6] transition-[max-height,padding] duration-300 ease-in-out ${
-        isOpen ? "max-h-[420px] py-4" : ""
-      }`}
-    >
-      <div className="mb-3 flex items-center justify-between">
-        <span className="font-manrope text-[13px] font-extrabold text-[#0a1628]">Message {listing.landlordName}</span>
-        <button
-          type="button"
-          onClick={onToggle}
-          aria-label="Close chatbox"
-          className="cursor-pointer rounded-[6px] border-none bg-none px-1.5 py-0.5 text-[20px] leading-none text-[#9a9490] transition-colors duration-150 hover:bg-[#edeae5] hover:text-[#0a1628]"
-        >
-          &times;
-        </button>
-      </div>
-      <div className="mb-2.5 flex flex-col gap-2">
-        <input
-          id="pwDetName"
-          type="text"
-          value={name}
-          onChange={(event) => setName(event.target.value)}
-          placeholder="Your name"
-          className="w-full box-border rounded-[9px] border-[1.5px] border-[#dedad5] bg-white px-3 py-[9px] font-manrope text-[13px] text-[#0a1628] outline-none transition-colors duration-200 placeholder:text-[#b5b0aa] focus:border-[#c9a84c]"
-        />
-        <input
-          id="pwDetPhone"
-          type="tel"
-          value={phone}
-          onChange={(event) => setPhone(event.target.value)}
-          placeholder="Your phone number"
-          className="w-full box-border rounded-[9px] border-[1.5px] border-[#dedad5] bg-white px-3 py-[9px] font-manrope text-[13px] text-[#0a1628] outline-none transition-colors duration-200 placeholder:text-[#b5b0aa] focus:border-[#c9a84c]"
-        />
-        <textarea
-          id="pwDetMsg"
-          rows={3}
-          value={message}
-          onChange={(event) => setMessage(event.target.value)}
-          placeholder="Hi, I'm interested in this property..."
-          className="w-full box-border resize-y rounded-[9px] border-[1.5px] border-[#dedad5] bg-white px-3 py-[9px] font-manrope text-[13px] text-[#0a1628] outline-none transition-colors duration-200 placeholder:text-[#b5b0aa] focus:border-[#c9a84c]"
-        />
-      </div>
-      <button
-        type="button"
-        onClick={submit}
-        className="mb-1.5 w-full cursor-pointer rounded-[10px] border-none bg-[#0a1628] p-[11px] font-manrope text-[13px] font-extrabold text-white transition-opacity duration-200 hover:opacity-85"
-      >
-        Send Message
-      </button>
-      <div id="pwDetSucc" className="min-h-5 text-center font-manrope text-[13px] font-bold text-[#15935f]">
-        {success}
-      </div>
-    </div>
-  );
-}
-
 /* ── Page ── */
 export default function ListingDetailPage() {
   const params = useParams<{ id: string }>();
@@ -181,7 +56,6 @@ export default function ListingDetailPage() {
   const [savePending, setSavePending] = useState(false);
   const [activeImage, setActiveImage] = useState(0);
   const [income, setIncome] = useState("");
-  const [chatOpen, setChatOpen] = useState(false);
   const [waSuccess, setWaSuccess] = useState(false);
 
   const [contactName, setContactName] = useState("");
@@ -238,6 +112,11 @@ export default function ListingDetailPage() {
       setSimilar(similarListings);
       setSaved(favIds.has(listingData.id));
       setUser(sessionUser);
+      if (sessionUser) {
+        /* Prefill the enquiry form for signed-in users; never overwrite what they typed. */
+        setContactName((current) => current || `${sessionUser.firstName || ""} ${sessionUser.lastName || ""}`.trim());
+        setContactPhone((current) => current || sessionUser.phone || "");
+      }
       setLoading(false);
     };
 
@@ -283,23 +162,6 @@ export default function ListingDetailPage() {
     setSavePending(false);
   }, [listing, saved, getSharedSession]);
 
-  const trackInquiry = useCallback(() => {
-    if (!listing) return;
-    try {
-      addInquiry({
-        listingId: listing.id,
-        listingTitle: listing.title,
-        area: listing.area,
-        rentPerYear: listing.rentPerYear,
-        landlordName: listing.landlordName,
-        landlordWhatsApp: listing.landlordWhatsApp,
-        tenantName: contactName.trim(),
-        tenantPhone: contactPhone.trim(),
-      });
-    } catch {
-      /* ignore */
-    }
-  }, [listing, contactName, contactPhone]);
 
   if (!id) {
     return (
@@ -371,21 +233,16 @@ export default function ListingDetailPage() {
   const l = listing;
   const monthlyAmt = Math.round(l.rentPerYear / 12);
 
-  const contactWaHref =
-    "https://wa.me/" +
-    l.landlordWhatsApp +
-    "?text=" +
-    encodeURIComponent(
-      "Hello " + l.landlordName + ", I am interested in " + l.title + " at " + l.address + ".",
-    );
-
-  const genericWaHref =
-    "https://wa.me/" +
-    l.landlordWhatsApp +
-    "?text=" +
-    encodeURIComponent(
-      'Hello, I am interested in your property "' + l.title + '" listed on Property Warehouse.',
-    );
+  /* Enquiries go to the Property Warehouse team, not the landlord (MoM 15 Sep 2026). */
+  const contactDetails = [
+    contactName.trim() && `Name: ${contactName.trim()}`,
+    contactPhone.trim() && `Phone: ${contactPhone.trim()}`,
+    contactMessage.trim(),
+  ]
+    .filter(Boolean)
+    .join("\n");
+  const contactWaHref = teamWhatsAppHref(l, contactDetails);
+  const genericWaHref = teamWhatsAppHref(l);
 
   let calcTone: "green" | "yellow" | "red" | null = null;
   let calcHtml = "";
@@ -592,17 +449,8 @@ export default function ListingDetailPage() {
                 <WhatsAppIcon className="size-[14px]" />
                 Chat on WhatsApp
               </a>
-              <button
-                type="button"
-                onClick={() => setChatOpen((open) => !open)}
-                className="inline-flex min-w-0 flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-[12px] border-none bg-[#0a1628] px-3.5 py-[11px] font-manrope text-[13px] font-bold text-white transition-opacity duration-200 hover:opacity-85"
-              >
-                <MessageIcon className="size-[14px] stroke-[2.2]" />
-                Send Inquiry
-              </button>
             </div>
 
-            <DetailChat listing={l} user={user} isOpen={chatOpen} onToggle={() => setChatOpen((open) => !open)} />
           </div>
 
           {/* RIGHT */}
@@ -625,7 +473,7 @@ export default function ListingDetailPage() {
                 <span id="ldetSaveLbl">{saved ? "Saved" : "Save Property"}</span>
               </button>
               <h3 className="mb-1 text-[15px] font-extrabold text-[#09182a]">Interested in this property?</h3>
-              <p className="mb-[18px] text-[13px] leading-[1.5] text-[#5d6876]">Message the landlord directly — no agents.</p>
+              <p className="mb-[18px] text-[13px] leading-[1.5] text-[#5d6876]">Our team will answer on WhatsApp and connect you with the landlord.</p>
               <div className="mb-3">
                 <label
                   htmlFor="ldetName"
@@ -680,7 +528,6 @@ export default function ListingDetailPage() {
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => {
-                  trackInquiry();
                   setTimeout(() => setWaSuccess(true), 400);
                 }}
                 className="mt-1 flex w-full items-center justify-center gap-2 rounded-[12px] bg-[#25D366] px-3 py-[13px] font-manrope text-[14px] font-extrabold text-white no-underline transition-opacity duration-200 hover:opacity-88"

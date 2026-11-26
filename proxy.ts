@@ -12,7 +12,7 @@ const API_PROXY_TARGET =
      2. We delete the "origin" header before forwarding — the backend allows
         requests without one, because those can only come from a server, not from
         someone else's website riding on your login cookies. */
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const headers = new Headers(request.headers);
   headers.delete("origin");
   headers.delete("host");

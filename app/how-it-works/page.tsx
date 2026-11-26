@@ -61,8 +61,8 @@ const tenantSteps = [
         <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.4 2 2 0 0 1 3.6 1.22h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.79a16 16 0 0 0 6.29 6.29l.96-.96a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7a2 2 0 0 1 1.73 2.04z" />
       </svg>
     ),
-    title: "Contact Landlord",
-    copy: "Send a WhatsApp message directly with the landlord. Zero agent involved.",
+    title: "Make an Enquiry",
+    copy: "Message the Property Warehouse team on WhatsApp. We answer your questions and connect you with the landlord.",
   },
   {
     icon: (
@@ -72,7 +72,7 @@ const tenantSteps = [
       </svg>
     ),
     title: "Inspect Property",
-    copy: "Schedule a physical visit directly with the landlord.",
+    copy: "We arrange a physical visit with the landlord at a time that suits you.",
   },
   {
     icon: (
@@ -105,7 +105,7 @@ const landlordSteps = [
       </svg>
     ),
     title: "Add Photos",
-    copy: "Upload property photos and set your WhatsApp number for visibility.",
+    copy: "Upload property photos and your contact details so our team can reach you.",
   },
   {
     icon: (
@@ -124,7 +124,7 @@ const landlordSteps = [
       </svg>
     ),
     title: "Receive Inquiries",
-    copy: "Tenants contact you directly on WhatsApp. You choose who fits.",
+    copy: "Our team handles tenant enquiries on WhatsApp and connects you with serious tenants. You choose who fits.",
   },
   {
     icon: (
@@ -134,7 +134,7 @@ const landlordSteps = [
       </svg>
     ),
     title: "Collect Rent",
-    copy: "No commission. No agent. 100% goes to you.",
+    copy: "Agree terms with your tenant and collect your rent. Any platform fee is agreed upfront.",
   },
 ];
 
@@ -183,7 +183,7 @@ const featureCards = [
       </svg>
     ),
     title: "Heat Map Insights",
-    copy: "See which Lagos areas are rising, falling or affordable right now.",
+    copy: "Coming soon: see which Lagos areas are in demand, based on real activity on the platform.",
   },
 ];
 
@@ -195,62 +195,20 @@ const featureIconClasses: Record<string, string> = {
 };
 
 const comparisonRows = [
-  { feature: "Agent Commission", pw: "NO ✓", agent: "10–15% ✕" },
+  { feature: "Upfront Commission Before Viewing", pw: "None ✓", agent: "10–15% ✕" },
   { feature: "Listing Verification", pw: "Yes ✓", agent: "Rarely ✕" },
   { feature: "Transparent Pricing", pw: "Always ✓", agent: "Hidden fees ✕" },
-  { feature: "Direct Communication", pw: "Yes ✓", agent: "No agent ✕" },
+  { feature: "Enquiry Support", pw: "WhatsApp team ✓", agent: "Varies ✕" },
   { feature: "Pay Monthly Option", pw: "Available ✓", agent: "Never ✕" },
   { feature: "Fake Listing Risk", pw: "Very Low ✓", agent: "Very High ✕" },
   { feature: "Speed of Finding a Home", pw: "Fast ✓", agent: "Slow ✕" },
 ];
 
-const trustItems = [
-  {
-    icon: (
-      <svg viewBox="0 0 24 24" width="28" height="28" fill="#a97e4b" stroke="#a97e4b" strokeWidth="1">
-        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-      </svg>
-    ),
-    value: "4.8",
-    denom: "/5",
-    label: "Rating from users",
-  },
-  {
-    icon: (
-      <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="#a97e4b" strokeWidth="2">
-        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-        <polyline points="9 22 9 12 15 12 15 22" />
-      </svg>
-    ),
-    value: "500+",
-    label: "Listings across Lagos",
-  },
-  {
-    icon: (
-      <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="#a97e4b" strokeWidth="2">
-        <path d="M12 3 5 6v5.5c0 4.1 2.8 7.9 7 9.5 4.2-1.6 7-5.4 7-9.5V6l-7-3Z" />
-        <path d="m9.5 12 1.7 1.7 3.6-4" />
-      </svg>
-    ),
-    value: "200+",
-    label: "Verified Landlords",
-  },
-  {
-    icon: (
-      <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="#a97e4b" strokeWidth="2">
-        <path d="M19 10.5c0 5-7 10-7 10s-7-5-7-10a7 7 0 1 1 14 0Z" />
-        <circle cx="12" cy="10.5" r="2.5" />
-      </svg>
-    ),
-    value: "12",
-    label: "LGAs Covered",
-  },
-];
 
 const faqLeft = [
   {
     q: "Is Property Warehouse really free for tenants?",
-    a: "Yes. Tenants pay zero fees to Property Warehouse. You only pay the rent and agreed fees directly to the landlord — no agent commission ever.",
+    a: "Browsing listings, checking affordability and making enquiries are free. If you rent a property through Property Warehouse, any service fee is explained clearly before you commit — no surprises at move-in.",
   },
   {
     q: "How do I know a listing is real and not fake?",
@@ -258,7 +216,7 @@ const faqLeft = [
   },
   {
     q: 'What does the "verified" badge mean?',
-    a: "A verified landlord has submitted valid ID, proof of property ownership, and passed our quality check. Their listings are guaranteed to be genuine.",
+    a: "A verified landlord has submitted valid ID, proof of property ownership, and passed our quality check. This gives you extra confidence that their listings are genuine.",
   },
   {
     q: "How does the Pay Monthly option work?",
@@ -273,15 +231,15 @@ const faqRight = [
   },
   {
     q: "What if I have a dispute with a landlord?",
-    a: "Contact our support team through your dashboard. We facilitate mediation between tenants and landlords and can suspend listings that violate our standards.",
+    a: "Contact our support team on WhatsApp. We facilitate mediation between tenants and landlords and can suspend listings that violate our standards.",
   },
   {
     q: "Which areas of Lagos are currently covered?",
-    a: "We currently cover 12 LGAs including Lekki, Ikoyi, Victoria Island, Yaba, Surulere, Gbagada, Ajah, Sangotedo, Ikeja, Agege, Isale-Eko, and Apapa.",
+    a: "We are starting with Lagos. Use the area filter on the Listings page to see the neighbourhoods currently available — more are added as landlords join.",
   },
   {
     q: "Is my personal information safe?",
-    a: "Yes. We only share your WhatsApp contact with landlords when you initiate a conversation. We never sell your data to third parties.",
+    a: "Yes. Your contact details are only shared with a landlord when you ask us to connect you about their property. We never sell your data to third parties.",
   },
 ];
 
@@ -468,7 +426,7 @@ export default function HowItWorksPage() {
           }}
         />
 
-        <div className="min-w-0">
+        <div id="landlords" className="min-w-0 scroll-mt-24">
           <div className="mb-9 flex items-center gap-2.5 text-[#a97e4b]">
             <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
@@ -573,22 +531,6 @@ export default function HowItWorksPage() {
             </tbody>
           </table>
         </div>
-      </section>
-
-      {/* ═══ TRUST BAR ═══ */}
-      <section className="flex flex-wrap justify-center gap-[60px] bg-white px-[60px] py-12 max-[860px]:px-6 max-[860px]:py-10 max-[560px]:gap-6">
-        {trustItems.map((item) => (
-          <div key={item.label} className="flex flex-col items-center gap-2 text-center">
-            <div className="mb-1">{item.icon}</div>
-            <strong className="font-cormorant text-[40px] font-bold leading-none text-[#09182a]">
-              {item.value}
-              {item.denom && (
-                <span className="text-[22px] text-[#5d6876]">{item.denom}</span>
-              )}
-            </strong>
-            <span className="text-[13px] font-semibold text-[#5d6876]">{item.label}</span>
-          </div>
-        ))}
       </section>
 
       {/* ═══ FAQ ═══ */}
@@ -696,7 +638,7 @@ export default function HowItWorksPage() {
             Ready to rent smarter?
           </h2>
           <p className="mb-9 text-[15px] text-white/70">
-            Join thousands of Lagos residents renting smarter — no agent, no stress.
+            Join Lagos residents renting smarter — clear prices, verified homes, no stress.
           </p>
 
           <div className="flex flex-wrap justify-center gap-4">

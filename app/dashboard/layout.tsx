@@ -17,12 +17,9 @@ import {
     LogoutIcon,
     MenuIcon,
     MessageIcon,
-    NotificationIcon,
     PaymentIcon,
     ProfileIcon,
-    PromoStarIcon,
     SearchIcon,
-    SettingsIcon,
     StarIcon,
     UsersIcon,
     VerifiedIcon,
@@ -80,10 +77,14 @@ export default function DashboardLayout({
         router.push("/auth");
     };
 
-    useEffect(() => {
+    /* Close the sidebar and dropdown on navigation — adjusted during render rather than in an
+       effect, so React doesn't paint the stale open state first. */
+    const [lastPathname, setLastPathname] = useState(pathname);
+    if (pathname !== lastPathname) {
+        setLastPathname(pathname);
         setSidebarOpen(false);
         setUserDropdownOpen(false);
-    }, [pathname]);
+    }
 
     useEffect(() => {
         if (!userDropdownOpen) return;
@@ -103,8 +104,6 @@ export default function DashboardLayout({
             </div>
         );
     }
-
-    const notifCount = role === "landlord" ? 3 : 6;
 
     return (
         <div className="min-h-screen overflow-x-hidden bg-[#f0f2f5] font-['Manrope'] text-[#09182a]">
@@ -165,7 +164,6 @@ export default function DashboardLayout({
                                 href="/dashboard/messages"
                                 label="Messages"
                                 active={isActive("/dashboard/messages")}
-                                badge="8"
                                 onClick={closeSidebar}
                             >
                                 <MessageIcon />
@@ -206,7 +204,6 @@ export default function DashboardLayout({
                                 href="/dashboard/reviews"
                                 label="Reviews"
                                 active={isActive("/dashboard/reviews")}
-                                badge="3"
                                 onClick={closeSidebar}
                             >
                                 <StarIcon />
@@ -234,7 +231,6 @@ export default function DashboardLayout({
                                 href="/dashboard/messages"
                                 label="Messages"
                                 active={isActive("/dashboard/messages")}
-                                badge="6"
                                 onClick={closeSidebar}
                             >
                                 <MessageIcon />
@@ -298,28 +294,22 @@ export default function DashboardLayout({
                     />
                     <p className="px-[14px] pb-[3px] pt-[11px] text-[11.5px] font-extrabold leading-[1.3] text-white">
                         {role === "landlord"
-                            ? "Boost your property visibility"
-                            : "Find your next dream home faster"}
+                            ? "Reach more tenants"
+                            : "Find your next home"}
                     </p>
                     <p className="px-[14px] pb-[11px] text-[10px] font-medium leading-[1.45] text-white/50">
                         {role === "landlord"
-                            ? "Promote your listings and reach more quality tenants."
-                            : "Get notified about new listings in your preferred areas instantly."}
+                            ? "Every new listing is reviewed by our team, then shown to tenants searching your area."
+                            : "Browse verified listings across Lagos and save the ones you like."}
                     </p>
-                    <button
-                        type="button"
-                        onClick={() =>
-                            alert(
-                                role === "landlord"
-                                    ? "Promotion feature coming soon!"
-                                    : "Premium upgrade coming soon!",
-                            )
-                        }
+                    <Link
+                        href={role === "landlord" ? "/dashboard/listings/create" : "/listings"}
+                        onClick={closeSidebar}
                         className="mx-[14px] mb-[14px] flex h-[33px] w-[calc(100%-28px)] items-center justify-center gap-[6px] rounded-[7px] bg-[#a97e4b] text-[11px] font-extrabold text-white transition-opacity hover:opacity-[.88]"
                     >
-                        {role === "landlord" ? <ArrowIcon /> : <PromoStarIcon />}
-                        {role === "landlord" ? "Promote Listing" : "Upgrade to Premium"}
-                    </button>
+                        <ArrowIcon />
+                        {role === "landlord" ? "Add a Listing" : "Browse Listings"}
+                    </Link>
                 </div>
             </aside>
 
@@ -404,29 +394,14 @@ export default function DashboardLayout({
                                         event.key === "Enter" &&
                                         event.currentTarget.value.trim()
                                     ) {
-                                        alert(
-                                            `Searching for "${event.currentTarget.value.trim()}"…`,
+                                        router.push(
+                                            `/listings?q=${encodeURIComponent(event.currentTarget.value.trim())}`,
                                         );
                                     }
                                 }}
                                 className="w-[190px] border-none bg-transparent text-[12.5px] text-[#09182a] outline-none placeholder:text-[#9aa4b2] max-[1160px]:w-[140px]"
                             />
                         </div>
-
-                        {/* NOTIFICATIONS */}
-                        <button
-                            type="button"
-                            aria-label="Notifications"
-                            onClick={() =>
-                                alert(`You have ${notifCount} unread notifications.`)
-                            }
-                            className="relative grid h-9 w-9 shrink-0 place-items-center rounded-[9px] border border-[rgba(9,24,42,.09)] bg-[#f6f7f9] text-[#09182a] max-[600px]:h-[42px] max-[600px]:w-[42px] max-[600px]:rounded-[12px] max-[600px]:bg-white max-[600px]:shadow-[0_3px_10px_rgba(9,24,42,.05)]"
-                        >
-                            <NotificationIcon />
-                            <span className="absolute right-1 top-1 grid min-h-4 min-w-4 place-items-center rounded-full bg-[#15935f] px-[3px] text-[9px] font-extrabold text-white">
-                                {notifCount}
-                            </span>
-                        </button>
 
                         {/* USER */}
                         <div
@@ -436,16 +411,7 @@ export default function DashboardLayout({
                                 setUserDropdownOpen((value) => !value);
                             }}
                         >
-                            {role === "landlord" ? (
-                                <div className="h-[30px] w-[30px] shrink-0 overflow-hidden rounded-full max-[600px]:h-[42px] max-[600px]:w-[42px]">
-                                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                                    <img
-                                        src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=80&h=80&fit=crop&crop=face"
-                                        alt="Landlord avatar"
-                                        className="block h-full w-full object-cover"
-                                    />
-                                </div>
-                            ) : (
+                            {(
                                 <div className="grid h-[30px] w-[30px] shrink-0 place-items-center rounded-full bg-[linear-gradient(135deg,#15935f_0%,#0d6e48_100%)] text-[11px] font-extrabold tracking-[.04em] text-white max-[600px]:h-[42px] max-[600px]:w-[42px] max-[600px]:text-[14px]">
                                     {initials}
                                 </div>
@@ -455,10 +421,16 @@ export default function DashboardLayout({
                                     {user ? `${user.firstName} ${user.lastName}`.trim() : ""}
                                 </strong>
                                 {role === "landlord" ? (
-                                    <span className="flex items-center gap-[3px] text-[10px] font-semibold text-[#15935f]">
-                                        <VerifiedIcon />
-                                        Verified Landlord
-                                    </span>
+                                    user?.isVerified ? (
+                                        <span className="flex items-center gap-[3px] text-[10px] font-semibold text-[#15935f]">
+                                            <VerifiedIcon />
+                                            Verified Landlord
+                                        </span>
+                                    ) : (
+                                        <span className="text-[10px] font-medium text-[#5d6876]">
+                                            Landlord · verification pending
+                                        </span>
+                                    )
                                 ) : (
                                     <span className="text-[10px] font-medium text-[#5d6876]">
                                         Tenant
@@ -472,20 +444,12 @@ export default function DashboardLayout({
                                     className="absolute right-0 top-[calc(100%+8px)] z-[300] min-w-[180px] overflow-hidden rounded-[11px] border border-[rgba(9,24,42,.09)] bg-white shadow-[0_12px_40px_rgba(9,24,42,.12)]"
                                 >
                                     <Link
-                                        href="/dashboard/settings"
+                                        href="/dashboard/profile"
                                         onClick={() => setUserDropdownOpen(false)}
                                         className="flex items-center gap-[10px] px-[15px] py-[10px] text-[12.5px] font-semibold text-[#09182a] hover:bg-[#f5f7fa]"
                                     >
                                         <ProfileIcon />
                                         My Profile
-                                    </Link>
-                                    <Link
-                                        href="/dashboard/settings"
-                                        onClick={() => setUserDropdownOpen(false)}
-                                        className="flex items-center gap-[10px] px-[15px] py-[10px] text-[12.5px] font-semibold text-[#09182a] hover:bg-[#f5f7fa]"
-                                    >
-                                        <SettingsIcon />
-                                        Settings
                                     </Link>
                                     <div className="h-px bg-[rgba(9,24,42,.09)]" />
                                     <button

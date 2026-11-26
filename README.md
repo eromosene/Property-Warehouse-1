@@ -1,36 +1,35 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Property Warehouse — Frontend (Next.js)
 
-## Getting Started
+The Next.js rebuild of the Property Warehouse site, agreed in the 15 Sep 2026 meeting:
+frontend in Next.js deployed on Vercel, backend hosted in the cloud (Render + Supabase).
 
-First, run the development server:
+## Running locally
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+cp .env.example .env.local   # then fill in the values
+npm run dev                  # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Environment variables
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Set these in `.env.local` locally, and in **Vercel → Project → Settings → Environment Variables** for production.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Variable | Purpose |
+|---|---|
+| `API_PROXY_TARGET` | Backend URL. `proxy.ts` forwards every `/api/*` request to it, so the browser never makes cross-origin calls. Defaults to the Render backend. |
+| `NEXT_PUBLIC_PW_WHATSAPP_NUMBER` | **Required before launch.** The team's WhatsApp business number (digits only, e.g. `2348012345678`). Every enquiry button on the site opens a chat with this number. |
 
-## Learn More
+## Product decisions reflected in the code
 
-To learn more about Next.js, take a look at the following resources:
+- **One enquiry channel: WhatsApp to the team** (MoM 15 Sep 2026, Item 4). Enquiry buttons never link to a
+  landlord's own number; they go to the team, with the listing reference in the message. See `app/lib/contact.ts`.
+- **Heat map is "coming soon"** (MoM 15 Sep 2026, Item 1). `/heatmap` is a placeholder until real search and
+  enquiry data exist.
+- **Open access, no premium tier at launch** (MoM 15 Sep 2026, Item 2). There are no upgrade or paywall prompts.
+- **No fabricated data** (MoM 31 Jul 2026, issue #2). Dashboards and marketing pages show only real data from
+  the API, or an honest empty or "coming soon" state.
+- **Fees:** the copy avoids promising "zero fees" because of the agreed agent fee on successful rentals. The final
+  public wording of that fee is still for the committee to decide.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+`legacy-source/` holds the previous vanilla HTML/CSS/JS site for reference only. It is not served.

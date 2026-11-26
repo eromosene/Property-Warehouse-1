@@ -3,19 +3,22 @@
 import Image from "next/image";
 import Link from "next/link";
 import { FormEvent, useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { api } from "./lib/api";
 import { getSharedSession, type SessionUser } from "./lib/auth";
 
-const navLinks = [["Listings", "/listings"], ["Heat Map", "/heatmap"], ["Landlords", "#landlords"], ["How It Works", "/how-it-works"], ["About Us", "#about-us"]];
+const navLinks = [["Listings", "/listings"], ["Heat Map", "/heatmap"], ["Landlords", "/how-it-works#landlords"], ["How It Works", "/how-it-works"]];
 
+/* Values must match the listings page filters exactly — the backend filters area/type by exact match. */
 const selectGroups = [
-  { label: "AREA", name: "area", options: ["Select Area", "Lekki", "Ikoyi", "Yaba", "Ikeja"] },
-  { label: "PROPERTY TYPE", name: "property-type", options: ["Select Type", "Apartment", "Duplex", "Studio", "Terrace"] },
-  { label: "MAX BUDGET", name: "max-budget", options: ["Max Budget", "\u20A61,000,000", "\u20A62,500,000", "\u20A65,000,000"] },
+  { label: "AREA", name: "area", options: [["", "Select Area"], ["Yaba", "Yaba"], ["Lekki Phase 1", "Lekki Phase 1"], ["Surulere", "Surulere"], ["Ajah", "Ajah"], ["Gbagada", "Gbagada"], ["Ikeja GRA", "Ikeja GRA"], ["Victoria Island", "Victoria Island"]] },
+  { label: "PROPERTY TYPE", name: "type", options: [["", "Select Type"], ["Self-contain", "Self-contain"], ["1 Bedroom", "1 Bedroom"], ["2 Bedroom", "2 Bedroom"], ["3 Bedroom", "3 Bedroom"], ["Duplex", "Duplex"], ["Bungalow", "Bungalow"]] },
+  { label: "MAX BUDGET", name: "maxRent", options: [["", "Max Budget"], ["500000", "₦500,000"], ["1200000", "₦1,200,000"], ["2000000", "₦2,000,000"]] },
 ];
 
 const stats = [
   {
-    value: "500+",
+    value: "live",
     label: "Active Listings",
     icon: (
       <>
@@ -26,8 +29,8 @@ const stats = [
     ),
   },
   {
-    value: "\u20A60",
-    label: "Agent Fees",
+    value: "Clear",
+    label: "Upfront Pricing",
     icon: (
       <>
         <path d="M12 3 5 6v5.5c0 4.1 2.8 7.9 7 9.5 4.2-1.6 7-5.4 7-9.5V6l-7-3Z" />
@@ -36,8 +39,8 @@ const stats = [
     ),
   },
   {
-    value: "200+",
-    label: "Verified Landlords",
+    value: "Verified",
+    label: "Landlords",
     icon: (
       <>
         <path d="M16 19c0-2.2-1.8-4-4-4s-4 1.8-4 4" />
@@ -50,8 +53,8 @@ const stats = [
     ),
   },
   {
-    value: "12",
-    label: "LGAs Covered",
+    value: "Lagos",
+    label: "Wide Coverage",
     icon: (
       <>
         <path d="M19 10.5c0 5-7 10-7 10s-7-5-7-10a7 7 0 1 1 14 0Z" />
@@ -104,8 +107,24 @@ export default function Home() {
 
   const closeMenu = () => setMenuOpen(false);
 
+  /* Live listing count from the backend instead of a made-up "500+". */
+  const [listingCount, setListingCount] = useState<number | null>(null);
+  useEffect(() => {
+    api<{ total: number }>("/api/listings?limit=1")
+      .then((data) => setListingCount(data.total))
+      .catch(() => setListingCount(null));
+  }, []);
+
+  const router = useRouter();
+  /* Hero search → /listings with the chosen filters (the listings page reads them from the URL). */
   const handleSearch = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    const params = new URLSearchParams();
+    new FormData(event.currentTarget).forEach((value, key) => {
+      if (typeof value === "string" && value) params.set(key, value);
+    });
+    const query = params.toString();
+    router.push(query ? `/listings?${query}` : "/listings");
   };
 
   const scrollCards = (direction: number) => {
@@ -187,7 +206,7 @@ export default function Home() {
               <span className="bg-white" />
               <span className="bg-[#15935f]" />
             </span>
-            <span>LAGOS&apos;S #1 DIRECT RENTAL PLATFORM</span>
+            <span>LAGOS DIRECT RENTAL PLATFORM</span>
           </div>
 
           <h1 id="hero-title" className="mt-4.5 mb-5.25 max-w-122.5 font-playfair text-[clamp(39px,11vw,43px)] font-bold leading-[0.97] tracking-[-0.045em] text-[#09182a] sm:text-[clamp(43px,11.7vw,54px)] md:text-[clamp(50px,8.9vw,64px)] lg:mt-4.25 lg:mb-4.5 lg:max-w-132.5 lg:text-[61px] lg:leading-[0.99] 2xl:max-w-155">
@@ -213,17 +232,6 @@ export default function Home() {
           </div>
         </div>
 
-        <aside className="absolute right-5 bottom-12 z-20 min-h-42.25 w-[min(260px,calc(100%-40px))] rounded-[17px] bg-white/95 px-6.25 py-4.75 shadow-[0_18px_48px_rgba(9,24,42,0.12)] sm:right-7.5 sm:w-[min(269px,calc(100%-60px))] md:right-10.25 lg:right-23.5 lg:bottom-18 lg:min-h-37.25 lg:w-56 lg:rounded-[11px] lg:px-7 lg:py-3.75 2xl:right-[calc((100vw-1440px)/2+94px)]" aria-label="Customer testimonial">
-          <span className="block h-4.75 font-playfair text-[33px] font-bold leading-[0.65] text-[#d7b17e] lg:text-[28px]">&ldquo;</span>
-          <p className="mt-1.5 mb-4.5 text-[13px] font-bold leading-[1.42] text-[#09182a] lg:mt-1 lg:mb-3.25 lg:text-[11px] lg:leading-[1.43]">&ldquo;We found our dream home in Lekki and saved over <strong>&#8358;350,000</strong> in agent fees!&rdquo;</p>
-          <div className="flex items-center gap-2.5">
-            <Image src="/IMG-20260512-WA0087.jpg" alt="Ibukun and Tayo" width={86} height={86} className="h-10.75 w-10.75 rounded-full object-cover object-[46%_42%] lg:h-9.75 lg:w-9.75" />
-            <div className="grid gap-px">
-              <strong className="text-[13px] leading-none lg:text-[11px]">Ibukun &amp; Tayo</strong>
-              <span className="text-[11px] font-semibold text-[#485363] lg:text-[9px]">Lekki, Lagos</span>
-            </div>
-          </div>
-        </aside>
       </section>
 
       <section className="relative z-10 bg-white pt-0 pb-4.25 lg:pt-18" aria-label="Platform numbers and partners">
@@ -231,8 +239,8 @@ export default function Home() {
           {selectGroups.map((group) => (
             <label className="grid gap-1.75 lg:gap-2" key={group.name}>
               <span className="text-xs font-extrabold tracking-[0.08em] text-[#1b2536] lg:text-[11px]">{group.label}</span>
-              <select className="h-8 w-full appearance-none rounded border border-[#09182a14] bg-white bg-[linear-gradient(45deg,transparent_50%,#111b29_50%),linear-gradient(135deg,#111b29_50%,transparent_50%)] bg-no-repeat pl-3 pr-9 text-[10px] font-medium text-[#5c6674] bg-position-[calc(100%-19px)_51%,calc(100%-15px)_51%] bg-size-[5px_5px,5px_5px] lg:h-9.75 lg:rounded-[5px] lg:pl-3.25 lg:text-[11px]" aria-label={`Select ${group.label.toLowerCase()}`}>
-                {group.options.map((option) => <option key={option}>{option}</option>)}
+              <select name={group.name} defaultValue="" className="h-8 w-full appearance-none rounded border border-[#09182a14] bg-white bg-[linear-gradient(45deg,transparent_50%,#111b29_50%),linear-gradient(135deg,#111b29_50%,transparent_50%)] bg-no-repeat pl-3 pr-9 text-[10px] font-medium text-[#5c6674] bg-position-[calc(100%-19px)_51%,calc(100%-15px)_51%] bg-size-[5px_5px,5px_5px] lg:h-9.75 lg:rounded-[5px] lg:pl-3.25 lg:text-[11px]" aria-label={`Select ${group.label.toLowerCase()}`}>
+                {group.options.map(([value, label]) => <option key={label} value={value}>{label}</option>)}
               </select>
             </label>
           ))}
@@ -249,23 +257,13 @@ export default function Home() {
                 <Icon className="h-5 w-5 stroke-[1.5] lg:h-5.5 lg:w-5.5">{stat.icon}</Icon>
               </span>
               <span className="grid min-w-0 lg:min-w-19.5">
-                <strong className="text-xl font-extrabold leading-none tracking-[-0.04em] text-[#08172a] xl:text-[22px]">{stat.value}</strong>
+                <strong className="text-xl font-extrabold leading-none tracking-[-0.04em] text-[#08172a] xl:text-[22px]">{stat.value === "live" ? (listingCount === null ? "—" : listingCount.toLocaleString()) : stat.value}</strong>
                 <small className="mt-1 text-[10px] font-medium text-[#4f5b69] lg:whitespace-nowrap lg:text-[11px]">{stat.label}</small>
               </span>
             </article>
           ))}
         </div>
 
-        <div className="mt-4.5 text-center lg:mt-6.25">
-          <p className="mb-3.25 text-[8px] font-black tracking-[0.24em] text-[#73717a] lg:mb-2.75">TRUSTED BY THOUSANDS OF LAGOSIANS</p>
-          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-4 px-6 text-[13px] font-extrabold text-[#0a2a4a] lg:gap-10 lg:px-0 lg:text-sm" aria-label="Partner logos">
-            <span className="inline-flex items-center gap-1 whitespace-nowrap"><i className="h-3.25 w-3.25 rotate-45 border-2 border-[#f08a24]" />access</span>
-            <span className="inline-flex h-5.75 w-5.75 items-center justify-center bg-[#ef6123] text-[7px] font-black text-white">GTCO</span>
-            <span className="inline-flex items-center gap-1 whitespace-nowrap"><i className="h-4.25 w-4.25 rounded-full border-[1.5px] border-[#ec6f49] bg-[linear-gradient(45deg,transparent_45%,#6bbf59_46%_55%,transparent_56%),linear-gradient(-45deg,transparent_45%,#1aa8e8_46%_55%,transparent_56%)]" />Flutterwave</span>
-            <span className="inline-flex items-center gap-1 whitespace-nowrap">Interswitch<i className="ml-px h-5 w-3.5 -skew-x-12 border-r-[3px] border-t-[3px] border-[#e6332a]" /></span>
-            <span className="inline-flex items-center gap-1 whitespace-nowrap"><i className="h-3.5 w-4 bg-[repeating-linear-gradient(to_bottom,#092746_0_2px,transparent_2px_4px)]" />paystack</span>
-          </div>
-        </div>
       </section>
 
       <section className="relative min-h-51.25 overflow-hidden bg-linear-to-b from-[#f7f0ea] to-[#fbf8f5] pt-4 lg:min-h-58 lg:pt-3.75" id="how-it-works">

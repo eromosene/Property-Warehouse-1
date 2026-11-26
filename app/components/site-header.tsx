@@ -8,9 +8,8 @@ import { getSharedSession, type SessionUser } from "../lib/auth";
 const LINKS = [
     { label: "Listings", href: "/listings" },
     { label: "Heat Map", href: "/heatmap" },
-    { label: "Landlords", href: "/#landlords" },
+    { label: "Landlords", href: "/how-it-works#landlords" },
     { label: "How It Works", href: "/how-it-works" },
-    { label: "About Us", href: "/#about-us" },
 ] as const;
 
 type Props = {
@@ -61,7 +60,7 @@ export default function SiteHeader({ position = "sticky" }: Props) {
     }, [drawerOpen]);
 
     const isActive = (href: string) => {
-        if (href.startsWith("/#")) return false;
+        if (href.includes("#")) return false;
         if (href === "/listings") return pathname === "/listings" || pathname.startsWith("/listing/");
         return pathname === href;
     };

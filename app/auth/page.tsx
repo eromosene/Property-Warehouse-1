@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, ReactNode, useEffect, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getSharedSession, login, signup } from "../lib/auth";
 import {
@@ -10,9 +10,6 @@ import {
   HomeIcon,
   TrustIcon,
   TrustIconKind,
-  GoogleIcon,
-  FacebookIcon,
-  AppleIcon,
 } from "../components/icons";
 
 type Role = "tenant" | "landlord";
@@ -118,8 +115,6 @@ export default function AuthPage() {
           {/* Trust badges */}
           <TrustBadges />
 
-          {/* Trusted / logos */}
-          <TrustedLogos />
         </div>
       </main>
     </div>
@@ -237,7 +232,7 @@ function AuthPanel() {
       <p className="mb-5 text-[13px] font-medium leading-[1.55] text-[#5d6876]">
         {tenant
           ? "Find verified properties, connect with landlords and rent smarter."
-          : "List your property, get verified and connect directly with thousands of tenants."}
+          : "List your property, get verified and connect with tenants across Lagos."}
       </p>
       <div className="mb-5 flex border-b-2 border-[#09182a14]" role="tablist">
         {(["login", "signup"] as Mode[]).map((item) => (
@@ -368,16 +363,6 @@ function AuthPanel() {
             {message}
           </p>
         )}
-        <div className="flex items-center gap-2.5 text-[11px] font-semibold text-[#5d6876]">
-          <span className="h-px flex-1 bg-[#09182a1a]" />
-          or continue with
-          <span className="h-px flex-1 bg-[#09182a1a]" />
-        </div>
-        <div className="grid grid-cols-3 gap-2 max-[560px]:grid-cols-1">
-          <SocialButton label="Google" icon={<GoogleIcon />} />
-          <SocialButton label="Facebook" icon={<FacebookIcon />} />
-          <SocialButton label="Apple" icon={<AppleIcon />} />
-        </div>
         <p className="text-center text-[11px] font-medium leading-[1.6] text-[#5d6876]">
           By continuing, you agree to our{" "}
           <button
@@ -406,8 +391,8 @@ function TrustBadges() {
   const badges: [TrustIconKind, string, string, string, string][] = [
     [
       "shield",
-      "No Agent Fees",
-      "Deal directly with landlords. Zero hidden charges.",
+      "Transparent Pricing",
+      "See the full cost of every home upfront. No hidden charges.",
       "#15935f",
       "rgba(21,147,95,0.12)",
     ],
@@ -420,8 +405,8 @@ function TrustBadges() {
     ],
     [
       "chat",
-      "Direct Communication",
-      "Chat with landlords directly on WhatsApp.",
+      "Fast Answers",
+      "Our team answers your enquiries on WhatsApp.",
       "#2563eb",
       "rgba(37,99,235,0.10)",
     ],
@@ -454,31 +439,6 @@ function TrustBadges() {
           </span>
         </div>
       ))}
-    </div>
-  );
-}
-
-function TrustedLogos() {
-  // Note: your auth.css defines .auth-trusted spacing/typography, but the
-  // actual partner logo marks (.access, .gtco, .flutter, .interswitch,
-  // .paystack) are styled in a different stylesheet (likely style.css),
-  // which wasn't included here. These render as plain text for now —
-  // share that file and I'll match the real logo styling.
-  const logos = ["access", "GTCO", "Flutterwave", "Interswitch", "paystack"];
-
-  return (
-    <div className="mt-7 pb-5 text-center">
-      <p className="mb-[14px] text-xs font-semibold tracking-[0.04em] text-[#5d6876]">
-        Trusted by thousands of Lagos residents
-      </p>
-      <div
-        className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-sm font-bold text-[#5d6876]"
-        aria-label="Partner logos"
-      >
-        {logos.map((logo) => (
-          <span key={logo}>{logo}</span>
-        ))}
-      </div>
     </div>
   );
 }
@@ -537,23 +497,5 @@ function SelectField({
         <option key={option}>{option}</option>
       ))}
     </select>
-  );
-}
-
-function SocialButton({
-  label,
-  icon,
-}: {
-  label: string;
-  icon?: ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      className="flex h-[38px] items-center justify-center gap-1.5 rounded-[7px] border border-[#09182a1f] bg-white text-xs font-bold hover:bg-[#f5f5f5]"
-    >
-      {icon}
-      {label}
-    </button>
   );
 }

@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { api, Listing, naira } from "../lib/api";
 import { getFavouriteIds, saveFavourite, unsaveFavourite } from "../lib/favourites";
-import { getSharedSession, type SessionUser } from "../lib/auth";
+import { getSharedSession } from "../lib/auth";
+import { teamWhatsAppHref } from "../lib/contact";
 import SiteHeader from "../components/site-header";
 import {
     ArrowIcon,
@@ -15,7 +16,6 @@ import {
     HeartIcon,
     HomeIcon,
     LocationIcon,
-    MessageIcon,
     SearchIcon,
     WhatsAppIcon,
 } from "../components/icons";
@@ -98,18 +98,6 @@ type ResponseState = {
   data: ListingsResponse | null;
   error: "network" | "server" | null;
 };
-
-/* ── Shared helpers (was listings-data.js) ── */
-function getInquiries() {
-  return JSON.parse(localStorage.getItem("pw_inquiries") || "[]");
-}
-
-function addInquiry(inquiry: Record<string, unknown>) {
-  const list = getInquiries();
-  list.unshift({ ...inquiry, sentAt: new Date().toISOString() });
-  if (list.length > 50) list.length = 50;
-  localStorage.setItem("pw_inquiries", JSON.stringify(list));
-}
 
 /* ── Sort select (shared by mobile bar + desktop bar) ── */
 function SortSelect({
@@ -304,142 +292,20 @@ function Sidebar({
   );
 }
 
-/* ── Inline chatbox (was listings.js pwToggleChat/pwSubmitInquiry + pw-chat-panel css) ── */
-function ChatPanel({
-  listing,
-  user,
-  isOpen,
-  onClose,
-}: {
-  listing: Listing;
-  user: SessionUser | null;
-  isOpen: boolean;
-  onClose: () => void;
-}) {
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [message, setMessage] = useState("");
-  const [success, setSuccess] = useState("");
-
-  /* Prefill the name/phone from the session every time the panel opens — mirrors the legacy
-     pwToggleChat(), which awaited the shared session promise on open. Done during render
-     (rather than in an effect) because it is a straight adjustment of state to a prop change. */
-  const [wasOpen, setWasOpen] = useState(isOpen);
-  if (isOpen !== wasOpen) {
-    setWasOpen(isOpen);
-    if (isOpen && user) {
-      setName(`${user.firstName || ""} ${user.lastName || ""}`.trim());
-      setPhone(user.phone || "");
-    }
-  }
-
-  const submit = () => {
-    if (!name.trim() || !phone.trim() || !message.trim()) {
-      alert("Please fill in your name, phone number, and a message.");
-      return;
-    }
-
-    addInquiry({
-      listingId: listing.id,
-      listingTitle: listing.title,
-      landlordName: listing.landlordName,
-      area: listing.area,
-      senderName: name.trim(),
-      senderPhone: phone.trim(),
-      message: message.trim(),
-    });
-
-    setSuccess("✅ Message sent! The landlord will contact you shortly.");
-
-    setTimeout(function () {
-      onClose();
-      setSuccess("");
-      setName("");
-      setPhone("");
-      setMessage("");
-    }, 3000);
-  };
-
-  return (
-    <div
-      onClick={(event) => event.stopPropagation()}
-      className={`max-h-0 overflow-hidden rounded-b-[14px] border-t border-[#ede9e3] bg-[#f9f8f6] px-4 transition-[max-height,padding] duration-300 ease-in-out ${
-        isOpen ? "max-h-[420px] py-4" : ""
-      }`}
-    >
-      <div className="mb-3 flex items-center justify-between">
-        <span className="font-manrope text-[13px] font-extrabold text-[#0a1628]">Message {listing.landlordName}</span>
-        <button
-          type="button"
-          onClick={(event) => {
-            event.stopPropagation();
-            onClose();
-          }}
-          aria-label="Close chatbox"
-          className="cursor-pointer rounded-[6px] border-none bg-none px-1.5 py-0.5 text-[20px] leading-none text-[#9a9490] transition-colors duration-150 hover:bg-[#edeae5] hover:text-[#0a1628]"
-        >
-          &times;
-        </button>
-      </div>
-      <div className="mb-2.5 flex flex-col gap-2">
-        <input
-          type="text"
-          value={name}
-          onChange={(event) => setName(event.target.value)}
-          placeholder="Your name"
-          className="w-full box-border rounded-[9px] border-[1.5px] border-[#dedad5] bg-white px-3 py-[9px] font-manrope text-[13px] text-[#0a1628] outline-none transition-colors duration-200 placeholder:text-[#b5b0aa] focus:border-[#c9a84c]"
-        />
-        <input
-          type="tel"
-          value={phone}
-          onChange={(event) => setPhone(event.target.value)}
-          placeholder="Your phone number"
-          className="w-full box-border rounded-[9px] border-[1.5px] border-[#dedad5] bg-white px-3 py-[9px] font-manrope text-[13px] text-[#0a1628] outline-none transition-colors duration-200 placeholder:text-[#b5b0aa] focus:border-[#c9a84c]"
-        />
-        <textarea
-          rows={3}
-          value={message}
-          onChange={(event) => setMessage(event.target.value)}
-          placeholder="Hi, I'm interested in this property..."
-          className="w-full box-border resize-y rounded-[9px] border-[1.5px] border-[#dedad5] bg-white px-3 py-[9px] font-manrope text-[13px] text-[#0a1628] outline-none transition-colors duration-200 placeholder:text-[#b5b0aa] focus:border-[#c9a84c]"
-        />
-      </div>
-      <button
-        type="button"
-        onClick={submit}
-        className="mb-1.5 w-full cursor-pointer rounded-[10px] border-none bg-[#0a1628] p-[11px] font-manrope text-[13px] font-extrabold text-white transition-opacity duration-200 hover:opacity-85"
-      >
-        Send Message
-      </button>
-      <div className="min-h-5 text-center font-manrope text-[13px] font-bold text-[#15935f]">{success}</div>
-    </div>
-  );
-}
-
 /* ── Listing card (was listings.js render() card markup) ── */
 function ListingCardView({
   listing,
   isSaved,
   isFavPending,
   onToggleFavourite,
-  chatOpen,
-  onToggleChat,
-  onCloseChat,
-  user,
 }: {
   listing: Listing;
   isSaved: boolean;
   isFavPending: boolean;
   onToggleFavourite: (id: string) => void;
-  chatOpen: boolean;
-  onToggleChat: (id: string) => void;
-  onCloseChat: (id: string) => void;
-  user: SessionUser | null;
 }) {
-  const waMsg = encodeURIComponent(
-    'Hello, I am interested in your property "' + listing.title + '" listed on Property Warehouse.',
-  );
-  const waHref = "https://wa.me/" + listing.landlordWhatsApp + "?text=" + waMsg;
+  /* Enquiries go to the Property Warehouse team, not the landlord (MoM 15 Sep 2026). */
+  const waHref = teamWhatsAppHref(listing);
 
   return (
     <div
@@ -538,25 +404,9 @@ function ListingCardView({
           >
             <WhatsAppIcon /> Chat on WhatsApp
           </a>
-          <button
-            type="button"
-            onClick={(event) => {
-              event.stopPropagation();
-              onToggleChat(listing.id);
-            }}
-            className="inline-flex min-w-0 flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-[10px] border-none bg-[#0a1628] px-[13px] py-2 font-manrope text-[12px] font-bold text-white transition-opacity duration-200 hover:opacity-85"
-          >
-            <MessageIcon className="size-[13px] stroke-[2.2]" /> Send Inquiry
-          </button>
         </div>
       </div>
 
-      <ChatPanel
-        listing={listing}
-        user={user}
-        isOpen={chatOpen}
-        onClose={() => onCloseChat(listing.id)}
-      />
     </div>
   );
 }
@@ -572,9 +422,7 @@ export default function ListingsPage() {
   const [resultCount, setResultCount] = useState<string | null>(null);
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [activeChat, setActiveChat] = useState<string | null>(null);
 
-  const [user, setUser] = useState<SessionUser | null>(null);
   const [favouriteIds, setFavouriteIds] = useState<Set<string>>(new Set());
   const [pendingFav, setPendingFav] = useState<Set<string>>(new Set());
 
@@ -598,7 +446,6 @@ export default function ListingsPage() {
     let cancelled = false;
     getSharedSession().then(async ({ user: sessionUser }) => {
       if (cancelled) return;
-      setUser(sessionUser);
       if (!sessionUser || sessionUser.role !== "tenant") return;
       const ids = await getFavouriteIds();
       if (!cancelled) setFavouriteIds(ids);
@@ -612,7 +459,21 @@ export default function ListingsPage() {
      uncontrolled, exactly as it was a plain DOM field read via .value, so the URL's query
      is written straight into the element and stashed for the first request. */
   useEffect(() => {
-    const q = new URLSearchParams(window.location.search).get("q");
+    const url = new URLSearchParams(window.location.search);
+    /* Filters from the homepage hero search (?area=&type=&maxRent=). */
+    const area = url.get("area");
+    const type = url.get("type");
+    const maxRent = url.get("maxRent");
+    if (area || type || maxRent) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time sync from the URL on mount
+      setFilters((current) => ({
+        ...current,
+        areas: area ? [area] : current.areas,
+        type: type ?? current.type,
+        maxRent: maxRent ?? current.maxRent,
+      }));
+    }
+    const q = url.get("q");
     if (!q) return;
     if (searchRef.current) searchRef.current.value = q;
     urlQueryRef.current = q;
@@ -644,7 +505,6 @@ export default function ListingsPage() {
         if (cancelled) return;
         setResultCount(`${result.total} propert${result.total === 1 ? "y" : "ies"} found`);
         setResponse({ key: queryKey, data: result, error: null });
-        setActiveChat(null);
       })
       .catch((reason: unknown) => {
         if (cancelled) return;
@@ -695,7 +555,6 @@ export default function ListingsPage() {
 
   const goPage = useCallback((next: number) => {
     setPage(next);
-    setActiveChat(null);
     requestAnimationFrame(() => {
       if (bodyRef.current) {
         window.scrollTo({ top: bodyRef.current.offsetTop - 80, behavior: "smooth" });
@@ -891,10 +750,6 @@ export default function ListingsPage() {
                 isSaved={favouriteIds.has(listing.id)}
                 isFavPending={pendingFav.has(listing.id)}
                 onToggleFavourite={toggleFavourite}
-                chatOpen={activeChat === listing.id}
-                onToggleChat={(id) => setActiveChat((current) => (current === id ? null : id))}
-                onCloseChat={(id) => setActiveChat((current) => (current === id ? null : current))}
-                user={user}
               />
             ))}
           </div>

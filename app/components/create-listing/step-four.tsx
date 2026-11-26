@@ -14,14 +14,12 @@ export default function StepFour({
   onBack,
   onContinue,
 }: StepFourProps) {
-  const whatsapp = form.whatsapp.trim() || "234XXXXXXXXXX";
-
   return (
     <Card>
       <Heading
         eyebrow="Contact info"
-        title="How should tenants reach you?"
-        description="Provide the contact details tenants can use when they are interested in your property."
+        title="How should our team reach you?"
+        description="Tenants send enquiries to the Property Warehouse team on WhatsApp. We use these details to contact you about interested tenants and inspections — they are not shown publicly."
       />
 
       <div className="mt-7 grid gap-5">
@@ -45,25 +43,6 @@ export default function StepFour({
             placeholder="08012345678"
             onChange={(value) => updateField("phone", value)}
           />
-        </div>
-
-        <div className="rounded-[16px] border border-[#e0ddd9] bg-[#faf9f7] p-5">
-          <p className="text-xs font-extrabold uppercase tracking-[0.15em] text-[#a97e4b]">
-            WhatsApp preview
-          </p>
-          <div className="mt-4 flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#15935f] text-sm font-extrabold text-white">
-              WA
-            </div>
-            <div>
-              <p className="text-sm font-extrabold text-[#09182a]">
-                Contact landlord
-              </p>
-              <p className="mt-1 text-xs font-medium text-[#8c8882]">
-                WhatsApp: {whatsapp}
-              </p>
-            </div>
-          </div>
         </div>
       </div>
 
