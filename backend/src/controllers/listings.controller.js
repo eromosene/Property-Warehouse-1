@@ -18,12 +18,13 @@ function splitCsv(value) {
 }
 
 // GET /api/listings — public browse/search/filter, mirrors listings.js's applyFilters().
-// Query params: area, type, maxRent, amenities, verifiedOnly, monthlyOnly, q, sort, page, limit
+// Query params: lga, area, type, maxRent, amenities, verifiedOnly, monthlyOnly, q, sort, page, limit
 async function list(req, res) {
-  const { area, type, maxRent, amenities, verifiedOnly, monthlyOnly, q, sort, page, limit } = req.query;
+  const { lga, area, type, maxRent, amenities, verifiedOnly, monthlyOnly, q, sort, page, limit } = req.query;
 
   const conditions = [eq(listings.status, 'active')];
 
+  if (lga) conditions.push(inArray(listings.lga, splitCsv(lga)));
   if (area) conditions.push(inArray(listings.area, splitCsv(area)));
   if (type) conditions.push(inArray(listings.type, splitCsv(type)));
   if (maxRent && !Number.isNaN(Number(maxRent))) conditions.push(lte(listings.rentPerYear, Number(maxRent)));
@@ -58,11 +59,11 @@ async function list(req, res) {
 
   // Record area/type/budget searches (first page only) as raw data for the heat map
   // (MoM 31 Jul 2026, item 16). Fire-and-forget: a logging failure never breaks search.
-  if ((area || type || maxRent || q) && (Number(page) || 1) === 1) {
+  if ((lga || area || type || maxRent || q) && (Number(page) || 1) === 1) {
     db.insert(searchEvents)
       .values({
         id: crypto.randomUUID(),
-        area: area ? String(area).slice(0, 200) : null,
+        area: (area || lga) ? String(area || lga).slice(0, 200) : null,
         type: type ? String(type).slice(0, 100) : null,
         maxRent: maxRent && !Number.isNaN(Number(maxRent)) ? Math.round(Number(maxRent)) : null,
         query: q ? String(q).slice(0, 200) : null,
