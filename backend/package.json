@@ -10,7 +10,8 @@
     "db:migrate": "node src/db/migrate.js",
     "db:normalize-phones": "node src/db/normalize-existing-phones.js",
     "db:studio": "drizzle-kit studio",
-    "seed": "node src/db/seed.js"
+    "seed": "node src/db/seed.js",
+    "admin:set": "node src/db/set-admin.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.110.7",
