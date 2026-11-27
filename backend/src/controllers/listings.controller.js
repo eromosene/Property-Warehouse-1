@@ -1,6 +1,6 @@
 const { and, eq, or, like, lte, inArray } = require('drizzle-orm');
 const { db } = require('../db/client');
-const { listings, listingImages, listingDocuments } = require('../db/schema');
+const { listings, listingImages, listingDocuments, searchEvents } = require('../db/schema');
 const { serializeListingRow, serializeListingRows, generateListingId } = require('../services/listings.service');
 
 const SORTERS = {
@@ -54,6 +54,22 @@ async function list(req, res) {
       const has = JSON.parse(r.amenitiesJson || '[]');
       return required.every((a) => has.includes(a));
     });
+  }
+
+  // Record area/type/budget searches (first page only) as raw data for the heat map
+  // (MoM 31 Jul 2026, item 16). Fire-and-forget: a logging failure never breaks search.
+  if ((area || type || maxRent || q) && (Number(page) || 1) === 1) {
+    db.insert(searchEvents)
+      .values({
+        id: crypto.randomUUID(),
+        area: area ? String(area).slice(0, 200) : null,
+        type: type ? String(type).slice(0, 100) : null,
+        maxRent: maxRent && !Number.isNaN(Number(maxRent)) ? Math.round(Number(maxRent)) : null,
+        query: q ? String(q).slice(0, 200) : null,
+        userId: null,
+        createdAt: new Date(),
+      })
+      .catch((err) => console.error('search event not recorded:', err.message));
   }
 
   rows.sort(SORTERS[sort] || SORTERS.newest);

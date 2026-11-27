@@ -116,4 +116,46 @@ const favourites = pgTable(
   })
 );
 
-module.exports = { users, listings, listingImages, listingDocuments, favourites };
+// Every enquiry a visitor starts from a listing (the WhatsApp button routes to the team, per
+// MoM 15 Sep 2026). Recorded so the platform keeps a trail of the deals it facilitates, landlords
+// can see interest in their listings, and the future heat map has real demand data (MoM 31 Jul,
+// items 13 & 16). listingId/userId are nullable so deleting a listing or account keeps the history.
+const inquiries = pgTable('inquiries', {
+  id: text('id').primaryKey(),
+  listingId: text('listing_id').references(() => listings.id, { onDelete: 'set null' }),
+  // Snapshot of where the listing was, so demand-by-area survives listing deletion.
+  area: text('area'),
+  userId: text('user_id').references(() => users.id, { onDelete: 'set null' }),
+  name: text('name'),
+  phone: text('phone'),
+  message: text('message'),
+  channel: text('channel').notNull().default('whatsapp'),
+  createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull(),
+});
+
+// Messages from the site's feedback bubble, reviewable by admins (MoM 31 Jul 2026, item 14).
+const feedback = pgTable('feedback', {
+  id: text('id').primaryKey(),
+  userId: text('user_id').references(() => users.id, { onDelete: 'set null' }),
+  name: text('name'),
+  email: text('email'),
+  category: text('category'),
+  message: text('message').notNull(),
+  page: text('page'),
+  status: text('status', { enum: ['new', 'reviewed'] }).notNull().default('new'),
+  createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull(),
+});
+
+// Area/type/budget searches on the listings page — raw material for the heat map
+// (MoM 31 Jul 2026, item 16). No personal data beyond an optional user id.
+const searchEvents = pgTable('search_events', {
+  id: text('id').primaryKey(),
+  area: text('area'),
+  type: text('type'),
+  maxRent: integer('max_rent'),
+  query: text('query'),
+  userId: text('user_id').references(() => users.id, { onDelete: 'set null' }),
+  createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull(),
+});
+
+module.exports = { users, listings, listingImages, listingDocuments, favourites, inquiries, feedback, searchEvents };

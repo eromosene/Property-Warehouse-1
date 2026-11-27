@@ -18,4 +18,7 @@ router.get(
   })
 );
 
+// GET /api/landlord/inquiries — enquiry counts on the landlord's own listings (no tenant contacts).
+router.get('/inquiries', asyncHandler(require('../controllers/activity.controller').landlordInquiries));
+
 module.exports = router;

@@ -8,6 +8,7 @@ const landlordRoutes = require('./routes/landlord.routes');
 const adminRoutes = require('./routes/admin.routes');
 const uploadsRoutes = require('./routes/uploads.routes');
 const favouritesRoutes = require('./routes/favourites.routes');
+const activityRoutes = require('./routes/activity.routes');
 
 const app = express();
 
@@ -43,6 +44,7 @@ app.use('/api/landlord', landlordRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/uploads', uploadsRoutes);
 app.use('/api/favourites', favouritesRoutes);
+app.use('/api', activityRoutes);
 
 app.use((req, res) => {
   res.status(404).json({ error: 'Not found' });
