@@ -1,4 +1,4 @@
-const { and, eq, or, like, lte, inArray } = require('drizzle-orm');
+const { and, eq, or, like, lte, gte, inArray } = require('drizzle-orm');
 const { db } = require('../db/client');
 const { listings, listingImages, listingDocuments, searchEvents } = require('../db/schema');
 const { serializeListingRow, serializeListingRows, generateListingId } = require('../services/listings.service');
@@ -18,15 +18,16 @@ function splitCsv(value) {
 }
 
 // GET /api/listings — public browse/search/filter, mirrors listings.js's applyFilters().
-// Query params: lga, area, type, maxRent, amenities, verifiedOnly, monthlyOnly, q, sort, page, limit
+// Query params: lga, area, type, minRent, maxRent, amenities, verifiedOnly, monthlyOnly, q, sort, page, limit
 async function list(req, res) {
-  const { lga, area, type, maxRent, amenities, verifiedOnly, monthlyOnly, q, sort, page, limit } = req.query;
+  const { lga, area, type, minRent, maxRent, amenities, verifiedOnly, monthlyOnly, q, sort, page, limit } = req.query;
 
   const conditions = [eq(listings.status, 'active')];
 
   if (lga) conditions.push(inArray(listings.lga, splitCsv(lga)));
   if (area) conditions.push(inArray(listings.area, splitCsv(area)));
   if (type) conditions.push(inArray(listings.type, splitCsv(type)));
+  if (minRent && !Number.isNaN(Number(minRent))) conditions.push(gte(listings.rentPerYear, Number(minRent)));
   if (maxRent && !Number.isNaN(Number(maxRent))) conditions.push(lte(listings.rentPerYear, Number(maxRent)));
   if (verifiedOnly === 'true') conditions.push(eq(listings.isVerified, true));
   if (monthlyOnly === 'true') conditions.push(eq(listings.isMonthly, true));
@@ -59,7 +60,7 @@ async function list(req, res) {
 
   // Record area/type/budget searches (first page only) as raw data for the heat map
   // (MoM 31 Jul 2026, item 16). Fire-and-forget: a logging failure never breaks search.
-  if ((lga || area || type || maxRent || q) && (Number(page) || 1) === 1) {
+  if ((lga || area || type || minRent || maxRent || q) && (Number(page) || 1) === 1) {
     db.insert(searchEvents)
       .values({
         id: crypto.randomUUID(),
