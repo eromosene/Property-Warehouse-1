@@ -6,6 +6,7 @@ import { FormEvent, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "./lib/api";
 import { LAGOS_LGAS } from "./lib/lagos";
+import { BUDGET_RANGES } from "./lib/budget";
 import { getSharedSession, type SessionUser } from "./lib/auth";
 
 const navLinks = [["Listings", "/listings"], ["Heat Map", "/heatmap"], ["Landlords", "/how-it-works#landlords"], ["How It Works", "/how-it-works"]];
@@ -14,7 +15,7 @@ const navLinks = [["Listings", "/listings"], ["Heat Map", "/heatmap"], ["Landlor
 const selectGroups = [
   { label: "LGA", name: "lga", options: [["", "Select LGA"], ...LAGOS_LGAS.map((lga) => [lga, lga])] },
   { label: "PROPERTY TYPE", name: "type", options: [["", "Select Type"], ["Self-contain", "Self-contain"], ["1 Bedroom", "1 Bedroom"], ["2 Bedroom", "2 Bedroom"], ["3 Bedroom", "3 Bedroom"], ["Duplex", "Duplex"], ["Bungalow", "Bungalow"]] },
-  { label: "MAX BUDGET", name: "maxRent", options: [["", "Max Budget"], ["500000", "₦500,000"], ["1200000", "₦1,200,000"], ["2000000", "₦2,000,000"]] },
+  { label: "BUDGET (PER YEAR)", name: "budget", options: [["", "Any budget"], ...BUDGET_RANGES.map((range) => [range.key, range.label])] },
 ];
 
 const stats = [

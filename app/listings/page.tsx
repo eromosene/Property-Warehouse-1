@@ -7,6 +7,7 @@ import { getFavouriteIds, saveFavourite, unsaveFavourite } from "../lib/favourit
 import { getSharedSession } from "../lib/auth";
 import { recordInquiry, teamWhatsAppHref } from "../lib/contact";
 import { LAGOS_LGAS } from "../lib/lagos";
+import { applyBudget, BUDGET_RANGES, budgetByKey } from "../lib/budget";
 import SiteHeader from "../components/site-header";
 import {
     ArrowIcon,
@@ -50,14 +51,6 @@ const TYPE_OPTIONS = [
 
 const AMENITY_OPTIONS = ["Water", "Parking", "Security", "Generator", "AC"];
 
-const MAX_RENT_OPTIONS = [
-  ["", "Any"],
-  ["200000", "₦200k"],
-  ["500000", "₦500k"],
-  ["800000", "₦800k"],
-  ["1200000", "₦1.2M"],
-  ["2000000", "₦2M"],
-];
 
 const SORT_OPTIONS = [
   ["newest", "Newest"],
@@ -70,7 +63,7 @@ type Filters = {
   lga: string;
   areas: string[];
   type: string;
-  maxRent: string;
+  budget: string;
   amenities: string[];
   verifiedOnly: boolean;
   monthlyOnly: boolean;
@@ -81,7 +74,7 @@ const EMPTY_FILTERS: Filters = {
   lga: "",
   areas: [],
   type: "",
-  maxRent: "",
+  budget: "",
   amenities: [],
   verifiedOnly: false,
   monthlyOnly: false,
@@ -235,16 +228,17 @@ function Sidebar({
       </div>
 
       <div className="mb-[22px]">
-        <p className="mb-2.5 text-[10px] font-extrabold uppercase tracking-[1.5px] text-[#9a9490]">MAX RENT</p>
+        <p className="mb-2.5 text-[10px] font-extrabold uppercase tracking-[1.5px] text-[#9a9490]">BUDGET (PER YEAR)</p>
         <select
           id="lsMaxRent"
-          value={filters.maxRent}
-          onChange={(event) => setFilters({ ...filters, maxRent: event.target.value })}
+          value={filters.budget}
+          onChange={(event) => setFilters({ ...filters, budget: event.target.value })}
           className="w-full cursor-pointer rounded-[9px] border border-[#e0ddd9] bg-white px-3 py-[9px] font-manrope text-[13px] font-semibold text-[#09182a] outline-none"
         >
-          {MAX_RENT_OPTIONS.map(([optionValue, label]) => (
-            <option key={optionValue} value={optionValue}>
-              {label}
+          <option value="">Any budget</option>
+          {BUDGET_RANGES.map((range) => (
+            <option key={range.key} value={range.key}>
+              {range.label}
             </option>
           ))}
         </select>
@@ -483,19 +477,19 @@ export default function ListingsPage() {
      is written straight into the element and stashed for the first request. */
   useEffect(() => {
     const url = new URLSearchParams(window.location.search);
-    /* Filters from the homepage hero search (?area=&type=&maxRent=). */
+    /* Filters from the homepage hero search (?lga=&type=&budget=). */
     const area = url.get("area");
     const lga = url.get("lga");
     const type = url.get("type");
-    const maxRent = url.get("maxRent");
-    if (area || lga || type || maxRent) {
+    const budget = budgetByKey(url.get("budget")) ? url.get("budget") : null;
+    if (area || lga || type || budget) {
       // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time sync from the URL on mount
       setFilters((current) => ({
         ...current,
         lga: lga ?? current.lga,
         areas: area ? [area] : current.areas,
         type: type ?? current.type,
-        maxRent: maxRent ?? current.maxRent,
+        budget: budget ?? current.budget,
       }));
     }
     const q = url.get("q");
@@ -517,7 +511,7 @@ export default function ListingsPage() {
     if (filters.areas.length) params.set("area", filters.areas.join(","));
     if (filters.lga) params.set("lga", filters.lga);
     if (filters.type) params.set("type", filters.type);
-    if (Number(filters.maxRent) > 0) params.set("maxRent", String(filters.maxRent));
+    applyBudget(params, filters.budget);
     if (filters.amenities.length) params.set("amenities", filters.amenities.join(","));
     if (filters.verifiedOnly) params.set("verifiedOnly", "true");
     if (filters.monthlyOnly) params.set("monthlyOnly", "true");
