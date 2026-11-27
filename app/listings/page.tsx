@@ -6,6 +6,7 @@ import { api, Listing, naira } from "../lib/api";
 import { getFavouriteIds, saveFavourite, unsaveFavourite } from "../lib/favourites";
 import { getSharedSession } from "../lib/auth";
 import { recordInquiry, teamWhatsAppHref } from "../lib/contact";
+import { LAGOS_LGAS } from "../lib/lagos";
 import SiteHeader from "../components/site-header";
 import {
     ArrowIcon,
@@ -66,6 +67,7 @@ const SORT_OPTIONS = [
 ];
 
 type Filters = {
+  lga: string;
   areas: string[];
   type: string;
   maxRent: string;
@@ -76,6 +78,7 @@ type Filters = {
 };
 
 const EMPTY_FILTERS: Filters = {
+  lga: "",
   areas: [],
   type: "",
   maxRent: "",
@@ -168,6 +171,23 @@ function Sidebar({
         >
           &#x2715; Clear all
         </button>
+      </div>
+
+      <div className="mb-[22px]">
+        <p className="mb-2.5 text-[10px] font-extrabold uppercase tracking-[1.5px] text-[#9a9490]">LGA</p>
+        <select
+          id="lsLga"
+          value={filters.lga}
+          onChange={(event) => setFilters({ ...filters, lga: event.target.value })}
+          className="w-full cursor-pointer rounded-[9px] border border-[#e0ddd9] bg-white px-3 py-[9px] font-manrope text-[13px] font-semibold text-[#09182a] outline-none"
+        >
+          <option value="">All LGAs</option>
+          {LAGOS_LGAS.map((lga) => (
+            <option key={lga} value={lga}>
+              {lga}
+            </option>
+          ))}
+        </select>
       </div>
 
       <div className="mb-[22px]">
@@ -465,12 +485,14 @@ export default function ListingsPage() {
     const url = new URLSearchParams(window.location.search);
     /* Filters from the homepage hero search (?area=&type=&maxRent=). */
     const area = url.get("area");
+    const lga = url.get("lga");
     const type = url.get("type");
     const maxRent = url.get("maxRent");
-    if (area || type || maxRent) {
+    if (area || lga || type || maxRent) {
       // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time sync from the URL on mount
       setFilters((current) => ({
         ...current,
+        lga: lga ?? current.lga,
         areas: area ? [area] : current.areas,
         type: type ?? current.type,
         maxRent: maxRent ?? current.maxRent,
@@ -493,6 +515,7 @@ export default function ListingsPage() {
     const q = hasUserQueryRef.current ? filters.q : (urlQueryRef.current ?? filters.q);
     const params = new URLSearchParams();
     if (filters.areas.length) params.set("area", filters.areas.join(","));
+    if (filters.lga) params.set("lga", filters.lga);
     if (filters.type) params.set("type", filters.type);
     if (Number(filters.maxRent) > 0) params.set("maxRent", String(filters.maxRent));
     if (filters.amenities.length) params.set("amenities", filters.amenities.join(","));

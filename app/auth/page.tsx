@@ -11,6 +11,7 @@ import {
   TrustIcon,
   TrustIconKind,
 } from "../components/icons";
+import { LAGOS_LGAS } from "../lib/lagos";
 
 type Role = "tenant" | "landlord";
 type Mode = "login" | "signup";
@@ -320,7 +321,7 @@ function AuthPanel() {
                 label="Type of property to list"
                 options={propertyTypes}
               />
-              <SelectField name="lga" label="LGA / Area" options={areas} />
+              <SelectField name="lga" label="LGA" options={[...LAGOS_LGAS]} />
             </>
           ))}
         {mode === "login" && (

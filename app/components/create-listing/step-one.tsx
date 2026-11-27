@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import type { ListingForm, UpdateListingField } from "./types";
+import { LAGOS_LGAS } from "../../lib/lagos";
 
 type StepOneProps = {
   form: ListingForm;
@@ -23,21 +24,7 @@ type SelectProps = {
   onChange: (value: string) => void;
 };
 
-const lgaOptions = [
-  "Lagos Mainland",
-  "Lagos Island",
-  "Surulere",
-  "Yaba",
-  "Ikeja",
-  "Eti-Osa",
-  "Alimosho",
-  "Kosofe",
-  "Amuwo-Odofin",
-  "Agege",
-  "Mushin",
-  "Apapa",
-  "Other",
-];
+const lgaOptions: string[] = [...LAGOS_LGAS];
 
 const propertyTypeOptions = [
   "1 Bedroom",

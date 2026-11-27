@@ -5,13 +5,14 @@ import Link from "next/link";
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "./lib/api";
+import { LAGOS_LGAS } from "./lib/lagos";
 import { getSharedSession, type SessionUser } from "./lib/auth";
 
 const navLinks = [["Listings", "/listings"], ["Heat Map", "/heatmap"], ["Landlords", "/how-it-works#landlords"], ["How It Works", "/how-it-works"]];
 
 /* Values must match the listings page filters exactly — the backend filters area/type by exact match. */
 const selectGroups = [
-  { label: "AREA", name: "area", options: [["", "Select Area"], ["Yaba", "Yaba"], ["Lekki Phase 1", "Lekki Phase 1"], ["Surulere", "Surulere"], ["Ajah", "Ajah"], ["Gbagada", "Gbagada"], ["Ikeja GRA", "Ikeja GRA"], ["Victoria Island", "Victoria Island"]] },
+  { label: "LGA", name: "lga", options: [["", "Select LGA"], ...LAGOS_LGAS.map((lga) => [lga, lga])] },
   { label: "PROPERTY TYPE", name: "type", options: [["", "Select Type"], ["Self-contain", "Self-contain"], ["1 Bedroom", "1 Bedroom"], ["2 Bedroom", "2 Bedroom"], ["3 Bedroom", "3 Bedroom"], ["Duplex", "Duplex"], ["Bungalow", "Bungalow"]] },
   { label: "MAX BUDGET", name: "maxRent", options: [["", "Max Budget"], ["500000", "₦500,000"], ["1200000", "₦1,200,000"], ["2000000", "₦2,000,000"]] },
 ];
@@ -140,7 +141,7 @@ export default function Home() {
       <header className="absolute inset-x-3 top-3.25 z-30 flex h-15.5 items-center gap-6 rounded-[10px] border border-white/85 bg-white/95 px-5 shadow-[0_18px_55px_rgba(9,24,42,0.08)] md:inset-x-9 lg:inset-x-18 lg:top-2 lg:h-15.75 lg:rounded-[14px] lg:px-6.25 2xl:inset-x-[calc((100vw-1440px)/2+72px)]">
         <a className="flex min-w-0 items-center gap-3 lg:min-w-53.5 lg:gap-2.5" href="#" aria-label="Property Warehouse home" onClick={closeMenu}>
           <span className="inline-block font-cormorant text-[32px] font-bold leading-[0.82] tracking-[-0.09em] text-[#a97e4b] xl:text-[34px]">
-            R<span className="-ml-0.75 inline-block translate-y-2.75">W</span>
+            P<span className="-ml-0.75 inline-block translate-y-2.75">W</span>
           </span>
           <span className="grid gap-px text-[12px] font-extrabold leading-none tracking-[-0.04em] xl:text-[13px]">
             <span>PROPERTY</span>
