@@ -32,4 +32,11 @@ Set these in `.env.local` locally, and in **Vercel → Project → Settings → 
 - **Fees:** the copy avoids promising "zero fees" because of the agreed agent fee on successful rentals. The final
   public wording of that fee is still for the committee to decide.
 
+## Backend endpoints this frontend needs
+
+The feedback bubble, enquiry recording, landlord enquiry counts and the admin Users, Enquiries and Feedback tabs
+call endpoints added on the backend branch `backend/open-items` (`/api/feedback`, `/api/inquiries`,
+`/api/landlord/inquiries`, `/api/admin/users`, `/api/admin/inquiries`, `/api/admin/feedback`). Deploy that
+branch and run its database migration (`npm run db:migrate`, which only creates three new tables) before going live.
+
 `legacy-source/` holds the previous vanilla HTML/CSS/JS site for reference only. It is not served.

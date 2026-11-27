@@ -5,7 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { api, Listing, naira } from "../lib/api";
 import { getFavouriteIds, saveFavourite, unsaveFavourite } from "../lib/favourites";
 import { getSharedSession } from "../lib/auth";
-import { teamWhatsAppHref } from "../lib/contact";
+import { recordInquiry, teamWhatsAppHref } from "../lib/contact";
 import SiteHeader from "../components/site-header";
 import {
     ArrowIcon,
@@ -399,7 +399,10 @@ function ListingCardView({
             href={waHref}
             target="_blank"
             rel="noopener noreferrer"
-            onClick={(event) => event.stopPropagation()}
+            onClick={(event) => {
+              event.stopPropagation();
+              recordInquiry(listing.id);
+            }}
             className="inline-flex min-w-0 flex-1 items-center justify-center gap-1.5 rounded-[10px] bg-[#25D366] px-[13px] py-2 font-manrope text-[12px] font-bold text-white no-underline transition-opacity duration-200 hover:opacity-85"
           >
             <WhatsAppIcon /> Chat on WhatsApp

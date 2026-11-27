@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import FeedbackBubble from "./components/feedback-bubble";
 
 export const metadata: Metadata = {
   title: "Property Warehouse",
-  description: "Lagos direct rental platform landing page.",
+  description: "Find verified rental homes across Lagos. Clear prices, no surprises.",
 };
 
 export default function RootLayout({
@@ -21,7 +22,10 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="min-h-full bg-[#f6f4f1]">{children}</body>
+      <body className="min-h-full bg-[#f6f4f1]">
+        {children}
+        <FeedbackBubble />
+      </body>
     </html>
   );
 }

@@ -7,7 +7,7 @@ import { api, Listing, naira } from "../../lib/api";
 import { getFavouriteIds, saveFavourite, unsaveFavourite } from "../../lib/favourites";
 import { getSharedSession, type SessionUser } from "../../lib/auth";
 import SiteHeader from "../../components/site-header";
-import { teamWhatsAppHref } from "../../lib/contact";
+import { recordInquiry, teamWhatsAppHref } from "../../lib/contact";
 import {
     ArrowLeftIcon,
     BathIcon,
@@ -442,6 +442,7 @@ export default function ListingDetailPage() {
             <div className="flex flex-wrap gap-2.5">
               <a
                 href={genericWaHref}
+                onClick={() => recordInquiry(l.id)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex min-w-0 flex-1 items-center justify-center gap-1.5 rounded-[12px] bg-[#25D366] px-3.5 py-[11px] font-manrope text-[13px] font-bold text-white no-underline transition-opacity duration-200 hover:opacity-85"
@@ -528,6 +529,7 @@ export default function ListingDetailPage() {
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => {
+                  recordInquiry(l.id, { name: contactName, phone: contactPhone, message: contactMessage });
                   setTimeout(() => setWaSuccess(true), 400);
                 }}
                 className="mt-1 flex w-full items-center justify-center gap-2 rounded-[12px] bg-[#25D366] px-3 py-[13px] font-manrope text-[14px] font-extrabold text-white no-underline transition-opacity duration-200 hover:opacity-88"
