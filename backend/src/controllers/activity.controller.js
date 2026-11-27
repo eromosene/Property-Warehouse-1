@@ -9,7 +9,7 @@ function clean(value, max) {
   return trimmed ? trimmed.slice(0, max) : null;
 }
 
-const FEEDBACK_CATEGORIES = ['bug', 'suggestion', 'question', 'other'];
+const FEEDBACK_CATEGORIES = ['feedback', 'complaint', 'suggestion', 'other'];
 
 // POST /api/inquiries — public (optionalAuth). Called when a visitor opens the team WhatsApp chat
 // about a listing. Records the enquiry; the conversation itself happens on WhatsApp.
